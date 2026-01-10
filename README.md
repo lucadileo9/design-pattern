@@ -1,6 +1,12 @@
 # Design Patterns Repository
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 
-> A practical and personal encyclopedia of the most common design patterns in object-oriented programming.
+![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+![Course](https://img.shields.io/badge/Course-Software%20Development%20Methodologies-green)
+![UNIMORE](https://img.shields.io/badge/University-UNIMORE-004990?style=flat)
+
+A practical and personal encyclopedia of the most common design patterns in object-oriented programming.
 
 ---
 
