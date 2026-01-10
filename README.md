@@ -1,37 +1,41 @@
-# 📚 Design Patterns Repository
+# Design Patterns Repository
 
-> Un'enciclopedia pratica e personale dei design pattern più comuni nella programmazione orientata agli oggetti.
+> A practical and personal encyclopedia of the most common design patterns in object-oriented programming.
 
-## 🎯 Obiettivo del Progetto
+---
 
-Questo repository nasce come strumento di studio e consultazione per comprendere, implementare e padroneggiare i design pattern fondamentali. Ogni pattern è:
+## Project Goal
 
-- ✅ **Isolato** - Un micro-progetto indipendente
-- 📖 **Spiegato** - Con descrizioni chiare e concise
-- 💡 **Dimostrato** - Con esempi didattici e pratici
-- 🌍 **Contestualizzato** - Con analogie dalla vita reale
+This repository was created as a study and reference tool to understand, implement, and master fundamental design patterns. Each pattern is:
 
-## 🏗️ Struttura del Repository
+* **Isolated**: A self-contained micro-project.
+* **Explained**: With clear and concise descriptions.
+* **Demonstrated**: Using educational and practical examples.
+* **Contextualized**: With real-world analogies.
+
+---
+
+## Repository Structure
 
 ```
 design-pattern/
-├── README.md                    # Questo file
-├── docs/                        # Documentazione di supporto
-│   ├── glossary.md             # Terminologia dei design patterns
-│   ├── comparison.md           # Confronti tra pattern simili
-│   └── resources.md            # Risorse e link utili
+├── README.md                    # This file
+├── docs/                        # Supporting documentation
+│   ├── glossary.md              # Design patterns terminology
+│   ├── comparison.md            # Comparisons between similar patterns
+│   └── resources.md             # Useful links and resources
 │
-├── 01_creational/              # Pattern Creazionali
-│   ├── README.md               # Overview della categoria
+├── 01_creational/               # Creational Patterns
+│   ├── README.md                # Category overview
 │   ├── factory/
-│   │   ├── README.md          # Spiegazione del pattern
-│   │   └── example.py         # Implementazione didattica
+│   │   ├── README.md            # Pattern explanation
+│   │   └── example.py           # Educational implementation
 │   ├── singleton/
 │   ├── builder/
 │   ├── prototype/
 │   └── abstract_factory/
 │
-├── 02_structural/              # Pattern Strutturali
+├── 02_structural/               # Structural Patterns
 │   ├── README.md
 │   ├── adapter/
 │   ├── bridge/
@@ -41,7 +45,7 @@ design-pattern/
 │   ├── flyweight/
 │   └── proxy/
 │
-└── 03_behavioral/              # Pattern Comportamentali
+└── 03_behavioral/               # Behavioral Patterns
     ├── README.md
     ├── chain_of_responsibility/
     ├── command/
@@ -53,94 +57,120 @@ design-pattern/
     ├── strategy/
     ├── template_method/
     └── visitor/
+
 ```
-
-## 📋 Struttura di Ogni Pattern
-
-Ogni pattern segue una struttura standardizzata per facilitare l'apprendimento:
-
-### README.md del Pattern
-1. **🎯 Problema** - Quale problema risolve il pattern?
-2. **✅ Soluzione** - Come il pattern affronta il problema
-3. **📊 Diagramma** - Visualizzazione con Mermaid UML
-4. **🌍 Analogia Reale** - Esempio dalla vita quotidiana
-
-### example.py
-Implementazione minima e didattica del pattern in Python, con:
-- Codice chiaro e commentato
-- Esempio di utilizzo pratico
-- Output dimostrativo
-
-## 🚀 Come Usare Questo Repository
-
-### Per Studiare
-Naviga tra le categorie e leggi i README di ogni pattern. Le analogie reali ti aiuteranno a comprendere il concetto in modo intuitivo.
-
-### Per Consultare
-Usa la struttura ad albero per trovare rapidamente il pattern che ti serve. Ogni esempio è eseguibile autonomamente.
-
-### Per Dimostrare
-Mostra la tua conoscenza teorica e pratica dei design pattern con implementazioni concrete e documentate.
-
-## 📊 Progress Tracker
-
-### Pattern Creazionali
-- [ ] Factory Method
-- [ ] Abstract Factory
-- [ ] Builder
-- [ ] Prototype
-- [ ] Singleton
-
-### Pattern Strutturali
-- [ ] Adapter
-- [ ] Bridge
-- [ ] Composite
-- [ ] Decorator
-- [ ] Facade
-- [ ] Flyweight
-- [ ] Proxy
-
-### Pattern Comportamentali
-- [ ] Chain of Responsibility
-- [ ] Command
-- [ ] Iterator
-- [ ] Mediator
-- [ ] Memento
-- [ ] Observer
-- [ ] State
-- [ ] Strategy
-- [ ] Template Method
-- [ ] Visitor
-
-## 🛠️ Tecnologie
-
-- **Linguaggio**: Python 3.x
-- **Diagrammi**: Mermaid
-- **Documentazione**: Markdown
-
-## 📚 Categorie di Design Pattern
-
-### 🔨 Creazionali (Creational)
-Riguardano la **creazione di oggetti**, fornendo meccanismi che aumentano la flessibilità e il riutilizzo del codice.
-
-### 🏛️ Strutturali (Structural)
-Riguardano la **composizione di classi e oggetti**, spiegando come assemblare oggetti e classi in strutture più grandi.
-
-### 🎭 Comportamentali (Behavioral)
-Riguardano la **comunicazione tra oggetti**, definendo come gli oggetti interagiscono e distribuiscono le responsabilità.
-
-## 🎓 Per Chi È Questo Repository?
-
-- **Studenti** che vogliono imparare i design pattern
-- **Sviluppatori** che cercano un riferimento rapido
-- **Intervistati** che si preparano per colloqui tecnici
-- **Chiunque** voglia approfondire la programmazione OOP
-
-## 📝 Note
-
-> ⚠️ **Work in Progress**: Questo repository è in continua evoluzione. I pattern vengono aggiunti e migliorati progressivamente.
 
 ---
 
-**Autore**: lucadileo9  
-**Versione**: 1.0.0 (WIP)
+## Pattern Documentation Template
+
+Each pattern follows a standardized structure to facilitate learning:
+
+### Pattern README.md
+
+1. **Problem**: What specific problem does the pattern solve?
+2. **Solution**: How the pattern addresses the problem.
+3. **Diagram**: Visualization using Mermaid UML.
+4. **Real-World Analogy**: An example from everyday life.
+
+### example.py
+
+A minimal and educational implementation of the pattern in Python, featuring:
+
+* Clear and commented code.
+* Practical usage example.
+* Demonstrative output.
+
+---
+
+## How to Use This Repository
+
+### For Studying
+
+Navigate through the categories and read the README for each pattern. Real-world analogies will help you understand the concepts intuitively.
+
+### For Reference
+
+Use the tree structure to quickly find the pattern you need. Every example can be executed independently.
+
+### For Demonstration
+
+Showcase your theoretical and practical knowledge of design patterns with concrete, documented implementations.
+
+---
+
+## Progress Tracker
+
+### Creational Patterns
+
+* [ ] Factory Method
+* [ ] Abstract Factory
+* [ ] Builder
+* [ ] Prototype
+* [ ] Singleton
+
+### Structural Patterns
+
+* [ ] Adapter
+* [ ] Bridge
+* [ ] Composite
+* [ ] Decorator
+* [ ] Facade
+* [ ] Flyweight
+* [ ] Proxy
+
+### Behavioral Patterns
+
+* [ ] Chain of Responsibility
+* [ ] Command
+* [ ] Iterator
+* [ ] Mediator
+* [ ] Memento
+* [ ] Observer
+* [ ] State
+* [ ] Strategy
+* [ ] Template Method
+* [ ] Visitor
+
+---
+
+## Technologies
+
+* **Language**: Python 3.x
+* **Diagrams**: Mermaid
+* **Documentation**: Markdown
+
+---
+
+## Design Pattern Categories
+
+### Creational
+
+These patterns concern **object creation**, providing mechanisms that increase flexibility and code reuse.
+
+### Structural
+
+These patterns concern the **composition of classes and objects**, explaining how to assemble objects and classes into larger structures.
+
+### Behavioral
+
+These patterns concern **communication between objects**, defining how objects interact and distribute responsibilities.
+
+---
+
+## Who Is This Repository For?
+
+* **Students** wanting to learn design patterns.
+* **Developers** looking for a quick reference.
+* **Candidates** preparing for technical interviews.
+* **Anyone** wishing to deepen their knowledge of OOP.
+
+---
+
+## Notes
+
+> **Work in Progress**: This repository is constantly evolving. Patterns are added and improved progressively.
+
+**Author**: lucadileo9
+
+**Version**: 1.0.0 (WIP)
