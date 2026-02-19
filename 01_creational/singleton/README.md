@@ -17,16 +17,76 @@ La soluzione è il pattern **Singleton**. Procediamo per fasi:
 - **Costruttore privato**: rendiamo il costruttore della classe privato (o protetto) in modo che non possa essere chiamato direttamente dall'esterno. 
 - **Metodo di accesso pubblico**: definiamo un metodo pubblico statico (es. `get_instance()`) che controlla se l'istanza esiste già. Se non esiste, la crea (con il costruttore); altrimenti, restituisce quella esistente.
 
-## 📊 Diagramma
-
+## Diagrammi
+ 
+### Diagramma delle classi
 ```mermaid
-%% Diagramma da completare
 classDiagram
     class Singleton {
-        -instance
-        +get_instance()
+        - instance: Singleton$
+        - lock: Lock$
+        - Singleton()
+        + getInstance() Singleton$
+        + businessLogic()
     }
+
+    %% Auto-referenziazione: l'unica istanza risiede dentro la classe stessa
+    Singleton --> Singleton : "holds the unique instance"
+
+    %% Styling
+    style Singleton fill:#1e272e,stroke:#0fbcf9,stroke-width:2px,color:#fff
 ```
+
+### Diagramma di sequenza 
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Singleton (Class)
+    participant I as Instance (Object)
+
+    Note over C, S: Prima chiamata del sistema
+    C->>S: getInstance()
+    activate S
+    S->>I: << create >>
+    I-->>S: instance
+    S-->>C: return instance
+    deactivate S
+
+    Note over C, S: Chiamate successive
+    C->>S: getInstance()
+    activate S
+    S-->>C: return existing instance
+    deactivate S
+
+    Note right of C: Il Client usa sempre lo stesso oggetto
+    C->>I: businessLogic()
+```
+
+### Diagramma di flusso (per la logica di creazione dell'istanza)
+```mermaid
+flowchart TD
+    Start([Chiamata getInstance]) --> Check1{Istanza esiste?}
+    
+    Check1 -- Si --> Return[Ritorna Istanza Esistente]
+    Check1 -- No --> Lock[Acquisisci Lock]
+    
+    Lock --> Check2{Istanza creata da<br/>un altro thread?}
+    
+    Check2 -- No --> Create[Crea Nuova Istanza]
+    Check2 -- Si --> Unlock[Rilascia Lock]
+    
+    Create --> Unlock
+    Unlock --> Return
+    Return --> End([Fine])
+
+    %% Styling
+    style Check1 fill:#2d3436,stroke:#0fbcf9,color:#fff
+    style Check2 fill:#2d3436,stroke:#0fbcf9,color:#fff
+    style Lock fill:#2d3436,stroke:#ef5777,color:#fff
+    style Create fill:#2d3436,stroke:#05c46b,color:#fff
+```
+Il duplice controllo (double-checked locking) è una tecnica comune per garantire che l'istanza venga creata solo una volta, anche in ambienti multithread. Il primo controllo avviene senza bloccare, per evitare overhead inutili dopo che l'istanza è stata creata. Il secondo controllo avviene all'interno del blocco, per garantire che un altro thread non abbia già creato l'istanza nel frattempo.
 
 ### Vantaggi
 
