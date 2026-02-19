@@ -24,45 +24,44 @@ This repository was created as a study and reference tool to understand, impleme
 ## Repository Structure
 
 ```
+```
 design-pattern/
-├── README.md                    # This file
-├── docs/                        # Supporting documentation
-│   ├── glossary.md              # Design patterns terminology
-│   ├── comparison.md            # Comparisons between similar patterns
-│   └── resources.md             # Useful links and resources
+├── README.md                    # Questo file
+├── docs/                        # Documentazione di supporto
+│   ├── glossary.md             # Terminologia dei design patterns
+│   ├── comparison.md           # Confronti tra pattern simili
+│   └── resources.md            # Risorse e link utili
 │
-├── 01_creational/               # Creational Patterns
-│   ├── README.md                # Category overview
+├── 01_creational/              # Pattern Creazionali
+│   ├── README.md               # Overview della categoria
 │   ├── factory/
-│   │   ├── README.md            # Pattern explanation
-│   │   └── example.py           # Educational implementation
-│   ├── singleton/
-│   ├── builder/
-│   ├── prototype/
-│   └── abstract_factory/
+│   │   ├── README.md          # Spiegazione del pattern
+│   │   └── example.py         # Implementazione didattica
+│   └── singleton/
+│       ├── README.md
+│       └── example.py
 │
-├── 02_structural/               # Structural Patterns
+├── 02_structural/              # Pattern Strutturali
 │   ├── README.md
 │   ├── adapter/
-│   ├── bridge/
-│   ├── composite/
-│   ├── decorator/
+│   │   ├── README.md
+│   │   └── example.py
 │   ├── facade/
-│   ├── flyweight/
-│   └── proxy/
+│   │   ├── README.md
+│   │   └── example.py
+│   └── composite/
+│       ├── README.md
+│       └── example.py
 │
-└── 03_behavioral/               # Behavioral Patterns
+└── 03_behavioral/              # Pattern Comportamentali
     ├── README.md
-    ├── chain_of_responsibility/
-    ├── command/
-    ├── iterator/
-    ├── mediator/
-    ├── memento/
     ├── observer/
-    ├── state/
-    ├── strategy/
-    ├── template_method/
-    └── visitor/
+    │   ├── README.md
+    │   └── example.py
+    └── iterator/
+        ├── README.md
+        └── example.py
+```
 
 ```
 
