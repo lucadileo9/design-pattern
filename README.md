@@ -24,7 +24,6 @@ This repository was created as a study and reference tool to understand, impleme
 ## Repository Structure
 
 ```
-```
 design-pattern/
 ├── README.md                    # Questo file
 ├── docs/                        # Documentazione di supporto
@@ -61,8 +60,6 @@ design-pattern/
     └── iterator/
         ├── README.md
         └── example.py
-```
-
 ```
 
 ---
