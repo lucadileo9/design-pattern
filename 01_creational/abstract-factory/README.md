@@ -117,102 +117,118 @@ La cosa migliore è guardare questi diagramma dopo aver visto il codice, altrime
 ```mermaid
 %%{init: {"layout": "elk"}}%%
 classDiagram
-    direction TD
+    direction TB
 
-    %% Gerarchia PRODOTTI
+    %% --- INTERFACCE (PRODOTTI) ---
     class DatabaseConnection {
         <<interface>>
-        +open()*
-        +query(sql)*
+        +open() bool
+        +query(sql) str
+        +health_check() bool
+        +close()
     }
-    class MySQLConnection {
-        +connection_string: str
-        +open()
-        +query(sql)
+
+    class Logger {
+        <<interface>>
+        +info(msg)
+        +error(msg)
+        +flush()
     }
-    class MongoDBConnection {
-        +uri: str
-        +open()
-        +query(sql)
-    }
-    
-    %% Gerarchia CREATORI
-    class DatabaseManager {
+
+    %% --- GERARCHIA FACTORY ---
+    class InfrastructureFactory {
         <<abstract>>
         +create_database()* DatabaseConnection
-        +initialize_system()
-    }
-    class ProductionMySQLManager {
-        +create_database() DatabaseConnection
-    }
-    class CloudMongoManager {
-        +create_database() DatabaseConnection
+        +create_logger()* Logger
     }
 
-    %% Relazioni di Ereditarietà
-    DatabaseConnection <|-- MySQLConnection : implementa
-    DatabaseConnection <|-- MongoDBConnection : implementa
-    DatabaseManager <|-- ProductionMySQLManager : estende
-    DatabaseManager <|-- CloudMongoManager : estende
+    class ProductionFactory {
+        +create_database() DatabaseConnection
+        +create_logger() Logger
+    }
 
-    %% Relazione di Dipendenza e Creazione
-    DatabaseManager ..> DatabaseConnection : usa
-    ProductionMySQLManager ..> MySQLConnection : crea
-    CloudMongoManager ..> MongoDBConnection : crea
+    class CloudFactory {
+        +create_database() DatabaseConnection
+        +create_logger() Logger
+    }
+
+    %% --- CLIENT ---
+    class Application {
+        -db: DatabaseConnection
+        -log: Logger
+        +run()
+    }
+
+    %% --- RELAZIONI ---
+    InfrastructureFactory <|-- ProductionFactory : implementa
+    InfrastructureFactory <|-- CloudFactory : implementa
+    
+    DatabaseConnection <|.. MySQLConnection : implementa
+    DatabaseConnection <|.. MongoDBConnection : implementa
+    
+    Logger <|.. FileLogger : implementa
+    Logger <|.. CloudLogger : implementa
+
+    %% Relazioni di Creazione (Vicolo di coerenza)
+    ProductionFactory ..> MySQLConnection : "crea"
+    ProductionFactory ..> FileLogger : "crea"
+    
+    CloudFactory ..> MongoDBConnection : "crea"
+    CloudFactory ..> CloudLogger : "crea"
+
+    %% Il Client usa solo le astrazioni
+    Application o-- InfrastructureFactory : riceve
+    Application o-- DatabaseConnection : usa
+    Application o-- Logger : usa
 
     %% Styling
+    style InfrastructureFactory fill:#1e272e,stroke:#05c46b,stroke-width:2px,color:#fff
     style DatabaseConnection fill:#1e272e,stroke:#0fbcf9,stroke-width:2px,color:#fff
-    style DatabaseManager fill:#1e272e,stroke:#05c46b,stroke-width:2px,color:#fff
-    style MySQLConnection fill:#2f3542,stroke:#ced4da,color:#fff
-    style MongoDBConnection fill:#2f3542,stroke:#ced4da,color:#fff
+    style Logger fill:#1e272e,stroke:#ffa502,stroke-width:2px,color:#fff
+    style Application fill:#2d3436,stroke:#ef5777,stroke-width:2px,color:#fff
 ```
 ### Diagramma di esecuzione
 
 
 ```mermaid
 %%{init: {"layout": "elk"}}%%
-graph 
-    %% Definizione Stili Note
-    classDef note style fill:#2f3640,stroke:#fbc531,stroke-width:2px,stroke-dasharray: 5 5,color:#fbc531,font-style:italic;
-    classDef action style fill:#2d3436,stroke:#0fbcf9,color:#fff;
-    classDef logic style fill:#2d3436,stroke:#05c46b,color:#fff;
+sequenceDiagram
+    autonumber
+    
+    participant Client as Main / EntryPoint
+    participant App as Application
+    participant Fact as ProductionFactory
+    participant DB as MySQLConnection
+    participant Log as FileLogger
 
-    subgraph Client_Space [Ambiente Client]
-        direction TB
-        A[Inizio] --> B[Istanzia ProductionMySQLManager]
-        
-        %% NOTA 1
-        N1{{<b>NOTA 1: Scelta del DB</b><br/>In questo preciso punto il Client<br/>decide quale database usare.<br/>Cambiando questa riga, cambia<br/>l'intero comportamento del sistema.}}
-        B -.-> N1
-    end
+    Note over Client, Fact: 1. Setup dell'Ambiente
+    Client->>Fact: new ProductionFactory()
+    Client->>App: new Application(factory)
+    
+    activate App
+    App->>Fact: create_database()
+    Fact->>DB: new MySQLConnection(config)
+    Fact-->>App: ritorna istanza DB
+    
+    App->>Fact: create_logger()
+    Fact->>Log: new FileLogger(path)
+    Fact-->>App: ritorna istanza Logger
+    deactivate App
 
-    subgraph Manager_Logic [DatabaseManager Base]
-        direction TB
-        C[Chiama initialize_system] --> D["db = self.create_database()"]
-        
-        %% NOTA 2
-        N2{{<b>NOTA 2: Astrazione </b><br/> Il metodo ritorna un oggetto<br/>'DatabaseConnection'. Il Manager<br/>non sa se è MySQL o Mongo,<br/>sa solo che rispetta l'interfaccia.}}
-        D -.-> N2
-    end
-
-    subgraph Operation [Utilizzo Polimorfico]
-        direction TB
-        H[db.open] --> I[db.query]
-        
-        %% NOTA 3
-        N3{{<b>NOTA 3: Polimorfismo</b><br/>Questi metodi chiamati nel DataBaseManager funzionano a<br/>prescindere dal DB scelto perché<br/>tutte le classi derivano dalla<br/>stessa classe base astratta.}}
-        I -.-> N3
-    end
-
-    %% Collegamenti tra i blocchi
-    B --> C
-    D --> H
-
-    %% Assegnazione Classi
-    class B,H,I action;
-    class C,D logic;
-    class N1,N2,N3 note;
-
+    Note over App, Log: 2. Esecuzione Business Logic
+    Client->>App: run()
+    activate App
+    App->>Log: info("Avvio applicazione")
+    App->>DB: open()
+    DB-->>App: True
+    App->>DB: query("SELECT version()")
+    DB-->>App: "[MySQL] Risultato..."
+    App->>Log: info("Query eseguita")
+    
+    App->>DB: close()
+    App->>Log: flush()
+    deactivate App
+    
 ```
 
 ### ✅ Vantaggi
