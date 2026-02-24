@@ -33,21 +33,152 @@ Nell'analogia della festa di laurea, il Facade è il **Wedding Planner**: noi gl
 
 **N.B.**: Una buona Facade non dovrebbe impedire l'accesso al sottosistema complesso. Se un "client esperto" avesse bisogno di un controllo granulare che la Facade non offre, dovrebbe comunque poter interagire direttamente con le classi originali (X, Y o Z). La Facade è una comodità, non una prigione
 
-## 📊 Diagramma
+## Diagrammi
+
+### Diagramma delle classi generico
 
 ```mermaid
-%% Diagramma da completare
 classDiagram
+    class Client {
+        <<codice applicativo>>
+    }
     class Facade {
+        -subsystemA
+        -subsystemB
+        -subsystemC
         +operation()
     }
     class SubsystemA {
-        +operation_a()
+        +operationA1()
+        +operationA2()
     }
     class SubsystemB {
-        +operation_b()
+        +operationB1()
+        +operationB2()
+        +operationB3()
     }
+    class SubsystemC {
+        +operationC1()
+        +operationC2()
+    }
+
+    Client --> Facade : usa
+    Facade *-- SubsystemA : crea e coordina
+    Facade *-- SubsystemB : crea e coordina
+    Facade *-- SubsystemC : crea e coordina
+
+    note for Facade "Espone un metodo semplice.\nOrchestra internamente A → B → C.\nGestisce errori e rollback."
+    note for Client "Conosce SOLO la Facade.\nNon sa che A, B, C esistono."
 ```
+
+### Diagramma delle classi specifico
+
+```mermaid
+classDiagram
+    class CheckoutFacade {
+        -_catalog: CatalogService
+        -_payment: PaymentService
+        -_shipping: ShippingService
+        -_notifications: NotificationService
+        +complete_order(items, email, address, card) OrderResult
+    }
+
+    class CatalogService {
+        -_stock: dict
+        +check_availability(product_id, qty) bool
+        +reserve_stock(product_id, qty)
+        +release_stock(product_id, qty)
+    }
+
+    class PaymentService {
+        +process_payment(card_number, amount) Optional~str~
+    }
+
+    class ShippingService {
+        +create_shipment(address, n_items) str
+    }
+
+    class NotificationService {
+        +send_confirmation(email, order_id, total, tracking)$
+        +send_error(email, reason)$
+    }
+
+    class CartItem {
+        <<dataclass>>
+        +product_id: str
+        +name: str
+        +quantity: int
+        +unit_price: float
+        +subtotal: float
+    }
+
+    class OrderResult {
+        <<dataclass>>
+        +success: bool
+        +order_id: Optional~str~
+        +tracking_code: Optional~str~
+        +total: float
+        +message: str
+    }
+
+    CheckoutFacade *-- CatalogService
+    CheckoutFacade *-- PaymentService
+    CheckoutFacade *-- ShippingService
+    CheckoutFacade *-- NotificationService
+
+    CheckoutFacade ..> CartItem : riceve
+    CheckoutFacade ..> OrderResult : restituisce
+```
+
+### Diagramma di sequenza — `complete_order()`
+
+```mermaid
+sequenceDiagram
+    actor Client
+    participant Facade as CheckoutFacade
+    participant Catalog as CatalogService
+    participant Payment as PaymentService
+    participant Shipping as ShippingService
+    participant Email as NotificationService
+
+    Client ->>+ Facade: complete_order(items, email, address, card)
+
+    Note over Facade: Passo 1 — Verifica disponibilità
+    loop per ogni item nel carrello
+        Facade ->> Catalog: check_availability(product_id, qty)
+        Catalog -->> Facade: bool
+    end
+
+    Note over Facade: Passo 2 — Riserva stock
+    loop per ogni item
+        Facade ->> Catalog: reserve_stock(product_id, qty)
+    end
+
+    Note over Facade: Passo 3 — Pagamento
+    Facade ->> Payment: process_payment(card, total)
+
+    alt pagamento accettato
+        Payment -->> Facade: transaction_id
+
+        Note over Facade: Passo 4 — Spedizione
+        Facade ->> Shipping: create_shipment(address, n_items)
+        Shipping -->> Facade: tracking_code
+
+        Note over Facade: Passo 5 — Conferma
+        Facade ->> Email: send_confirmation(email, order_id, total, tracking)
+        Facade ->>- Client: OrderResult(success=True)
+
+    else pagamento rifiutato
+        Payment -->> Facade: None
+        Note over Facade: ↩ ROLLBACK
+        loop per ogni item riservato
+            Facade ->> Catalog: release_stock(product_id, qty)
+        end
+        Facade ->> Email: send_error(email, reason)
+        Facade -->> Client: OrderResult(success=False)
+    end
+```
+Come si può vedere, il client chiama un unico metodo `complete_order()`, tutta la complessità è nascosta all'interno del Facade, che si occupa di orchestrare le chiamate ai vari servizi e gestire errori e rollback in caso di problemi.
 
 ### Vantaggi
 
