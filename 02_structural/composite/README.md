@@ -27,20 +27,86 @@ In questo modo, chiamare `operation()` sul nodo radice propaga automaticamente l
 
 ## 📊 Diagramma
 
+### Diagramma generico
+
 ```mermaid
-%% Diagramma da completare
 classDiagram
     class Component {
-        +operation()
+        <<abstract>>
+        +operation()*
     }
     class Leaf {
         +operation()
     }
     class Composite {
+        -children: list~Component~
         +operation()
-        +add()
-        +remove()
+        +add(Component)
+        +remove(Component)
     }
+
+    Component <|-- Leaf
+    Component <|-- Composite
+    Composite o-- Component : contiene
+```
+
+### Diagramma specifico — Menu ristorante
+
+```mermaid
+classDiagram
+    class ComponenteMenu {
+        <<abstract>>
+        +nome: str
+        +mostra(indentazione)*
+        +conta_piatti()* int
+        +get_prezzi()* list~float~
+        +get_prezzo_medio() float
+    }
+    class Piatto {
+        +prezzo: float
+        +descrizione: str
+        +mostra(indentazione)
+        +conta_piatti() int
+        +get_prezzi() list~float~
+    }
+    class SezioneMenu {
+        -_figli: list~ComponenteMenu~
+        +aggiungi(ComponenteMenu)
+        +rimuovi(ComponenteMenu)
+        +mostra(indentazione)
+        +conta_piatti() int
+        +get_prezzi() list~float~
+    }
+
+    ComponenteMenu <|-- Piatto : Leaf
+    ComponenteMenu <|-- SezioneMenu : Composite
+    SezioneMenu o-- ComponenteMenu : contiene
+```
+
+### Diagramma di sequenza — `conta_piatti()` ricorsivo
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Menu as Menu (SezioneMenu)
+    participant Primi as Primi (SezioneMenu)
+    participant Carbonara as Carbonara (Piatto)
+    participant Risotto as Risotto (Piatto)
+    participant Bevande as Bevande (SezioneMenu)
+    participant Birra as Birra (Piatto)
+
+    Client->>Menu: conta_piatti()
+    Menu->>Primi: conta_piatti()
+    Primi->>Carbonara: conta_piatti()
+    Carbonara-->>Primi: 1
+    Primi->>Risotto: conta_piatti()
+    Risotto-->>Primi: 1
+    Primi-->>Menu: 2
+    Menu->>Bevande: conta_piatti()
+    Bevande->>Birra: conta_piatti()
+    Birra-->>Bevande: 1
+    Bevande-->>Menu: 1
+    Menu-->>Client: 3
 ```
 
 ### Vantaggi
