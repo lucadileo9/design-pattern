@@ -26,21 +26,140 @@ Per implementare questa soluzione:
 
 Dopodiché il client istanzia un `Adapter`, passando un'istanza di `Adaptee`, e lo usa come se fosse un `Target` normale.
 
-## 📊 Diagramma
+## Diagrammi
+
+### Diagramma delle classi generico
 
 ```mermaid
-%% Diagramma da completare
+%%{init: {'layout': 'elk'}}%%
+
 classDiagram
+    direction TB
+
+    class Client {
+        +doWork(target: Target)
+    }
+
     class Target {
-        +request()
+        <<interface>>
+        +request() Result*
     }
+
     class Adapter {
-        +request()
+        -_adaptee: Adaptee
+        +request() Result
     }
+
     class Adaptee {
-        +specific_request()
+        +specificRequest() RawData
     }
+
+    %% Relazioni
+    Client ..> Target : usa
+    Adapter ..|> Target : implementa
+    Adapter o-- Adaptee : wraps
+
+    %% Note sui ruoli
+    note for Target "Interfaccia che il Client conosce. Definisce il formato standard atteso."
+    note for Adaptee "Classe esistente incompatibile. Non si può/vuole modificare."
+    note for Adapter "Traduce request() in specificRequest() e converte RawData → Result."
+
+    %% Styling
+    style Target fill:#2d3436,stroke:#00cec9,stroke-width:2px,color:#fff
+    style Adapter fill:#2d3436,stroke:#fdcb6e,stroke-width:2px,color:#fff
+    style Adaptee fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
+    style Client fill:#2d3436,stroke:#a29bfe,stroke-width:2px,color:#fff
 ```
+
+### Diagramma delle classi specifico per il nostro esempio
+```mermaid
+%%{init: {'layout': 'elk'}}%%
+classDiagram
+    direction TB
+
+    class GeneratoreReport {
+        +genera_report(sorgente: SorgenteDati, nome: str)
+    }
+
+    class SorgenteDati {
+        <<interface>>
+        +get_vendite() list[dict]*
+    }
+
+    class DatabaseAdapter {
+        -_adaptee: DatabaseAziendale
+        +get_vendite() list[dict]
+    }
+
+    class APIAdapter {
+        -_adaptee: APIFornitoreEsterno
+        +get_vendite() list[dict]
+    }
+
+    class CSVAdapter {
+        -_adaptee: ParserCSV
+        +get_vendite() list[dict]
+    }
+
+    class DatabaseAziendale {
+        +recupera_vendite() list[dict]
+    }
+
+    class APIFornitoreEsterno {
+        +fetch_orders() list[dict]
+    }
+
+    class ParserCSV {
+        +leggi_file() list[tuple]
+    }
+
+    %% Relazioni
+    GeneratoreReport ..> SorgenteDati : usa
+    DatabaseAdapter ..|> SorgenteDati : implementa
+    APIAdapter      ..|> SorgenteDati : implementa
+    CSVAdapter      ..|> SorgenteDati : implementa
+    DatabaseAdapter o-- DatabaseAziendale : wraps
+    APIAdapter      o-- APIFornitoreEsterno : wraps
+    CSVAdapter      o-- ParserCSV : wraps
+
+    %% Styling
+    style SorgenteDati fill:#2d3436,stroke:#00cec9,stroke-width:2px,color:#fff
+    style DatabaseAdapter fill:#2d3436,stroke:#fdcb6e,stroke-width:2px,color:#fff
+    style APIAdapter fill:#2d3436,stroke:#fdcb6e,stroke-width:2px,color:#fff
+    style CSVAdapter fill:#2d3436,stroke:#fdcb6e,stroke-width:2px,color:#fff
+    style DatabaseAziendale fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
+    style APIFornitoreEsterno fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
+    style ParserCSV fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
+    style GeneratoreReport fill:#2d3436,stroke:#a29bfe,stroke-width:2px,color:#fff
+```
+
+### Diagramma di sequenza
+```mermaid
+sequenceDiagram
+    autonumber
+    participant G as GeneratoreReport
+    participant A as APIAdapter
+    participant API as APIFornitoreEsterno
+
+    Note over G, API: Esempio con APIAdapter — il flusso è identico per Database e CSV
+
+    G->>A: get_vendite()
+    activate A
+    Note right of A: L'Adapter conosce il contratto<br/>della sorgente esterna
+
+    A->>API: fetch_orders()
+    activate API
+    API-->>A: [{"item_name": ..., "total_eur": ..., "order_date": "15-01-2024"}]
+    deactivate API
+
+    Note right of A: Traduzione:<br/>item_name → prodotto<br/>total_eur → importo<br/>"15-01-2024" → "2024-01-15"
+
+    A-->>G: [{"prodotto": ..., "importo": ..., "data": "2024-01-15"}]
+    deactivate A
+
+    Note over G: Il GeneratoreReport riceve sempre<br/>lo stesso formato standard,<br/>indipendentemente dalla sorgente
+```
+
 
 
 ---
