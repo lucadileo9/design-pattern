@@ -31,17 +31,97 @@ Nell'analogia del negoziante: il negoziante è il `Subject`, i clienti sono gli 
 
 ## 📊 Diagramma
 
+### Diagramma generico
+
 ```mermaid
-%% Diagramma da completare
 classDiagram
     class Subject {
-        +attach()
-        +detach()
+        -observers: list~Observer~
+        +attach(Observer)
+        +detach(Observer)
         +notify()
     }
     class Observer {
+        <<interface>>
+        +update()*
+    }
+    class ConcreteObserverA {
         +update()
     }
+    class ConcreteObserverB {
+        +update()
+    }
+
+    Subject o-- Observer : notifica
+    Observer <|.. ConcreteObserverA
+    Observer <|.. ConcreteObserverB
+```
+
+### Diagramma specifico — Event-driven UI
+
+```mermaid
+classDiagram
+    class EventListener {
+        <<abstract>>
+        +su_evento(Evento)*
+    }
+    class ComponenteUI {
+        +nome: str
+        -_listener: dict
+        +registra(tipo, EventListener)
+        +rimuovi(tipo, EventListener)
+        -_emetti(tipo, dati)
+    }
+    class Bottone {
+        +click()
+    }
+    class CampoTesto {
+        +valore: str
+        +scrivi(testo)
+    }
+    class Form {
+        +campi: dict
+        +invia()
+    }
+    class Logger {
+        +log: list
+        +su_evento(Evento)
+    }
+    class Analytics {
+        +contatori: dict
+        +su_evento(Evento)
+    }
+    class Validatore {
+        +su_evento(Evento)
+    }
+
+    ComponenteUI <|-- Bottone
+    ComponenteUI <|-- CampoTesto
+    ComponenteUI <|-- Form
+    ComponenteUI o-- EventListener : notifica
+    EventListener <|-- Logger
+    EventListener <|-- Analytics
+    EventListener <|-- Validatore
+```
+
+### Diagramma di sequenza — Click su un bottone
+
+```mermaid
+sequenceDiagram
+    participant Utente
+    participant Bottone as Bottone (Subject)
+    participant Logger as Logger (Observer)
+    participant Analytics as Analytics (Observer)
+    participant UI as AggiornamentoUI (Observer)
+
+    Utente->>Bottone: click()
+    Bottone->>Bottone: _emetti("click")
+    Bottone->>Logger: su_evento(evento)
+    Logger-->>Bottone: (log scritto)
+    Bottone->>Analytics: su_evento(evento)
+    Analytics-->>Bottone: (contatore aggiornato)
+    Bottone->>UI: su_evento(evento)
+    UI-->>Bottone: (UI aggiornata)
 ```
 
 ### Vantaggi
