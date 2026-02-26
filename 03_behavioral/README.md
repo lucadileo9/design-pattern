@@ -40,7 +40,7 @@ Riferimento: [Spiegazione completa](./strategy/README.md)
 
 **Utilizzo tipico**: pipeline con flusso fisso ma step intercambiabili (importazione dati, generazione report, processi ETL) — quando più varianti condividono la stessa sequenza di passaggi ma differiscono in alcuni di essi.
 
-Riferimento: [Spiegazione completa](./template-method/README.MD)
+Riferimento: [Spiegazione completa](./template-method/README.md)
 
 ---
 

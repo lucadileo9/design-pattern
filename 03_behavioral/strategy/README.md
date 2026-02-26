@@ -21,7 +21,7 @@ I quattro attori:
 
 > **Analogia**: invece di avere una guida che contiene tutte le informazioni, abbiamo una guida che ci dice "Ecco le opzioni di trasporto disponibili, scegli quella che preferisci". Il client sceglie una strategia (es. "Usa l'auto") e fornisce la strategia concreta alla classe contesto; la guida userà quell'esperto per fare tutte le operazioni necessarie. Se viene aggiunto un nuovo mezzo di trasporto, basta aggiungere una nuova classe esperta — le classi esistenti non vanno toccate.
 
-## 📊 Diagramma
+## Diagrammi
 
 ### Diagramma generico
 
@@ -101,7 +101,7 @@ classDiagram
     Ordine *-- ArticoloCarrello : contiene
 ```
 
-### Diagramma di sequenza — Checkout con cambio metodo
+### Diagramma di sequenza
 
 ```mermaid
 sequenceDiagram

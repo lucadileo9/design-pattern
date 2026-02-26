@@ -35,7 +35,7 @@ Nell'analogia della festa di laurea, il Facade è il **Wedding Planner**: noi gl
 
 ## Diagrammi
 
-### Diagramma delle classi generico
+### Diagramma generico
 
 ```mermaid
 classDiagram
@@ -71,7 +71,7 @@ classDiagram
     note for Client "Conosce SOLO la Facade.\nNon sa che A, B, C esistono."
 ```
 
-### Diagramma delle classi specifico
+### Diagramma specifico
 
 ```mermaid
 classDiagram
@@ -130,7 +130,7 @@ classDiagram
     CheckoutFacade ..> OrderResult : restituisce
 ```
 
-### Diagramma di sequenza — `complete_order()`
+### Diagramma di sequenza
 
 ```mermaid
 sequenceDiagram

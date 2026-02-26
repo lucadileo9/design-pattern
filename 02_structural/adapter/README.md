@@ -9,7 +9,7 @@ Realisticamente però i cambiamenti arrivano: se `Y` cambia il proprio formato, 
 Analogia reale: una presa elettrica di tipo A (americana) accetta solo spine di tipo A. Per usare un dispositivo con spina di tipo B (europea) non possiamo modificare né la presa né la spina — serve un adattatore.
 
 
-## ✅ Soluzione
+## Soluzione
 
 La soluzione è il pattern **Adapter**. I tre attori sono:
 
@@ -28,7 +28,7 @@ Dopodiché il client istanzia un `Adapter`, passando un'istanza di `Adaptee`, e 
 
 ## Diagrammi
 
-### Diagramma delle classi generico
+### Diagramma generico
 
 ```mermaid
 %%{init: {'layout': 'elk'}}%%
@@ -71,7 +71,7 @@ classDiagram
     style Client fill:#2d3436,stroke:#a29bfe,stroke-width:2px,color:#fff
 ```
 
-### Diagramma delle classi specifico per il nostro esempio
+### Diagramma specifico
 ```mermaid
 %%{init: {'layout': 'elk'}}%%
 classDiagram
@@ -161,31 +161,25 @@ sequenceDiagram
 ```
 
 
+### Vantaggi
 
----
-
-## I Vantaggi 
-
-1. **Principio di Singola Responsabilità (SRP):**
+- **Principio di Singola Responsabilità (SRP):**
 Uno dei vantaggi principali è la separazione degli interessi. Il codice che si occupa della conversione dei dati o dell'interfaccia è isolato all'interno dell'Adapter. La logica di business del sistema rimane pulita e non viene "inquinata" dai dettagli tecnici necessari per far funzionare una libreria esterna o un sistema legacy.
-2. **Principio Aperto/Chiuso (OCP):**
+- **Principio Aperto/Chiuso (OCP):**
 E' possibile introdurre nuovi tipi di Adapter nel sistema senza modificare il codice client esistente. Finché il nuovo Adapter implementa l'interfaccia `Target` che il client si aspetta, tutto funzionerà correttamente. Questo rende il sistema estremamente **estensibile**.
-3. **Riutilizzo di Codice Incompatibile:**
+- **Riutilizzo di Codice Incompatibile:**
 L'Adapter è la "macchina del tempo" del software. Permette di utilizzare classi scritte anni fa (legacy) o librerie di terze parti i cui sorgenti non sono modificabili, rendendole compatibili.
-4. **Flessibilità e Disaccoppiamento:**
+- **Flessibilità e Disaccoppiamento:**
 Il client non sa nulla della classe concreta che sta fornendo il servizio (l'Adaptee). Conosce solo l'interfaccia Target. Questo significa che, in futuro, si può cambiare interamente la libreria sottostante semplicemente creando un nuovo Adapter, senza che il resto dell'applicazione se ne accorga.
 
----
 
-## Gli Svantaggi
+### Svantaggi
 
-1. **Aumento della Complessità Complessiva:**
+- **Aumento della Complessità Complessiva:**
 L'introduzione di un Adapter significa aggiungere nuove classi e interfacce al progetto. È il classico caso di "over-engineering".
-2. **Overhead Prestazionale (Minimo, ma esistente):**
+- **Overhead Prestazionale (Minimo, ma esistente):**
 Ogni volta che il client chiama un metodo dell'Adapter, avviene una "delega" (l'Adapter chiama l'Adaptee). Questo aggiunge un piccolo passaggio extra nello stack delle chiamate. Nella stragrande maggioranza delle applicazioni questo ritardo è impercettibile, ma in sistemi *real-time* estremi o ad altissime prestazioni, ogni livello di astrazione conta.
-3. **Difficoltà nel Debugging:**
+- **Difficoltà nel Debugging:**
 Quando si verifica un errore, il flusso del programma attraversa più livelli (Client -> Adapter -> Adaptee). Seguire il percorso dei dati durante il debugging può diventare più frustrante, specialmente se ci sono conversioni di dati complesse nel mezzo.
-4. **Rischio di "Codice Morto" o Ridondante:**
+- **Rischio di "Codice Morto" o Ridondante:**
 A volte è più semplice e pulito modificare direttamente la classe originale (se ne abbiamo il controllo) piuttosto che costruire un Adapter. Se iniziate a creare Adapter per classi che potreste facilmente rifattorizzare, state solo aggiungendo burocrazia al vostro codice.
-
----

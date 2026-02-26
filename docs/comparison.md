@@ -1,18 +1,18 @@
-# 🔄 Confronti tra Pattern
+# Confronti tra Pattern
 
 > Quando usare un pattern invece di un altro?
 
 ## Pattern Creazionali
 
-_Da completare_
+*Da completare...*
 
 ## Pattern Strutturali
 
-_Da completare_
+*Da completare...*
 
 ## Pattern Comportamentali
 
-_Da completare_
+*Da completare...*
 
 ---
 

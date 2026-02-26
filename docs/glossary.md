@@ -1,4 +1,4 @@
-# 📖 Glossario dei Design Pattern
+# Glossario dei Design Pattern
 
 > Terminologia comune utilizzata nel contesto dei design pattern
 
@@ -21,7 +21,7 @@ Pattern che si occupa della comunicazione tra oggetti.
 
 ## Termini Specifici
 
-_Da completare durante l'implementazione dei pattern_
+*Da completare...*
 
 ---
 

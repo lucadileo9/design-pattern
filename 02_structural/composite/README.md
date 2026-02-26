@@ -25,7 +25,7 @@ In questo modo, chiamare `operation()` sul nodo radice propaga automaticamente l
 
 > **N.B.**: i metodi `add()` e `remove()` possono essere definiti solo nella classe `Composite` e non nell'interfaccia `Component`. Questo evita metodi vuoti o eccezioni nella classe `Leaf`, a scapito però di un'interfaccia meno uniforme — è una scelta di design.
 
-## 📊 Diagramma
+## Diagrammi
 
 ### Diagramma generico
 
@@ -83,7 +83,7 @@ classDiagram
     SezioneMenu o-- ComponenteMenu : contiene
 ```
 
-### Diagramma di sequenza — `conta_piatti()` ricorsivo
+### Diagramma di sequenza
 
 ```mermaid
 sequenceDiagram

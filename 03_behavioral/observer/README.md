@@ -1,6 +1,6 @@
 # Observer Pattern
 
-## 🎯 Problema
+## Problema
 
 Ipotizziamo di avere un oggetto `A` che cambia il proprio stato interno, e un altro oggetto `B` il cui stato è strettamente legato a quello di `A`. Per mantenersi aggiornato, `B` deve periodicamente chiedere ad `A` se il suo stato è cambiato — questo approccio è detto **polling**.
 
@@ -9,7 +9,7 @@ Se entrano in gioco altri oggetti `C`, `D`, `E` con la stessa esigenza, `A` vien
 Analogia col mondo reale: pensiamo ad negoziante, che ha le sue cose da fare e gestire. Se ci fosse un cliente che periodicamente gli chiede se ha un certo prodotto in magazzinom vorrebbe dire che il negoziante dovrebber interrompere quello che sta facendo per rispondere al cliente. Se poi entrano in gioco altri clienti, allora il negoziante deve periodicamente interrompere quello che sta facendo per rispondere a tutti i clienti, non riuscendo più a concentrarsi su quello che sta facendo.
 
 
-## ✅ Soluzione
+## Soluzione
 
 La soluzione è il pattern **Observer**, che inverte la responsabilità: invece di far fare polling agli osservatori, è il **Subject** (`A`) a notificare proattivamente tutti gli interessati quando il proprio stato cambia.
 
@@ -29,7 +29,7 @@ L'interfaccia comune degli Observer è il punto chiave: permette al `Subject` di
 
 Nell'analogia del negoziante: il negoziante è il `Subject`, i clienti sono gli `Observer`. Quando arriva un nuovo prodotto, il negoziante avvisa direttamente tutti i clienti interessati — senza aspettare che siano loro a chiedere.
 
-## 📊 Diagramma
+## Diagrammi
 
 ### Diagramma generico
 
@@ -104,7 +104,7 @@ classDiagram
     EventListener <|-- Validatore
 ```
 
-### Diagramma di sequenza — Click su un bottone
+### Diagramma di sequenza
 
 ```mermaid
 sequenceDiagram

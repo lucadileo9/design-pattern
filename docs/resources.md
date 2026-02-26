@@ -1,4 +1,4 @@
-# 📚 Risorse e Riferimenti
+# Risorse e Riferimenti
 
 > Link utili per approfondire i design pattern
 
@@ -14,11 +14,11 @@
 
 ## Video
 
-_Da aggiungere_
+*Da aggiungere...*
 
 ## Articoli
 
-_Da aggiungere_
+*Da aggiungere...*
 
 ---
 

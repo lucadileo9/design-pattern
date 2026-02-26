@@ -40,9 +40,9 @@ ATTENZIONE: non confondere con lo *Simple Factory* — la `MezzoDiTrasportoFacto
 
 N.B.: da nessuna parte c'è bisogno di mettere una lista di classi concrete, perché appunto è tutto perfettamente disaccoppiato. 
 
-##  Diagrammi
+## Diagrammi
 
-### Diagramma generico delle classi
+### Diagramma generico
 
 ```mermaid
 classDiagram
@@ -85,7 +85,7 @@ classDiagram
 
 
 
-### Diagramma delle classi
+### Diagramma specifico
 
 La cosa migliore è guardare questi diagramma dopo aver visto il codice, altrimenti potrebbe essere un po' difficile da capire. 
 
@@ -141,7 +141,7 @@ classDiagram
     style MySQLConnection fill:#2f3542,stroke:#ced4da,color:#fff
     style MongoDBConnection fill:#2f3542,stroke:#ced4da,color:#fff
 ```
-### Diagramma di esecuzione
+### Diagramma di sequenza
 
 
 ```mermaid
@@ -205,13 +205,4 @@ Nonostante i benefici, ci sono aspetti critici da considerare:
 
 - **Aumento della complessità**: il numero di sottoclassi può aumentare, rendendo il codice più articolato.
 - **Rischio di over-engineering**: su progetti molto semplici il pattern può complicare inutilmente l'architettura.
-
-
-### Quando usarlo?
-
-Dovreste considerare il Factory Method nelle seguenti situazioni:
-
-- **Incertezza sui tipi**: quando non conoscete in anticipo i tipi esatti e le dipendenze degli oggetti.
-- **Estensibilità di framework/librerie**: quando volete permettere estensioni tramite ereditarietà.
-- **Delega della creazione**: quando la responsabilità della creazione deve essere delegata alle sottoclassi per flessibilità.
 

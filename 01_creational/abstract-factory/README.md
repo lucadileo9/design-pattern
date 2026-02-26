@@ -32,9 +32,9 @@ Esempio (logistica)
 - Implementazioni concrete: `FactoryElettrica`, `FactoryCombustione`, ciascuna crea i rispettivi mezzi di trasporto della famiglia. 
 
 
-##  Diagrammi
+## Diagrammi
 
-### Diagramma generico delle classi
+### Diagramma generico
 
 ```mermaid
 %%{init: {"layout": "elk"}}%%
@@ -110,7 +110,7 @@ classDiagram
 
 
 
-### Diagramma delle classi
+### Diagramma specifico
 
 La cosa migliore è guardare questi diagramma dopo aver visto il codice, altrimenti potrebbe essere un po' difficile da capire. 
 
@@ -187,7 +187,7 @@ classDiagram
     style Logger fill:#1e272e,stroke:#ffa502,stroke-width:2px,color:#fff
     style Application fill:#2d3436,stroke:#ef5777,stroke-width:2px,color:#fff
 ```
-### Diagramma di esecuzione
+### Diagramma di sequenza
 
 
 ```mermaid
@@ -231,7 +231,7 @@ sequenceDiagram
     
 ```
 
-### ✅ Vantaggi
+### Vantaggi
 L'Abstract Factory offre benefici cruciali per la gestione di sistemi complessi:
 
 - **Compatibilità dei Prodotti**: Garantite che i prodotti ottenuti da una factory siano compatibili tra loro, mantenendo la coerenza all'interno della famiglia di oggetti.
@@ -255,12 +255,3 @@ Tuttavia, l'astrazione ha un costo:
 
 
 - **Difficoltà Iniziale**: Richiede una pianificazione attenta e una conoscenza approfondita dei principi della programmazione orientata agli oggetti.
-
-### Quando usarlo?
-Dovreste optare per l'Abstract Factory nelle seguenti circostanze:
-- **Sistemi Multi-Piattaforma o Multi-Ambiente**: Quando il sistema deve supportare diverse famiglie di prodotti (es. interfacce utente per Windows, macOS e Linux) e volete che tutti i componenti siano coerenti tra loro.
-
-- **Dipendenze tra Prodotti**: Quando avete un insieme di oggetti correlati progettati per essere utilizzati insieme e volete forzare questo vincolo a livello architettonico.
-
-
-- **Configurazione Dinamica**: Quando un'applicazione deve scegliere una famiglia di prodotti in base alla configurazione corrente o alle impostazioni dell'ambiente.

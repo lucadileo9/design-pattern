@@ -28,7 +28,9 @@ Lato client: si chiama `create_iterator()` sulla collezione e si usa l'iteratore
 
 > **N.B.**: questo pattern è diverso rispetto al patter **Composite**: il Composite è un pattern strutturale, che quindi si occupa di organizzare le classi e le loro relazioni, mentre l'Iterator è un pattern comportamentale, che si occupa di definire come l'utente interagisce con le classi. Spesso quel che succede è che una classe complessa e con struttura riscorsiva (come un albero) è implementata usando il Composite, e poi si fornisce un iteratore per attraversarla usando l'Iterator. Ma sono due pattern distinti, con scopi diversi.
 
-## 📊 Diagramma
+## Diagrammi
+
+### Diagramma generico
 
 ```mermaid
 classDiagram
@@ -60,7 +62,7 @@ classDiagram
     Client --> Aggregate : usa
 ```
 
-## 📊 Diagramma — Esempio reale
+### Diagramma specifico — Esempio reale
 
 ```mermaid
 classDiagram
@@ -112,7 +114,7 @@ classDiagram
 ```
 
 
-## Diagramma di sequenza
+### Diagramma di sequenza
 
 ```mermaid
 sequenceDiagram

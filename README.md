@@ -12,10 +12,10 @@ Un'enciclopedia pratica e personale dei design pattern più comuni nella program
 
 Questo repository nasce come strumento di studio e riferimento personale per capire, implementare e padroneggiare i design pattern fondamentali. Ogni pattern è:
 
-* **Isolato**: un micro-progetto autocontenuto
-* **Spiegato**: con descrizioni chiare e precise, analogie con il mondo reale e diagrammi UML
-* **Dimostrato**: con un'implementazione didattica e un esempio concreto ispirato a scenari reali
-* **Contestualizzato**: con casi in cui il pattern è stato applicato in prima persona
+- **Isolato**: un micro-progetto autocontenuto
+- **Spiegato**: con descrizioni chiare e precise, analogie con il mondo reale e diagrammi UML
+- **Dimostrato**: con un'implementazione didattica e un esempio concreto ispirato a scenari reali
+- **Contestualizzato**: con casi in cui il pattern è stato applicato in prima persona
 
 ---
 
@@ -108,9 +108,9 @@ Si occupano della **comunicazione tra oggetti**, definendo come interagiscono e 
 
 ## Tecnologie
 
-* **Linguaggio**: Python 3.x
-* **Diagrammi**: Mermaid
-* **Documentazione**: Markdown
+- **Linguaggio**: Python 3.x
+- **Diagrammi**: Mermaid
+- **Documentazione**: Markdown
 
 ---
 

@@ -1,12 +1,12 @@
 # Template Method Pattern
 
-## 🎯 Problema
+## Problema
 
 Ipotizziamo di trovarci in una situazione in cui abbiamo una **serie di algoritmi** che condividono tanti passaggi in comune, ma con alcune differenze specifiche, soprattutto in alcuni step specifici. Essendo algoritmi diversi quel che facciamo è andare a implementare ogni algoritmo in una classe diversa, ma questo porta a una **duplicazione di codice** enorme, con tutti i problemi che ne conseguono: difficile da mantenere, estendere e testare.
 
 > **Analogia**: è come se dovessimo scrivere una ricetta per fare la pasta al pomodoro, e poi una ricetta per fare la pasta al pesto. Le due ricette condividono tanti passaggi in comune (es. cuocere la pasta, scolare, impiattare), ma differiscono in alcuni passaggi specifici (es. preparare il sugo al pomodoro o al pesto). Se scriviamo due ricette separate, finiamo per duplicare tutti i passaggi comuni, rendendo il tutto difficile da mantenere e da aggiornare (ad esempio se vogliamo cambiare il modo in cui cuociamo la pasta, dobbiamo modificare entrambe le ricette).
 
-## ✅ Soluzione
+## Soluzione
 
 La soluzione è il pattern **Template Method**: si crea una **classe astratta** che definisce la struttura generale dell'algoritmo tramite un metodo template che chiama i vari passaggi in ordine. I passaggi comuni vengono implementati direttamente nella classe astratta, mentre i passaggi specifici vengono lasciati come metodi astratti da implementare nelle classi concrete. In questo modo si evita la duplicazione di codice e si rende il sistema più flessibile e facile da estendere.
 
@@ -20,7 +20,7 @@ I tre attori:
 
 > **Analogia**: la classe astratta è la ricetta generale per fare la pasta, che definisce i passaggi comuni (cuocere la pasta, scolare, impiattare) e lascia i passaggi specifici (preparare il condimento) come metodi astratti. Le classi concrete sono le ricette specifiche per la pasta al pomodoro e la pasta al pesto: implementano il sugo, ma ereditano la struttura generale dalla classe astratta.
 
-## 📊 Diagramma
+## Diagrammi
 
 ### Diagramma generico
 
@@ -81,7 +81,7 @@ classDiagram
     ImportatoreDati ..> Record : produce
 ```
 
-### Diagramma di sequenza — Importazione da CSV
+### Diagramma di sequenza
 
 ```mermaid
 sequenceDiagram

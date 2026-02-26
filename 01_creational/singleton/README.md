@@ -18,8 +18,8 @@ La soluzione è il pattern **Singleton**. Procediamo per fasi:
 - **Metodo di accesso pubblico**: definiamo un metodo pubblico statico (es. `get_instance()`) che controlla se l'istanza esiste già. Se non esiste, la crea (con il costruttore); altrimenti, restituisce quella esistente.
 
 ## Diagrammi
- 
-### Diagramma delle classi
+
+### Diagramma generico
 ```mermaid
 classDiagram
     class Singleton {
@@ -37,7 +37,7 @@ classDiagram
     style Singleton fill:#1e272e,stroke:#0fbcf9,stroke-width:2px,color:#fff
 ```
 
-### Diagramma di sequenza 
+### Diagramma di sequenza
 ```mermaid
 sequenceDiagram
     autonumber
@@ -106,13 +106,4 @@ Molti sviluppatori moderni considerano il Singleton un "anti-pattern" a causa di
 - **Accoppiamento stretto**: può mascherare un cattivo design dove i componenti sanno "troppo" l'uno dell'altro, creando dipendenze nascoste che rendono il sistema rigido.
 - **Complessità nel multithreading**: in ambienti concorrenti, è necessario implementare logiche di blocco (thread-lock) per evitare che due thread creino accidentalmente due istanze separate nello stesso istante.
 - **Ostacolo ai test unitari**: è molto difficile isolare il codice che usa un Singleton. Poiché il costruttore è privato, molti framework di testing non riescono a creare "mock" (oggetti finti) per simulare il comportamento della classe.
-
-
-### Quando usarlo?
-
-La regola d'oro è: usalo solo quando il controllo dell'unicità è più importante della facilità di test.
-
-- **Risorse condivise critiche**: quando una classe deve gestire una risorsa hardware o software che non supporta accessi multipli disordinati (es. database, file system, configurazione globale).
-- **Sostituto superiore alle variabili globali**: quando hai bisogno di variabili globali ma vuoi impedire che chiunque le modifichi liberamente, garantendo che solo la classe gestisca l'istanza.
-- **Integrazione con altri pattern**: le classi Facade, Abstract Factory o Builder spesso vengono implementate come Singleton perché una sola istanza è solitamente sufficiente.
 
