@@ -23,6 +23,8 @@ I quattro attori:
 
 ## 📊 Diagramma
 
+### Diagramma generico
+
 ```mermaid
 classDiagram
     class Strategy {
@@ -51,6 +53,79 @@ classDiagram
     Context o-- Strategy : delega a
     Client --> Context : configura
     Client --> Strategy : sceglie
+```
+
+### Diagramma specifico — Pagamento E-commerce
+
+```mermaid
+classDiagram
+    class MetodoPagamento {
+        <<abstract>>
+        +paga(importo: float)* bool
+        +descrizione()* str
+    }
+    class CartaDiCredito {
+        +numero_carta: str
+        +cvv: str
+        +paga(importo: float) bool
+        +descrizione() str
+    }
+    class PayPal {
+        +email: str
+        +paga(importo: float) bool
+        +descrizione() str
+    }
+    class Criptovaluta {
+        +wallet: str
+        +paga(importo: float) bool
+        +descrizione() str
+    }
+    class Ordine {
+        +articoli: list~ArticoloCarrello~
+        -_metodo_pagamento: MetodoPagamento
+        +aggiungi(nome, prezzo, quantita)
+        +get_totale() float
+        +imposta_pagamento(MetodoPagamento)
+        +paga() bool
+    }
+    class ArticoloCarrello {
+        +nome: str
+        +prezzo: float
+        +quantita: int
+    }
+
+    MetodoPagamento <|.. CartaDiCredito : implements
+    MetodoPagamento <|.. PayPal : implements
+    MetodoPagamento <|.. Criptovaluta : implements
+    Ordine o-- MetodoPagamento : delega a
+    Ordine *-- ArticoloCarrello : contiene
+```
+
+### Diagramma di sequenza — Checkout con cambio metodo
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Ordine
+    participant Carta as CartaDiCredito
+    participant PP as PayPal
+
+    Client->>Ordine: aggiungi("Webcam HD", 59.99)
+    Client->>Ordine: imposta_pagamento(Carta)
+    Client->>Ordine: paga()
+    Ordine->>Ordine: get_totale() → €59.99
+    Ordine->>Carta: paga(59.99)
+    Carta-->>Ordine: False (dati non validi)
+    Ordine-->>Client: ⚠️ Pagamento fallito
+
+    Note over Client: L'utente cambia metodo a runtime
+
+    Client->>Ordine: imposta_pagamento(PayPal)
+    Client->>Ordine: paga()
+    Ordine->>Ordine: get_totale() → €59.99
+    Ordine->>PP: paga(59.99)
+    PP-->>Ordine: True
+    Ordine-->>Client: ✅ Ordine completato
 ```
 
 
