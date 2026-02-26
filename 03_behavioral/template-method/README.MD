@@ -22,6 +22,8 @@ I tre attori:
 
 ## 📊 Diagramma
 
+### Diagramma generico
+
 ```mermaid
 classDiagram
     class AbstractClass {
@@ -45,6 +47,62 @@ classDiagram
     AbstractClass <|-- ConcreteClassA : extends
     AbstractClass <|-- ConcreteClassB : extends
     Client --> AbstractClass : usa
+```
+
+### Diagramma specifico — Pipeline di Importazione Dati
+
+```mermaid
+classDiagram
+    class ImportatoreDati {
+        <<abstract>>
+        +nome_sorgente: str
+        +importa() list~Record~
+        -_leggi_sorgente()* list~Record~
+        -_pulisci_dati(records) list~Record~
+        -_salva_nel_db(records)
+    }
+    class CSVImporter {
+        -_contenuto: str
+        -_leggi_sorgente() list~Record~
+    }
+    class SQLImporter {
+        -_risultati: list~tuple~
+        -_leggi_sorgente() list~Record~
+    }
+    class Record {
+        +timestamp: str
+        +livello: str
+        +messaggio: str
+        +sorgente: str
+    }
+
+    ImportatoreDati <|-- CSVImporter : extends
+    ImportatoreDati <|-- SQLImporter : extends
+    ImportatoreDati ..> Record : produce
+```
+
+### Diagramma di sequenza — Importazione da CSV
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant CSV as CSVImporter
+    participant Base as ImportatoreDati (base)
+
+    Client->>CSV: importa()
+    Note over CSV,Base: Il template method nella classe base<br/>definisce l'ordine degli step
+
+    CSV->>CSV: _leggi_sorgente()
+    Note right of CSV: Step 1 — specifico:<br/>parsing del file CSV
+
+    CSV->>Base: _pulisci_dati(records)
+    Note right of Base: Step 2 — comune:<br/>rimuove vuoti e duplicati
+    Base-->>CSV: records puliti
+
+    CSV->>Base: _salva_nel_db(records)
+    Note right of Base: Step 3 — comune:<br/>salva nel database
+
+    CSV-->>Client: records importati
 ```
 
 ### Vantaggi
