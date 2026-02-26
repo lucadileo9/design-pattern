@@ -26,20 +26,114 @@ Lato client: si chiama `create_iterator()` sulla collezione e si usa l'iteratore
 
 > **N.B.**: i nomi dei metodi (`has_next`, `next`) sono convenzionali; possono variare e possono essere presenti metodi aggiuntivi (es. `reset()`).
 
+> **N.B.**: questo pattern è diverso rispetto al patter **Composite**: il Composite è un pattern strutturale, che quindi si occupa di organizzare le classi e le loro relazioni, mentre l'Iterator è un pattern comportamentale, che si occupa di definire come l'utente interagisce con le classi. Spesso quel che succede è che una classe complessa e con struttura riscorsiva (come un albero) è implementata usando il Composite, e poi si fornisce un iteratore per attraversarla usando l'Iterator. Ma sono due pattern distinti, con scopi diversi.
 
 ## 📊 Diagramma
 
 ```mermaid
-%% Diagramma da completare
 classDiagram
     class Iterator {
-        +has_next()
-        +next()
+        <<interface>>
+        +has_next() bool
+        +next() Item
+    }
+    class ConcreteIterator {
+        -collection: ConcreteAggregate
+        -index: int
+        +has_next() bool
+        +next() Item
     }
     class Aggregate {
-        +create_iterator()
+        <<interface>>
+        +create_iterator() Iterator
     }
+    class ConcreteAggregate {
+        -items: list[Item]
+        +create_iterator() Iterator
+    }
+    class Client
+
+    Iterator <|.. ConcreteIterator : implements
+    Aggregate <|.. ConcreteAggregate : implements
+    ConcreteAggregate ..> ConcreteIterator : create_iterator()
+    Client --> Iterator : usa
+    Client --> Aggregate : usa
 ```
+
+## 📊 Diagramma — Esempio reale
+
+```mermaid
+classDiagram
+    class Iterator {
+        <<interface>>
+        +has_next() bool
+        +next() Employee
+    }
+    class Aggregate {
+        <<interface>>
+        +create_iterator(strategy) Iterator
+    }
+    class PreOrderIterator {
+        -stack: list[Employee]
+        +has_next() bool
+        +next() Employee
+    }
+    class BFSIterator {
+        -queue: deque[Employee]
+        +has_next() bool
+        +next() Employee
+    }
+    class PostOrderIterator {
+        -nodes: list[Employee]
+        -index: int
+        +has_next() bool
+        +next() Employee
+    }
+    class Organization {
+        -name: str
+        -ceo: Employee
+        +create_iterator(strategy) Iterator
+    }
+    class Employee {
+        -name: str
+        -role: str
+        -level: int
+        -reports: list[Employee]
+        +add_report(employee)
+    }
+
+    Iterator <|.. PreOrderIterator : implements
+    Iterator <|.. BFSIterator : implements
+    Iterator <|.. PostOrderIterator : implements
+    Aggregate <|.. Organization : implements
+    Organization ..> Iterator : create_iterator()
+    Organization --> Employee : ceo
+    Employee "1" o-- "*" Employee : reports
+```
+
+
+## Diagramma di sequenza
+
+```mermaid
+sequenceDiagram
+    actor Client
+    participant agg as ConcreteAggregate
+    participant it as ConcreteIterator
+
+    Client ->> agg: create_iterator()
+    agg -->> Client: iterator
+
+    loop finché has_next() == True
+        Client ->> it: has_next()
+        it -->> Client: True
+        Client ->> it: next()
+        it -->> Client: item
+    end
+
+    Client ->> it: has_next()
+    it -->> Client: False
+```
+
 
 ### Vantaggi
 
