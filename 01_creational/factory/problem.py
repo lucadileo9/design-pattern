@@ -1,57 +1,58 @@
 # ==========================================
-# PRODOTTI CONCRETI (X, Y, Z)
+# CONCRETE PRODUCTS (X, Y, Z)
 # ==========================================
-# In questo scenario spesso non c'è nemmeno un'interfaccia 
-# comune formale, il che rende tutto ancora più fragile.
+# In this scenario there's often not even a formal common interface,
+# which makes everything even more fragile.
 
-class ProdottoX:
-    def operazione_specifica_x(self):
-        return "Risultato del Prodotto X"
+class ProductX:
+    def specific_operation_x(self):
+        return "Result from Product X"
 
-class ProdottoY:
-    def operazione_diversa_y(self):
-        return "Risultato del Prodotto Y"
+class ProductY:
+    def different_operation_y(self):
+        return "Result from Product Y"
 
-class ProdottoZ:
-    def operazione_z(self):
-        return "Risultato del Prodotto Z"
+class ProductZ:
+    def operation_z(self):
+        return "Result from Product Z"
 
 # ==========================================
-# IL PROBLEMA: IL CLIENT ACCOPPIATO
+# THE PROBLEM: THE COUPLED CLIENT
 # ==========================================
-class ApplicazioneClient:
-    def esegui_logica(self, tipo_prodotto):
-        print(f"Client: Sto provando a creare un prodotto di tipo {tipo_prodotto}")
+class ClientApplication:
+    def execute_logic(self, product_type):
+        print(f"Client: I'm trying to create a product of type {product_type}")
         
-        # --- INIZIO DEL DISASTRO ---
-        # Il client deve conoscere tutte le classi concrete.
-        # Se aggiungiamo "ProdottoW", dobbiamo modificare questo file e questa funzione.
-        if tipo_prodotto == "X":
-            prodotto = ProdottoX()
-            risultato = prodotto.operazione_specifica_x()
-        elif tipo_prodotto == "Y":
-            prodotto = ProdottoY()
-            risultato = prodotto.operazione_diversa_y()
-        elif tipo_prodotto == "Z":
-            prodotto = ProdottoZ()
-            risultato = prodotto.operazione_z()
+        # --- START OF THE DISASTER ---
+        # The client must know all concrete classes.
+        # If we add "ProductW", we must modify this file and this function.
+        if product_type == "X":
+            product = ProductX()
+            result = product.specific_operation_x()
+        elif product_type == "Y":
+            product = ProductY()
+            result = product.different_operation_y()
+        elif product_type == "Z":
+            product = ProductZ()
+            result = product.operation_z()
         else:
-            raise Exception("Tipo di prodotto sconosciuto!")
-        # --- FINE DEL DISASTRO ---
+            raise Exception("Unknown product type!")
+        # --- END OF THE DISASTER ---
 
-        print(f"Risultato ottenuto: {risultato}")
+        print(f"Result obtained: {result}")
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
-# Come vediamo c0è troppo logica nella sezione di esegui_logica(), nonostante ci 
-# comportamenti simili c'è tanto codice ripetuto (DRY)
-# Inoltre, se vogliamo aggiungere un nuovo tipo di prodotto, dobbiamo modificare questa funzione, il che viola il principio di Open/Closed.
+# As we can see there's too much logic in the execute_logic() section, despite
+# having similar behaviors there's a lot of repeated code (DRY)
+# Moreover, if we want to add a new product type, we must modify this function,
+# which violates the Open/Closed principle.
 if __name__ == "__main__":
-    app = ApplicazioneClient()
+    app = ClientApplication()
     
-    # Per ogni nuovo tipo di prodotto, il client deve essere informato 
-    # e il codice sopra deve essere cambiato.
-    app.esegui_logica("X")
-    app.esegui_logica("Y")
-    app.esegui_logica("Z")
+    # For each new product type, the client must be informed
+    # and the code above must be changed.
+    app.execute_logic("X")
+    app.execute_logic("Y")
+    app.execute_logic("Z")

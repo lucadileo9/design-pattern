@@ -1,25 +1,25 @@
 # Singleton Pattern
 
-## Problema
+## Problem
 
-Ipotizziamo di voler fare un'operazione particolare, la quale richiedere la creazione di un qualcosa, ma non un qualcosa generico, bensì un qualcosa di specifico, che (per un motivo o per un altro) deve essere unico all'interno del nostro sistema.
-Se creiamo una classe normale, per definizione, ogni volta che chiamiamo il suo costruttore, otteniamo una nuova istanza. Non rispecchiando la nostra esigenza di unicità, ci ritroveremmo con più istanze di quella classe, cosa che potrebbe portare a comportamenti indesiderati o incoerenti.
+Let's suppose we want to perform a particular operation that requires creating something — not just any generic thing, but something specific that (for one reason or another) must be unique within our system.
+If we create a normal class, by definition, every time we call its constructor we get a new instance. Since it doesn't meet our uniqueness requirement, we would end up with multiple instances of that class, which could lead to undesired or inconsistent behavior.
 
-Per chiarire, i casi in cui possono servire singleton sono quelli in cui:
-- Abbiamo bisogno di un punto di accesso globale a una risorsa condivisa. Es. una connessione al database, un logger, una configurazione; ovviamente non vogliamo più connessioni o più logger, ma uno solo che venga usato da tutto il sistema.
-- Vogliamo garantire che ci sia solo un'istanza di una classe per motivi di coerenza o per evitare conflitti. Es. un gestore di configurazione, un gestore di sessione, un gestore di cache; in questi casi, avere più istanze potrebbe portare a dati incoerenti o a comportamenti imprevedibili. 
+To clarify, scenarios where singletons can be useful are those where:
+- We need a global access point to a shared resource. E.g. a database connection, a logger, a configuration; obviously we don't want multiple connections or multiple loggers, but a single one used by the entire system.
+- We want to guarantee that there is only one instance of a class for consistency reasons or to avoid conflicts. E.g. a configuration manager, a session manager, a cache manager; in these cases, having multiple instances could lead to inconsistent data or unpredictable behavior.
 
 
-## Soluzione
+## Solution
 
-La soluzione è il pattern **Singleton**. Procediamo per fasi:
-- **Classe Singleton**: definiamo una classe che ha un attributo privato statico (es. `_instance`) che conterrà l'UNICA istanza della classe. 
-- **Costruttore privato**: rendiamo il costruttore della classe privato (o protetto) in modo che non possa essere chiamato direttamente dall'esterno. 
-- **Metodo di accesso pubblico**: definiamo un metodo pubblico statico (es. `get_instance()`) che controlla se l'istanza esiste già. Se non esiste, la crea (con il costruttore); altrimenti, restituisce quella esistente.
+The solution is the **Singleton** pattern. Let's proceed step by step:
+- **Singleton Class**: we define a class that has a private static attribute (e.g. `_instance`) that will hold the ONLY instance of the class.
+- **Private Constructor**: we make the class constructor private (or protected) so that it cannot be called directly from outside.
+- **Public Access Method**: we define a public static method (e.g. `get_instance()`) that checks if the instance already exists. If it doesn't exist, it creates it (with the constructor); otherwise, it returns the existing one.
 
-## Diagrammi
+## Diagrams
 
-### Diagramma generico
+### Generic Diagram
 ```mermaid
 classDiagram
     class Singleton {
@@ -30,14 +30,14 @@ classDiagram
         + businessLogic()
     }
 
-    %% Auto-referenziazione: l'unica istanza risiede dentro la classe stessa
+    %% Self-reference: the unique instance resides inside the class itself
     Singleton --> Singleton : "holds the unique instance"
 
     %% Styling
     style Singleton fill:#1e272e,stroke:#0fbcf9,stroke-width:2px,color:#fff
 ```
 
-### Diagramma di sequenza
+### Sequence Diagram
 ```mermaid
 sequenceDiagram
     autonumber
@@ -45,7 +45,7 @@ sequenceDiagram
     participant S as Singleton (Class)
     participant I as Instance (Object)
 
-    Note over C, S: Prima chiamata del sistema
+    Note over C, S: First call of the system
     C->>S: getInstance()
     activate S
     S->>I: << create >>
@@ -53,32 +53,32 @@ sequenceDiagram
     S-->>C: return instance
     deactivate S
 
-    Note over C, S: Chiamate successive
+    Note over C, S: Subsequent calls
     C->>S: getInstance()
     activate S
     S-->>C: return existing instance
     deactivate S
 
-    Note right of C: Il Client usa sempre lo stesso oggetto
+    Note right of C: The Client always uses the same object
     C->>I: businessLogic()
 ```
 
-### Diagramma di flusso (per la logica di creazione dell'istanza)
+### Flow Diagram (for the instance creation logic)
 ```mermaid
 flowchart TD
-    Start([Chiamata getInstance]) --> Check1{Istanza esiste?}
+    Start([getInstance call]) --> Check1{Instance exists?}
     
-    Check1 -- Si --> Return[Ritorna Istanza Esistente]
-    Check1 -- No --> Lock[Acquisisci Lock]
+    Check1 -- Yes --> Return[Return Existing Instance]
+    Check1 -- No --> Lock[Acquire Lock]
     
-    Lock --> Check2{Istanza creata da<br/>un altro thread?}
+    Lock --> Check2{Instance created by<br/>another thread?}
     
-    Check2 -- No --> Create[Crea Nuova Istanza]
-    Check2 -- Si --> Unlock[Rilascia Lock]
+    Check2 -- No --> Create[Create New Instance]
+    Check2 -- Yes --> Unlock[Release Lock]
     
     Create --> Unlock
     Unlock --> Return
-    Return --> End([Fine])
+    Return --> End([End])
 
     %% Styling
     style Check1 fill:#2d3436,stroke:#0fbcf9,color:#fff
@@ -86,24 +86,24 @@ flowchart TD
     style Lock fill:#2d3436,stroke:#ef5777,color:#fff
     style Create fill:#2d3436,stroke:#05c46b,color:#fff
 ```
-Il duplice controllo (double-checked locking) è una tecnica comune per garantire che l'istanza venga creata solo una volta, anche in ambienti multithread. Il primo controllo avviene senza bloccare, per evitare overhead inutili dopo che l'istanza è stata creata. Il secondo controllo avviene all'interno del blocco, per garantire che un altro thread non abbia già creato l'istanza nel frattempo.
+The double check (double-checked locking) is a common technique to ensure that the instance is created only once, even in multithreaded environments. The first check happens without locking, to avoid unnecessary overhead after the instance has been created. The second check happens inside the lock, to ensure that another thread hasn't already created the instance in the meantime.
 
-### Vantaggi
+### Advantages
 
-L'adozione del Singleton offre benefici strutturali evidenti quando la coerenza dell'istanza è la priorità assoluta:
+Adopting the Singleton offers clear structural benefits when instance consistency is the absolute priority:
 
-- **Garanzia di unicità**: hai la certezza che la classe abbia una sola istanza, eliminando il rischio di conflitti tra più oggetti che gestiscono la stessa risorsa.
-- **Accesso globale controllato**: fornisce un unico punto di accesso rigoroso. A differenza delle variabili globali comuni, il Singleton protegge l'istanza impedendo che altro codice la sovrascriva accidentalmente.
-- **Inizializzazione lazy (pigra)**: l'oggetto viene creato solo quando richiesto per la prima volta, risparmiando risorse di sistema iniziali.
-- **Flessibilità futura**: se in futuro decidessi di gestire multiple istanze (es. due pool di connessioni), modificherai solo il metodo `getInstance()` senza toccare il resto del codice.
+- **Uniqueness Guarantee**: you have the certainty that the class has only one instance, eliminating the risk of conflicts between multiple objects managing the same resource.
+- **Controlled Global Access**: provides a single rigorous access point. Unlike common global variables, the Singleton protects the instance by preventing other code from accidentally overwriting it.
+- **Lazy Initialization**: the object is created only when requested for the first time, saving initial system resources.
+- **Future Flexibility**: if in the future you decide to manage multiple instances (e.g. two connection pools), you'll only modify the `getInstance()` method without touching the rest of the code.
 
 
-### Svantaggi
+### Disadvantages
 
-Molti sviluppatori moderni considerano il Singleton un "anti-pattern" a causa di diverse criticità:
+Many modern developers consider the Singleton an "anti-pattern" due to several critical issues:
 
-- **Violazione del Single Responsibility Principle (SRP)**: il pattern risolve due problemi contemporaneamente: gestisce il ciclo di vita (creazione e unicità) e svolge i compiti di business (es. interrogare un database).
-- **Accoppiamento stretto**: può mascherare un cattivo design dove i componenti sanno "troppo" l'uno dell'altro, creando dipendenze nascoste che rendono il sistema rigido.
-- **Complessità nel multithreading**: in ambienti concorrenti, è necessario implementare logiche di blocco (thread-lock) per evitare che due thread creino accidentalmente due istanze separate nello stesso istante.
-- **Ostacolo ai test unitari**: è molto difficile isolare il codice che usa un Singleton. Poiché il costruttore è privato, molti framework di testing non riescono a creare "mock" (oggetti finti) per simulare il comportamento della classe.
+- **Violation of the Single Responsibility Principle (SRP)**: the pattern solves two problems simultaneously: it manages the lifecycle (creation and uniqueness) and performs business tasks (e.g. querying a database).
+- **Tight Coupling**: it can mask a bad design where components know "too much" about each other, creating hidden dependencies that make the system rigid.
+- **Multithreading Complexity**: in concurrent environments, it's necessary to implement locking logic (thread-lock) to prevent two threads from accidentally creating two separate instances at the same moment.
+- **Obstacle to Unit Testing**: it's very difficult to isolate code that uses a Singleton. Since the constructor is private, many testing frameworks can't create "mocks" (fake objects) to simulate the class's behavior.
 

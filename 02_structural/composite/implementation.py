@@ -1,136 +1,136 @@
 # ==========================================
-# COMPOSITE PATTERN — SOLUZIONE
+# COMPOSITE PATTERN — SOLUTION
 # ==========================================
-# Definiamo un'interfaccia comune (ComponenteCatalogo) che viene
-# implementata sia dai PRODOTTI (foglie) sia dalle CATEGORIE
-# (nodi interni — composite).
+# We define a common interface (CatalogComponent) that is
+# implemented by both PRODUCTS (leaves) and CATEGORIES
+# (internal nodes — composites).
 #
-# Il client chiama .get_prezzo() su qualsiasi elemento, senza
-# sapere se è un prodotto singolo o un'intera categoria con
-# sotto-categorie annidate. Niente più if/isinstance!
+# The client calls .get_price() on any element, without
+# knowing whether it's a single product or an entire category
+# with nested sub-categories. No more if/isinstance!
 
 from abc import ABC, abstractmethod
 
 
 # ==========================================
-# COMPONENT — l'interfaccia comune
+# COMPONENT — the common interface
 # ==========================================
-# Dichiara le operazioni condivise da foglie e composite.
-# Ogni nodo dell'albero, che sia semplice o composto, è un
-# ComponenteCatalogo.
+# Declares the operations shared by leaves and composites.
+# Every node in the tree, whether simple or composite, is a
+# CatalogComponent.
 
-class ComponenteCatalogo(ABC):
-    """Interfaccia comune per foglie (Prodotto) e composite (Categoria)."""
+class CatalogComponent(ABC):
+    """Common interface for leaves (Product) and composites (Category)."""
 
-    def __init__(self, nome: str):
-        self.nome = nome
+    def __init__(self, name: str):
+        self.name = name
 
     @abstractmethod
-    def get_prezzo(self) -> float:
-        """Restituisce il prezzo (singolo o totale della sotto-struttura)."""
+    def get_price(self) -> float:
+        """Returns the price (single or total of the sub-structure)."""
         ...
 
     @abstractmethod
-    def mostra(self, indentazione: int = 0) -> None:
-        """Stampa la struttura con indentazione."""
+    def display(self, indentation: int = 0) -> None:
+        """Prints the structure with indentation."""
         ...
 
 
 # ==========================================
-# LEAF — il prodotto (foglia)
+# LEAF — the product (leaf)
 # ==========================================
-# Un Prodotto non ha figli. È il caso base della ricorsione:
-# get_prezzo() restituisce semplicemente il proprio prezzo.
+# A Product has no children. It's the base case of the recursion:
+# get_price() simply returns its own price.
 
-class Prodotto(ComponenteCatalogo):
-    """Foglia: un singolo prodotto con nome e prezzo."""
+class Product(CatalogComponent):
+    """Leaf: a single product with name and price."""
 
-    def __init__(self, nome: str, prezzo: float):
-        super().__init__(nome)
-        self.prezzo = prezzo
+    def __init__(self, name: str, price: float):
+        super().__init__(name)
+        self.price = price
 
-    def get_prezzo(self) -> float:
-        return self.prezzo                      # caso base — nessuna ricorsione
+    def get_price(self) -> float:
+        return self.price                       # base case — no recursion
 
-    def mostra(self, indentazione: int = 0) -> None:
-        prefisso = "  " * indentazione
-        print(f"{prefisso}📦 {self.nome} — €{self.prezzo:.2f}")
+    def display(self, indentation: int = 0) -> None:
+        prefix = "  " * indentation
+        print(f"{prefix}📦 {self.name} — €{self.price:.2f}")
 
 
 # ==========================================
-# COMPOSITE — la categoria (nodo interno)
+# COMPOSITE — the category (internal node)
 # ==========================================
-# Una Categoria contiene figli (ComponenteCatalogo), che possono
-# essere sia Prodotti sia altre Categorie — struttura ricorsiva.
+# A Category contains children (CatalogComponent), which can
+# be either Products or other Categories — recursive structure.
 #
-# get_prezzo() delega ai figli e somma: il client non si accorge
-# della differenza rispetto a un singolo prodotto.
+# get_price() delegates to children and sums: the client doesn't
+# notice the difference compared to a single product.
 
-class Categoria(ComponenteCatalogo):
-    """Composite: contiene figli di tipo ComponenteCatalogo."""
+class Category(CatalogComponent):
+    """Composite: contains children of type CatalogComponent."""
 
-    def __init__(self, nome: str):
-        super().__init__(nome)
-        self._figli: list[ComponenteCatalogo] = []
+    def __init__(self, name: str):
+        super().__init__(name)
+        self._children: list[CatalogComponent] = []
 
-    # --- gestione figli (solo nel Composite) ---
+    # --- child management (only in the Composite) ---
 
-    def aggiungi(self, componente: ComponenteCatalogo) -> None:
-        self._figli.append(componente)
+    def add(self, component: CatalogComponent) -> None:
+        self._children.append(component)
 
-    def rimuovi(self, componente: ComponenteCatalogo) -> None:
-        self._figli.remove(componente)
+    def remove(self, component: CatalogComponent) -> None:
+        self._children.remove(component)
 
-    # --- operazioni dell'interfaccia ---
+    # --- interface operations ---
 
-    def get_prezzo(self) -> float:
-        # Delega ai figli: somma ricorsiva. Il Composite non sa
-        # se un figlio è Prodotto o un'altra Categoria — non gli interessa.
-        return sum(figlio.get_prezzo() for figlio in self._figli)
+    def get_price(self) -> float:
+        # Delegates to children: recursive sum. The Composite doesn't know
+        # if a child is a Product or another Category — it doesn't care.
+        return sum(child.get_price() for child in self._children)
 
-    def mostra(self, indentazione: int = 0) -> None:
-        prefisso = "  " * indentazione
-        print(f"{prefisso}📁 {self.nome} (totale: €{self.get_prezzo():.2f})")
-        for figlio in self._figli:
-            figlio.mostra(indentazione + 1)     # chiamata polimorfica
+    def display(self, indentation: int = 0) -> None:
+        prefix = "  " * indentation
+        print(f"{prefix}📁 {self.name} (total: €{self.get_price():.2f})")
+        for child in self._children:
+            child.display(indentation + 1)      # polymorphic call
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
-# Il client lavora SEMPRE con ComponenteCatalogo.
-# Non fa mai isinstance(), non distingue foglie da composite.
+# The client ALWAYS works with CatalogComponent.
+# It never uses isinstance(), never distinguishes leaves from composites.
 
 if __name__ == "__main__":
 
-    # --- Costruzione dell'albero (identico al problem.py) ---
-    laptop = Prodotto("Laptop Gaming", 1299.99)
-    mouse = Prodotto("Mouse Wireless", 34.99)
-    cuffie = Prodotto("Cuffie Bluetooth", 79.99)
-    monitor = Prodotto("Monitor 4K", 499.99)
-    webcam = Prodotto("Webcam HD", 59.99)
+    # --- Building the tree (identical to problem.py) ---
+    laptop = Product("Laptop Gaming", 1299.99)
+    mouse = Product("Mouse Wireless", 34.99)
+    headphones = Product("Bluetooth Headphones", 79.99)
+    monitor = Product("Monitor 4K", 499.99)
+    webcam = Product("Webcam HD", 59.99)
 
-    informatica = Categoria("Informatica")
-    informatica.aggiungi(laptop)
-    informatica.aggiungi(mouse)
+    computers = Category("Computers")
+    computers.add(laptop)
+    computers.add(mouse)
 
-    accessori = Categoria("Accessori")
-    accessori.aggiungi(cuffie)
-    accessori.aggiungi(webcam)
+    accessories = Category("Accessories")
+    accessories.add(headphones)
+    accessories.add(webcam)
 
-    catalogo = Categoria("Catalogo")
-    catalogo.aggiungi(informatica)
-    catalogo.aggiungi(accessori)
-    catalogo.aggiungi(monitor)      # prodotto direttamente nella radice
+    catalog = Category("Catalog")
+    catalog.add(computers)
+    catalog.add(accessories)
+    catalog.add(monitor)            # product directly at the root
 
-    # --- Il client usa solo l'interfaccia comune ---
-    print("=== Catalogo ===")
-    catalogo.mostra()
+    # --- The client uses only the common interface ---
+    print("=== Catalog ===")
+    catalog.display()
 
-    print(f"\nPrezzo totale catalogo: €{catalogo.get_prezzo():.2f}")
-    print(f"Prezzo totale 'Informatica': €{informatica.get_prezzo():.2f}")
-    print(f"Prezzo singolo 'Laptop Gaming': €{laptop.get_prezzo():.2f}")
+    print(f"\nTotal catalog price: €{catalog.get_price():.2f}")
+    print(f"Total 'Computers' price: €{computers.get_price():.2f}")
+    print(f"Single 'Laptop Gaming' price: €{laptop.get_price():.2f}")
 
-    # VANTAGGIO: se aggiungiamo un nuovo tipo di foglia (es. "Bundle"),
-    # basta che implementi ComponenteCatalogo. Nessuna funzione del
-    # client va modificata — il polimorfismo gestisce tutto.
+    # ADVANTAGE: if we add a new leaf type (e.g. "Bundle"),
+    # it just needs to implement CatalogComponent. No client
+    # function needs to be modified — polymorphism handles everything.

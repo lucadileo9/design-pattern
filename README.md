@@ -1,47 +1,47 @@
-# Design Patterns — Enciclopedia Personale
+# Design Patterns — Personal Encyclopedia
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Course](https://img.shields.io/badge/Course-Software%20Development%20Methodologies-green)
 ![UNIMORE](https://img.shields.io/badge/University-UNIMORE-004990?style=flat)
 
-Un'enciclopedia pratica e personale dei design pattern più comuni nella programmazione orientata agli oggetti.
+A practical and personal encyclopedia of the most common design patterns in object-oriented programming.
 
 ---
 
-## Obiettivo
+## Objective
 
-Questo repository nasce come strumento di studio e riferimento personale per capire, implementare e padroneggiare i design pattern fondamentali. Ogni pattern è:
+This repository was created as a personal study and reference tool to understand, implement, and master fundamental design patterns. Each pattern is:
 
-- **Isolato**: un micro-progetto autocontenuto
-- **Spiegato**: con descrizioni chiare e precise, analogie con il mondo reale e diagrammi UML
-- **Dimostrato**: con un'implementazione didattica e un esempio concreto ispirato a scenari reali
-- **Contestualizzato**: con casi in cui il pattern è stato applicato in prima persona
+- **Isolated**: a self-contained micro-project
+- **Explained**: with clear and precise descriptions, real-world analogies, and UML diagrams
+- **Demonstrated**: with a didactic implementation and a concrete example inspired by real-world scenarios
+- **Contextualized**: with cases where the pattern was applied first-hand
 
 ---
 
-## Struttura del Repository
+## Repository Structure
 
 ```
 design-pattern/
-├── README.md                         # Questo file
-├── docs/                             # Documentazione di supporto
-│   ├── glossary.md                  # Terminologia dei design pattern
-│   ├── comparison.md                # Confronti tra pattern simili
-│   └── resources.md                 # Risorse e link utili
+├── README.md                         # This file
+├── docs/                             # Supporting documentation
+│   ├── glossary.md                  # Design pattern terminology
+│   ├── comparison.md                # Comparisons between similar patterns
+│   └── resources.md                 # Resources and useful links
 │
-├── 01_creational/                    # Pattern Creazionali
+├── 01_creational/                    # Creational Patterns
 │   ├── README.md
 │   ├── singleton/
 │   ├── factory/
 │   └── abstract-factory/
 │
-├── 02_structural/                    # Pattern Strutturali
+├── 02_structural/                    # Structural Patterns
 │   ├── README.md
 │   ├── adapter/
 │   ├── facade/
 │   └── composite/
 │
-└── 03_behavioral/                    # Pattern Comportamentali
+└── 03_behavioral/                    # Behavioral Patterns
     ├── README.md
     ├── observer/
     ├── iterator/
@@ -51,71 +51,71 @@ design-pattern/
 
 ---
 
-## Come è Documentato Ogni Pattern
+## How Each Pattern is Documented
 
-Ogni cartella di pattern segue una struttura standard:
+Each pattern folder follows a standard structure:
 
 ### `README.md`
-1. **Problema**: quale problema concreto risolve il pattern, con analogia reale
-2. **Soluzione**: come il pattern affronta il problema, con descrizione degli attori
-3. **Diagramma**: UML generato con Mermaid (generico + specifico per l'esempio)
+1. **Problem**: what concrete problem the pattern solves, with a real-world analogy
+2. **Solution**: how the pattern addresses the problem, with a description of the actors
+3. **Diagram**: UML generated with Mermaid (generic + specific for the example)
 
 ### `problem.py`
-Implementazione naïve del problema, senza applicare il pattern — per capire cosa si vuole evitare.
+Naïve implementation of the problem, without applying the pattern — to understand what we want to avoid.
 
 ### `implementation.py`
-Implementazione didattica del pattern: codice commentato, struttura chiara, output dimostrativo.
+Didactic implementation of the pattern: commented code, clear structure, demonstrative output.
 
 ### `real_example.py`
-Esempio concreto ispirato a uno scenario reale (e-commerce, pipeline dati, sistemi aziendali), che mostra come il pattern si applica in pratica.
+Concrete example inspired by a real-world scenario (e-commerce, data pipelines, enterprise systems), showing how the pattern is applied in practice.
 
 ---
 
-## Categorie
+## Categories
 
-### Pattern Creazionali — [`01_creational/`](./01_creational/)
+### Creational Patterns — [`01_creational/`](./01_creational/)
 
-Si occupano della **creazione di oggetti**, fornendo meccanismi flessibili per separare la creazione dalla responsabilità dell'oggetto stesso.
+They deal with **object creation**, providing flexible mechanisms to separate creation from the object's own responsibility.
 
-| Pattern | Intento |
+| Pattern | Intent |
 |---|---|
-| [Singleton](./01_creational/singleton/) | Una sola istanza globale |
-| [Factory Method](./01_creational/factory/) | Delega la creazione alle sottoclassi |
-| [Abstract Factory](./01_creational/abstract-factory/) | Famiglie di oggetti correlati |
+| [Singleton](./01_creational/singleton/) | A single global instance |
+| [Factory Method](./01_creational/factory/) | Delegates creation to subclasses |
+| [Abstract Factory](./01_creational/abstract-factory/) | Families of related objects |
 
-### Pattern Strutturali — [`02_structural/`](./02_structural/)
+### Structural Patterns — [`02_structural/`](./02_structural/)
 
-Si occupano della **composizione di classi e oggetti**, spiegando come assemblarli in strutture più grandi mantenendo flessibilità.
+They deal with the **composition of classes and objects**, explaining how to assemble them into larger structures while maintaining flexibility.
 
-| Pattern | Intento |
+| Pattern | Intent |
 |---|---|
-| [Adapter](./02_structural/adapter/) | Converte interfacce incompatibili |
-| [Facade](./02_structural/facade/) | Interfaccia semplificata a un sottosistema complesso |
-| [Composite](./02_structural/composite/) | Strutture ad albero parte-tutto |
+| [Adapter](./02_structural/adapter/) | Converts incompatible interfaces |
+| [Facade](./02_structural/facade/) | Simplified interface to a complex subsystem |
+| [Composite](./02_structural/composite/) | Part-whole tree structures |
 
-### Pattern Comportamentali — [`03_behavioral/`](./03_behavioral/)
+### Behavioral Patterns — [`03_behavioral/`](./03_behavioral/)
 
-Si occupano della **comunicazione tra oggetti**, definendo come interagiscono e come vengono distribuite le responsabilità.
+They deal with **communication between objects**, defining how they interact and how responsibilities are distributed.
 
-| Pattern | Intento |
+| Pattern | Intent |
 |---|---|
-| [Observer](./03_behavioral/observer/) | Notifica automatica ai dipendenti al cambio di stato |
-| [Iterator](./03_behavioral/iterator/) | Attraversamento uniforme di collezioni |
-| [Strategy](./03_behavioral/strategy/) | Algoritmi intercambiabili a runtime |
-| [Template Method](./03_behavioral/template-method/) | Scheletro fisso dell'algoritmo, passi variabili nelle sottoclassi |
+| [Observer](./03_behavioral/observer/) | Automatic notification to dependents on state change |
+| [Iterator](./03_behavioral/iterator/) | Uniform traversal of collections |
+| [Strategy](./03_behavioral/strategy/) | Interchangeable algorithms at runtime |
+| [Template Method](./03_behavioral/template-method/) | Fixed algorithm skeleton, variable steps in subclasses |
 
 ---
 
-## Tecnologie
+## Technologies
 
-- **Linguaggio**: Python 3.x
-- **Diagrammi**: Mermaid
-- **Documentazione**: Markdown
+- **Language**: Python 3.x
+- **Diagrams**: Mermaid
+- **Documentation**: Markdown
 
 ---
 
-## Note
+## Notes
 
-> **Work in Progress**: il repository è in costante evoluzione. I pattern vengono aggiunti e migliorati progressivamente.
+> **Work in Progress**: this repository is constantly evolving. Patterns are added and improved progressively.
 
-**Autore**: lucadileo9
+**Author**: lucadileo9

@@ -3,12 +3,12 @@ from dataclasses import dataclass
 from typing import Optional
 
 # ==========================================
-# 0. CONFIGURAZIONE (ISOLAMENTO DELLA CONFIG)
+# 0. CONFIGURATION (CONFIG ISOLATION)
 # ==========================================
-# In un'app reale questi valori verrebbero letti da variabili d'ambiente,
-# file .env, o sistemi come HashiCorp Vault / Azure Key Vault.
-# Isolare la config in un oggetto dedicato significa che cambiarla
-# non tocca né l'interfaccia né la logica di business.
+# In a real app these values would be read from environment variables,
+# .env files, or systems like HashiCorp Vault / Azure Key Vault.
+# Isolating the config in a dedicated object means that changing it
+# doesn't touch the interface or the business logic.
 
 @dataclass
 class ConnectionConfig:
@@ -17,17 +17,17 @@ class ConnectionConfig:
     pool_size: int = 5
 
 # ==========================================
-# 1. IL PRODOTTO (INTERFACCIA)
+# 1. THE PRODUCT (INTERFACE)
 # ==========================================
-# L'interfaccia comune che tutti i database devono implementare.
+# The common interface that all databases must implement.
 class DatabaseConnection(ABC):
     """
-    Contratto comune che tutti i database devono rispettare.
-    Il Creator e il Client lavorano solo con questa interfaccia.
+    Common contract that all databases must respect.
+    The Creator and the Client work only with this interface.
     """
     @abstractmethod
     def open(self) -> bool:
-        """Apre la connessione. Ritorna True se l'operazione è andata a buon fine."""
+        """Opens the connection. Returns True if the operation was successful."""
         pass
 
     @abstractmethod
@@ -36,7 +36,7 @@ class DatabaseConnection(ABC):
 
     @abstractmethod
     def health_check(self) -> bool:
-        """Verifica che la connessione sia ancora attiva e funzionante."""
+        """Verifies that the connection is still active and working."""
         pass
 
     @abstractmethod
@@ -44,18 +44,18 @@ class DatabaseConnection(ABC):
         pass
 
 # ==========================================
-# 2. PRODOTTI CONCRETI
+# 2. CONCRETE PRODUCTS
 # ==========================================
-# Ogni classe gestisce internamente logiche molto diverse
-# (pool di connessioni, elezione del nodo primario, file locking...),
-# ma espone all'esterno solo i quattro metodi dell'interfaccia.
-# Questo è il punto centrale: la complessità è *incapsulata* qui dentro.
+# Each class internally handles very different logic
+# (connection pools, primary node election, file locking...),
+# but externally exposes only the four interface methods.
+# This is the key point: the complexity is *encapsulated* within.
 
 class MySQLConnection(DatabaseConnection):
     """
-    Simula MySQL con connection pool interno.
-    Il pool viene creato e gestito privatamente: nessuno fuori da questa
-    classe deve sapere che esiste.
+    Simulates MySQL with an internal connection pool.
+    The pool is created and managed privately: nobody outside this
+    class needs to know it exists.
     """
     def __init__(self, host: str, user: str, password: str, schema: str, config: ConnectionConfig):
         self._dsn = f"mysql://{user}:***@{host}/{schema}"
@@ -64,37 +64,37 @@ class MySQLConnection(DatabaseConnection):
         self._active = False
 
     def _init_pool(self):
-        """Logica privata: popola il pool con N connessioni."""
+        """Private logic: populates the pool with N connections."""
         for i in range(self._config.pool_size):
             self._pool.append(f"conn_{i}")
-        print(f"[MySQL]  Pool di {self._config.pool_size} connessioni inizializzato.")
+        print(f"[MySQL]  Pool of {self._config.pool_size} connections initialized.")
 
     def open(self) -> bool:
-        print(f"[MySQL]  Connessione a {self._dsn} (timeout {self._config.timeout_seconds}s)...")
+        print(f"[MySQL]  Connecting to {self._dsn} (timeout {self._config.timeout_seconds}s)...")
         self._init_pool()
-        print("[MySQL]  Verifica permessi utente... OK.")
+        print("[MySQL]  Verifying user permissions... OK.")
         self._active = True
         return True
 
     def query(self, sql: str) -> str:
-        conn = self._pool[0]   # preleva una connessione dal pool
-        return f"[MySQL]  Eseguo '{sql}' su {conn}."
+        conn = self._pool[0]   # grab a connection from the pool
+        return f"[MySQL]  Executing '{sql}' on {conn}."
 
     def health_check(self) -> bool:
         ok = bool(self._pool) and self._active
-        print(f"[MySQL]  Health check pool: {'OK' if ok else 'FALLITO'}")
+        print(f"[MySQL]  Health check pool: {'OK' if ok else 'FAILED'}")
         return ok
 
     def close(self):
         self._pool.clear()
         self._active = False
-        print("[MySQL]  Pool rilasciato, connessione chiusa.")
+        print("[MySQL]  Pool released, connection closed.")
 
 
 class MongoDBConnection(DatabaseConnection):
     """
-    Simula MongoDB con replica set e failover automatico.
-    La logica di elezione del primary node è completamente nascosta.
+    Simulates MongoDB with replica set and automatic failover.
+    The primary node election logic is completely hidden.
     """
     def __init__(self, nodes: list[str], cluster: str, use_ssl: bool, config: ConnectionConfig):
         self._nodes = nodes
@@ -105,37 +105,37 @@ class MongoDBConnection(DatabaseConnection):
 
     def _elect_primary(self) -> str:
         """
-        Logica privata: simula l'algoritmo di elezione Raft-like di MongoDB.
-        In produzione contatta ogni nodo, raccoglie i voti e sceglie il primary.
+        Private logic: simulates the Raft-like election algorithm of MongoDB.
+        In production, it contacts each node, collects votes and chooses the primary.
         """
         elected = self._nodes[0]
-        print(f"[MongoDB] Elezione primary: '{elected}' vince su {len(self._nodes)} nodi.")
+        print(f"[MongoDB] Primary election: '{elected}' wins among {len(self._nodes)} nodes.")
         return elected
 
     def open(self) -> bool:
         ssl_label = "ON" if self._ssl else "OFF"
-        print(f"[MongoDB] Connessione al cluster '{self._cluster}' — SSL {ssl_label}...")
+        print(f"[MongoDB] Connecting to cluster '{self._cluster}' — SSL {ssl_label}...")
         self._primary = self._elect_primary()
         print(f"[MongoDB] Connected to primary: {self._primary}. OK.")
         return True
 
     def query(self, sql: str) -> str:
-        return f"[MongoDB] Traduco '{sql}' in aggregation pipeline BSON su {self._primary}."
+        return f"[MongoDB] Translating '{sql}' to BSON aggregation pipeline on {self._primary}."
 
     def health_check(self) -> bool:
         ok = self._primary is not None
-        print(f"[MongoDB] isMaster su '{self._primary}': {'OK' if ok else 'FALLITO'}")
+        print(f"[MongoDB] isMaster on '{self._primary}': {'OK' if ok else 'FAILED'}")
         return ok
 
     def close(self):
         self._primary = None
-        print(f"[MongoDB] Disconnesso dal cluster '{self._cluster}'.")
+        print(f"[MongoDB] Disconnected from cluster '{self._cluster}'.")
 
 
 class SQLiteConnection(DatabaseConnection):
     """
-    Simula SQLite con file locking e controllo di integrità.
-    SQLite usa un lock a livello di file per garantire scritture serializzate.
+    Simulates SQLite with file locking and integrity checking.
+    SQLite uses a file-level lock to guarantee serialized writes.
     """
     def __init__(self, file_path: str, config: ConnectionConfig):
         self._file_path = file_path
@@ -143,86 +143,86 @@ class SQLiteConnection(DatabaseConnection):
         self._locked = False
 
     def _acquire_lock(self):
-        """Logica privata: acquisisce il lock esclusivo sul file .db."""
+        """Private logic: acquires an exclusive lock on the .db file."""
         self._locked = True
-        print(f"[SQLite]  Lock esclusivo acquisito su '{self._file_path}'.")
+        print(f"[SQLite]  Exclusive lock acquired on '{self._file_path}'.")
 
     def _integrity_check(self):
-        """Logica privata: esegue PRAGMA integrity_check sul file."""
-        print("[SQLite]  PRAGMA integrity_check: OK (0 errori trovati).")
+        """Private logic: runs PRAGMA integrity_check on the file."""
+        print("[SQLite]  PRAGMA integrity_check: OK (0 errors found).")
 
     def open(self) -> bool:
-        print(f"[SQLite]  Apertura file: {self._file_path}...")
+        print(f"[SQLite]  Opening file: {self._file_path}...")
         self._acquire_lock()
         self._integrity_check()
         return True
 
     def query(self, sql: str) -> str:
-        return f"[SQLite]  Eseguo su file locale: {sql}"
+        return f"[SQLite]  Executing on local file: {sql}"
 
     def health_check(self) -> bool:
         ok = self._locked
-        print(f"[SQLite]  File lock attivo: {'OK' if ok else 'FALLITO'}")
+        print(f"[SQLite]  File lock active: {'OK' if ok else 'FAILED'}")
         return ok
 
     def close(self):
         self._locked = False
-        print(f"[SQLite]  Lock rilasciato, file '{self._file_path}' chiuso.")
+        print(f"[SQLite]  Lock released, file '{self._file_path}' closed.")
 
 
 # ==========================================
-# 3. IL CREATORE (ABSTRACT FACTORY METHOD)
+# 3. THE CREATOR (ABSTRACT FACTORY METHOD)
 # ==========================================
 class DatabaseManager(ABC):
     """
-    Il Creator gestisce la logica di business ad alto livello.
-    Non sa nulla delle implementazioni concrete: sa solo che esiste
-    una DatabaseConnection con cui può aprire, interrogare e chiudere.
+    The Creator manages high-level business logic.
+    It knows nothing about concrete implementations: it only knows that
+    a DatabaseConnection exists with which it can open, query, and close.
 
-    Nota: la retry logic qui è completamente generica — funziona
-    identicamente per MySQL, MongoDB e SQLite senza una riga di
-    codice specifico per ciascuno.
+    Note: the retry logic here is completely generic — it works
+    identically for MySQL, MongoDB, and SQLite without a single line
+    of database-specific code.
     """
     @abstractmethod
     def create_database(self) -> DatabaseConnection:
-        """Il Factory Method vero e proprio."""
+        """The actual Factory Method."""
         pass
 
     def initialize_system(self):
         """
-        Logica di alto livello: apre la connessione con retry automatico,
-        esegue una query e verifica lo stato del sistema.
-        È completamente ignara di quale database stia usando.
+        High-level logic: opens the connection with automatic retry,
+        executes a query, and verifies the system status.
+        It is completely unaware of which database it's using.
         """
         db = self.create_database()
 
-        # --- Retry logic generica (uguale per tutti i db) ---
+        # --- Generic retry logic (same for all databases) ---
         connected = False
         for attempt in range(1, 4):
-            print(f"\n[Manager] Tentativo di connessione {attempt}/3...")
+            print(f"\n[Manager] Connection attempt {attempt}/3...")
             connected = db.open()
             if connected:
                 break
 
         if not connected:
-            print("[Manager] ERRORE: impossibile connettersi dopo 3 tentativi.")
+            print("[Manager] ERROR: unable to connect after 3 attempts.")
             return
 
-        # --- Logica di business, ancora generica ---
+        # --- Business logic, still generic ---
         print(db.query("SELECT version()"))
 
         if db.health_check():
-            print("[Manager] Sistema operativo. Connessione verificata.")
+            print("[Manager] System operational. Connection verified.")
 
         db.close()
 
 
 # ==========================================
-# 4. FACTORY CONCRETE (GESTIONE CONFIGURAZIONE)
+# 4. CONCRETE FACTORIES (CONFIGURATION MANAGEMENT)
 # ==========================================
-# Ogni manager sa come costruire il proprio database con i parametri giusti.
-# Se la configurazione di produzione cambia (es. più connessioni nel pool),
-# si modifica solo qui — il resto del codice non viene toccato.
+# Each manager knows how to build its own database with the right parameters.
+# If the production configuration changes (e.g. more connections in the pool),
+# only this part is modified — the rest of the code is untouched.
 
 class ProductionMySQLManager(DatabaseManager):
     def create_database(self) -> DatabaseConnection:
@@ -242,24 +242,24 @@ class LocalDevManager(DatabaseManager):
 
 
 # ==========================================
-# 5. CODICE CLIENT
+# 5. CLIENT CODE
 # ==========================================
-# Il client conosce solo i Manager concreti (sa che esistono ambienti diversi),
-# ma non ha mai una dipendenza diretta su MySQLConnection, MongoDBConnection
-# o SQLiteConnection. Tutta la complessità è incapsulata nei livelli precedenti.
+# The client only knows the concrete Managers (knows that different environments exist),
+# but never has a direct dependency on MySQLConnection, MongoDBConnection,
+# or SQLiteConnection. All the complexity is encapsulated in the previous layers.
 
 if __name__ == "__main__":
     print("=" * 52)
-    print("  AMBIENTE PRODUZIONE (MySQL + connection pool)")
+    print("  PRODUCTION ENVIRONMENT (MySQL + connection pool)")
     print("=" * 52)
     ProductionMySQLManager().initialize_system()
 
     print("\n" + "=" * 52)
-    print("  AMBIENTE CLOUD/NoSQL (MongoDB + replica set)")
+    print("  CLOUD/NoSQL ENVIRONMENT (MongoDB + replica set)")
     print("=" * 52)
     CloudMongoManager().initialize_system()
 
     print("\n" + "=" * 52)
-    print("  AMBIENTE SVILUPPO LOCALE (SQLite + file lock)")
+    print("  LOCAL DEVELOPMENT ENVIRONMENT (SQLite + file lock)")
     print("=" * 52)
     LocalDevManager().initialize_system()

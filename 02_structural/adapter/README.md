@@ -1,34 +1,34 @@
 # Adapter Pattern
 
-## Problema
+## Problem
 
-Ipotizziamo di avere una classe `X` che esegue determinate operazioni (es. la stampa di dati) ricevendo input da una classe `Y`. In un approccio diretto, `X` gestisce esattamente il formato dei dati di `Y`: comodo finché si ha il controllo su entrambe le classi e non ci sono cambiamenti futuri.
+Let's suppose we have a class `X` that performs certain operations (e.g. printing data) receiving input from a class `Y`. In a direct approach, `X` handles exactly the data format of `Y`: convenient as long as we have control over both classes and there are no future changes.
 
-Realisticamente però i cambiamenti arrivano: se `Y` cambia il proprio formato, bisogna modificare `X`, per fare in modo che possa gestire il nuovo formato di `Y`. Ma soprattutto se volessimo rendere `X` compatibile con un'ulteriore classe `Z`, dovremmo aggiungere ancora logica a `X` (con catene di `if` o `switch`), rendendo il codice difficile da mantenere, poco flessibile e ad alto rischio di bug.
+Realistically though, changes arrive: if `Y` changes its format, we need to modify `X` to handle `Y`'s new format. But especially if we wanted to make `X` compatible with an additional class `Z`, we'd have to add more logic to `X` (with `if` or `switch` chains), making the code hard to maintain, inflexible, and at high risk of bugs.
 
-Analogia reale: una presa elettrica di tipo A (americana) accetta solo spine di tipo A. Per usare un dispositivo con spina di tipo B (europea) non possiamo modificare né la presa né la spina — serve un adattatore.
+Real-world analogy: a type A (American) electrical outlet only accepts type A plugs. To use a device with a type B (European) plug we can't modify either the outlet or the plug — we need an adapter.
 
 
-## Soluzione
+## Solution
 
-La soluzione è il pattern **Adapter**. I tre attori sono:
+The solution is the **Adapter** pattern. The three actors are:
 
-- **Target**: l'interfaccia che il client conosce e si aspetta (es. la presa di tipo A). Contiene le operazioni generiche che vogliamo eseguire.
-- **Adaptee**: la classe esistente con un'interfaccia incompatibile (es. la spina di tipo B). Può essere codice legacy o una libreria esterna su cui non abbiamo controllo.
-- **Adapter**: la classe intermedia che **implementa** l'interfaccia `Target` e **contiene** un'istanza di `Adaptee`. Traduce le chiamate generiche del `Target` in chiamate specifiche dell'`Adaptee`.
+- **Target**: the interface that the client knows and expects (e.g. the type A outlet). Contains the generic operations we want to perform.
+- **Adaptee**: the existing class with an incompatible interface (e.g. the type B plug). It can be legacy code or an external library over which we have no control.
+- **Adapter**: the intermediate class that **implements** the `Target` interface and **contains** an instance of `Adaptee`. It translates the generic `Target` calls into specific `Adaptee` calls.
 
-Il client usa l'`Adapter` come se fosse un normale `Target`: l'adattamento è completamente trasparente.
+The client uses the `Adapter` as if it were a normal `Target`: the adaptation is completely transparent.
 
-Per implementare questa soluzione:
-- **Target**: definire l'interfaccia con le operazioni generiche che ci servono.
-- **Adaptee**: la classe con le operazioni specifiche incompatibili con `Target`.
-- **Adapter**: implementa `Target` e contiene un'istanza di `Adaptee`, traducendo le operazioni generiche in operazioni specifiche.
+To implement this solution:
+- **Target**: define the interface with the generic operations we need.
+- **Adaptee**: the class with specific operations incompatible with `Target`.
+- **Adapter**: implements `Target` and contains an instance of `Adaptee`, translating generic operations into specific ones.
 
-Dopodiché il client istanzia un `Adapter`, passando un'istanza di `Adaptee`, e lo usa come se fosse un `Target` normale.
+Then the client instantiates an `Adapter`, passing an instance of `Adaptee`, and uses it as if it were a normal `Target`.
 
-## Diagrammi
+## Diagrams
 
-### Diagramma generico
+### Generic Diagram
 
 ```mermaid
 %%{init: {'layout': 'elk'}}%%
@@ -54,15 +54,15 @@ classDiagram
         +specificRequest() RawData
     }
 
-    %% Relazioni
-    Client ..> Target : usa
-    Adapter ..|> Target : implementa
+    %% Relations
+    Client ..> Target : uses
+    Adapter ..|> Target : implements
     Adapter o-- Adaptee : wraps
 
-    %% Note sui ruoli
-    note for Target "Interfaccia che il Client conosce. Definisce il formato standard atteso."
-    note for Adaptee "Classe esistente incompatibile. Non si può/vuole modificare."
-    note for Adapter "Traduce request() in specificRequest() e converte RawData → Result."
+    %% Notes on roles
+    note for Target "Interface that the Client knows. Defines the expected standard format."
+    note for Adaptee "Existing incompatible class. Cannot/should not be modified."
+    note for Adapter "Translates request() into specificRequest() and converts RawData → Result."
 
     %% Styling
     style Target fill:#2d3436,stroke:#00cec9,stroke-width:2px,color:#fff
@@ -71,115 +71,115 @@ classDiagram
     style Client fill:#2d3436,stroke:#a29bfe,stroke-width:2px,color:#fff
 ```
 
-### Diagramma specifico
+### Specific Diagram
 ```mermaid
 %%{init: {'layout': 'elk'}}%%
 classDiagram
     direction TB
 
-    class GeneratoreReport {
-        +genera_report(sorgente: SorgenteDati, nome: str)
+    class ReportGenerator {
+        +generate_report(source: DataSource, name: str)
     }
 
-    class SorgenteDati {
+    class DataSource {
         <<interface>>
-        +get_vendite() list[dict]*
+        +get_sales() list[dict]*
     }
 
     class DatabaseAdapter {
-        -_adaptee: DatabaseAziendale
-        +get_vendite() list[dict]
+        -_adaptee: CompanyDatabase
+        +get_sales() list[dict]
     }
 
     class APIAdapter {
-        -_adaptee: APIFornitoreEsterno
-        +get_vendite() list[dict]
+        -_adaptee: ExternalSupplierAPI
+        +get_sales() list[dict]
     }
 
     class CSVAdapter {
-        -_adaptee: ParserCSV
-        +get_vendite() list[dict]
+        -_adaptee: CSVParser
+        +get_sales() list[dict]
     }
 
-    class DatabaseAziendale {
-        +recupera_vendite() list[dict]
+    class CompanyDatabase {
+        +retrieve_sales() list[dict]
     }
 
-    class APIFornitoreEsterno {
+    class ExternalSupplierAPI {
         +fetch_orders() list[dict]
     }
 
-    class ParserCSV {
-        +leggi_file() list[tuple]
+    class CSVParser {
+        +read_file() list[tuple]
     }
 
-    %% Relazioni
-    GeneratoreReport ..> SorgenteDati : usa
-    DatabaseAdapter ..|> SorgenteDati : implementa
-    APIAdapter      ..|> SorgenteDati : implementa
-    CSVAdapter      ..|> SorgenteDati : implementa
-    DatabaseAdapter o-- DatabaseAziendale : wraps
-    APIAdapter      o-- APIFornitoreEsterno : wraps
-    CSVAdapter      o-- ParserCSV : wraps
+    %% Relations
+    ReportGenerator ..> DataSource : uses
+    DatabaseAdapter ..|> DataSource : implements
+    APIAdapter      ..|> DataSource : implements
+    CSVAdapter      ..|> DataSource : implements
+    DatabaseAdapter o-- CompanyDatabase : wraps
+    APIAdapter      o-- ExternalSupplierAPI : wraps
+    CSVAdapter      o-- CSVParser : wraps
 
     %% Styling
-    style SorgenteDati fill:#2d3436,stroke:#00cec9,stroke-width:2px,color:#fff
+    style DataSource fill:#2d3436,stroke:#00cec9,stroke-width:2px,color:#fff
     style DatabaseAdapter fill:#2d3436,stroke:#fdcb6e,stroke-width:2px,color:#fff
     style APIAdapter fill:#2d3436,stroke:#fdcb6e,stroke-width:2px,color:#fff
     style CSVAdapter fill:#2d3436,stroke:#fdcb6e,stroke-width:2px,color:#fff
-    style DatabaseAziendale fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
-    style APIFornitoreEsterno fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
-    style ParserCSV fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
-    style GeneratoreReport fill:#2d3436,stroke:#a29bfe,stroke-width:2px,color:#fff
+    style CompanyDatabase fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
+    style ExternalSupplierAPI fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
+    style CSVParser fill:#2d3436,stroke:#ff7675,stroke-width:2px,color:#fff
+    style ReportGenerator fill:#2d3436,stroke:#a29bfe,stroke-width:2px,color:#fff
 ```
 
-### Diagramma di sequenza
+### Sequence Diagram
 ```mermaid
 sequenceDiagram
     autonumber
-    participant G as GeneratoreReport
+    participant G as ReportGenerator
     participant A as APIAdapter
-    participant API as APIFornitoreEsterno
+    participant API as ExternalSupplierAPI
 
-    Note over G, API: Esempio con APIAdapter — il flusso è identico per Database e CSV
+    Note over G, API: Example with APIAdapter — the flow is identical for Database and CSV
 
-    G->>A: get_vendite()
+    G->>A: get_sales()
     activate A
-    Note right of A: L'Adapter conosce il contratto<br/>della sorgente esterna
+    Note right of A: The Adapter knows the contract<br/>of the external source
 
     A->>API: fetch_orders()
     activate API
     API-->>A: [{"item_name": ..., "total_eur": ..., "order_date": "15-01-2024"}]
     deactivate API
 
-    Note right of A: Traduzione:<br/>item_name → prodotto<br/>total_eur → importo<br/>"15-01-2024" → "2024-01-15"
+    Note right of A: Translation:<br/>item_name → product<br/>total_eur → amount<br/>"15-01-2024" → "2024-01-15"
 
-    A-->>G: [{"prodotto": ..., "importo": ..., "data": "2024-01-15"}]
+    A-->>G: [{"product": ..., "amount": ..., "date": "2024-01-15"}]
     deactivate A
 
-    Note over G: Il GeneratoreReport riceve sempre<br/>lo stesso formato standard,<br/>indipendentemente dalla sorgente
+    Note over G: The ReportGenerator always receives<br/>the same standard format,<br/>regardless of the source
 ```
 
 
-### Vantaggi
+### Advantages
 
-- **Principio di Singola Responsabilità (SRP):**
-Uno dei vantaggi principali è la separazione degli interessi. Il codice che si occupa della conversione dei dati o dell'interfaccia è isolato all'interno dell'Adapter. La logica di business del sistema rimane pulita e non viene "inquinata" dai dettagli tecnici necessari per far funzionare una libreria esterna o un sistema legacy.
-- **Principio Aperto/Chiuso (OCP):**
-E' possibile introdurre nuovi tipi di Adapter nel sistema senza modificare il codice client esistente. Finché il nuovo Adapter implementa l'interfaccia `Target` che il client si aspetta, tutto funzionerà correttamente. Questo rende il sistema estremamente **estensibile**.
-- **Riutilizzo di Codice Incompatibile:**
-L'Adapter è la "macchina del tempo" del software. Permette di utilizzare classi scritte anni fa (legacy) o librerie di terze parti i cui sorgenti non sono modificabili, rendendole compatibili.
-- **Flessibilità e Disaccoppiamento:**
-Il client non sa nulla della classe concreta che sta fornendo il servizio (l'Adaptee). Conosce solo l'interfaccia Target. Questo significa che, in futuro, si può cambiare interamente la libreria sottostante semplicemente creando un nuovo Adapter, senza che il resto dell'applicazione se ne accorga.
+- **Single Responsibility Principle (SRP):**
+One of the main advantages is separation of concerns. The code responsible for data or interface conversion is isolated within the Adapter. The system's business logic stays clean and isn't "polluted" by the technical details needed to make an external library or legacy system work.
+- **Open/Closed Principle (OCP):**
+It's possible to introduce new types of Adapters into the system without modifying existing client code. As long as the new Adapter implements the `Target` interface the client expects, everything will work correctly. This makes the system extremely **extensible**.
+- **Reuse of Incompatible Code:**
+The Adapter is the "time machine" of software. It allows using classes written years ago (legacy) or third-party libraries whose source code cannot be modified, making them compatible.
+- **Flexibility and Decoupling:**
+The client knows nothing about the concrete class providing the service (the Adaptee). It only knows the Target interface. This means that, in the future, you can entirely replace the underlying library by simply creating a new Adapter, without the rest of the application noticing.
 
 
-### Svantaggi
+### Disadvantages
 
-- **Aumento della Complessità Complessiva:**
-L'introduzione di un Adapter significa aggiungere nuove classi e interfacce al progetto. È il classico caso di "over-engineering".
-- **Overhead Prestazionale (Minimo, ma esistente):**
-Ogni volta che il client chiama un metodo dell'Adapter, avviene una "delega" (l'Adapter chiama l'Adaptee). Questo aggiunge un piccolo passaggio extra nello stack delle chiamate. Nella stragrande maggioranza delle applicazioni questo ritardo è impercettibile, ma in sistemi *real-time* estremi o ad altissime prestazioni, ogni livello di astrazione conta.
-- **Difficoltà nel Debugging:**
-Quando si verifica un errore, il flusso del programma attraversa più livelli (Client -> Adapter -> Adaptee). Seguire il percorso dei dati durante il debugging può diventare più frustrante, specialmente se ci sono conversioni di dati complesse nel mezzo.
-- **Rischio di "Codice Morto" o Ridondante:**
-A volte è più semplice e pulito modificare direttamente la classe originale (se ne abbiamo il controllo) piuttosto che costruire un Adapter. Se iniziate a creare Adapter per classi che potreste facilmente rifattorizzare, state solo aggiungendo burocrazia al vostro codice.
+- **Increase in Overall Complexity:**
+Introducing an Adapter means adding new classes and interfaces to the project. This is the classic case of "over-engineering".
+- **Performance Overhead (Minimal, but existing):**
+Every time the client calls an Adapter method, a "delegation" occurs (the Adapter calls the Adaptee). This adds a small extra step in the call stack. In the vast majority of applications this delay is imperceptible, but in extreme *real-time* or ultra-high-performance systems, every layer of abstraction counts.
+- **Debugging Difficulty:**
+When an error occurs, the program flow traverses multiple layers (Client -> Adapter -> Adaptee). Following the data path during debugging can become more frustrating, especially if there are complex data conversions in between.
+- **Risk of "Dead Code" or Redundancy:**
+Sometimes it's simpler and cleaner to directly modify the original class (if we have control over it) rather than building an Adapter. If you start creating Adapters for classes you could easily refactor, you're just adding bureaucracy to your code.

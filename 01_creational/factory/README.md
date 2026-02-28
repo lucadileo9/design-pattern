@@ -1,48 +1,48 @@
 # Factory Pattern
 
-## Problema
+## Problem
 
-Ipotizziamo di trovarci nella situazione in cui abbiamo una classe `X` che faccia determinate operazioni. In seguito però ci rendiamo conto che abbiamo bisogno di più classi che facciano operazioni simili a quelle di `X`, ma con alcune differenze (ad esempio `Y`).
+Let's say we have a class `X` that performs certain operations. Later, we realize we need more classes that perform operations similar to those of `X`, but with some differences (e.g. `Y`).
 
-In questo caso potremmo essere tentati di creare un'istanza di `X` o `Y` direttamente nel nostro codice, ma ciò ci costringerebbe a modificare il codice ogni volta che introduciamo una nuova classe. Inoltre, la creazione di istanze in più punti rende il codice più difficile da mantenere e testare.
+In this case we might be tempted to create an instance of `X` or `Y` directly in our code, but this would force us to modify the code every time we introduce a new class. Moreover, creating instances in multiple places makes the code harder to maintain and test.
 
-Con poche classi questo potrebbe andare bene, ma quando il numero di classi cresce e si osserva un pattern ricorrente di comportamento simile, è il momento di introdurre un pattern che gestisca la situazione in modo più efficiente e mantenibile.
+With a small number of classes this might be fine, but when the number of classes grows and you observe a recurring pattern of similar behavior, it's time to introduce a pattern that handles the situation more efficiently and maintainably.
 
-Esempio classico: la logistica
-- Abbiamo una classe `camion` con metodi `carica()` e `scarica()`.
-- L'azienda si espande e servono nuovi sistemi di trasporto, ad es. `nave`, con gli stessi metodi ma comportamenti diversi (acqua vs strada).
-- Il codice client dovrebbe creare istanze di `camion` o `nave` a seconda dei casi, aumentando il rischio di errori e la difficoltà di manutenzione.
-- Aggiungere un nuovo mezzo (es. `aereo`) richiederebbe modifiche al codice client se non si usa un pattern adeguato.
+Classic example: logistics
+- We have a `Truck` class with `load()` and `unload()` methods.
+- The company expands and needs new transport systems, e.g. `Ship`, with the same methods but different behaviors (water vs road).
+- The client code would need to create instances of `Truck` or `Ship` depending on the case, increasing the risk of errors and maintenance difficulty.
+- Adding a new vehicle (e.g. `Airplane`) would require changes to the client code if an appropriate pattern is not used.
 
 
-## Soluzione
+## Solution
 
-La soluzione è il pattern **Factory**. Procediamo per fasi:
+The solution is the **Factory** pattern. Let's proceed step by step:
 
-- **Product**: definiamo l'interfaccia del prodotto (es. `A`) con metodi astratti. Le classi concrete (`X`, `Y`, `Z`) implementeranno questa interfaccia.
-- **Factory / Creator**: definiamo l'interfaccia `Factory` con un metodo astratto `create()`. Le classi concrete (`FactoryX`, `FactoryY`, `FactoryZ`) implementano `create()` e restituiscono istanze dei prodotti concreti.
+- **Product**: we define the product interface (e.g. `A`) with abstract methods. The concrete classes (`X`, `Y`, `Z`) will implement this interface.
+- **Factory / Creator**: we define the `Factory` interface with an abstract `create()` method. The concrete classes (`FactoryX`, `FactoryY`, `FactoryZ`) implement `create()` and return instances of concrete products.
 
-Importante: il **Creator** non serve solo a creare oggetti; contiene spesso la logica di business core che si appoggia agli oggetti prodotto restituiti dal factory method.
+Important: the **Creator** is not just for creating objects; it often contains core business logic that relies on the product objects returned by the factory method.
 
-Come usare il Creator
+How to use the Creator
 
-- Nel codice client, invece di istanziare `X`, `Y` o `Z` direttamente, si istanzia la `Factory` concreta corrispondente (es. `FactoryX`) e si chiama `create()` per ottenere un prodotto (tipizzato come l'interfaccia `A`).
-- Il client utilizza l'interfaccia del prodotto senza conoscere la sua implementazione concreta.
+- In the client code, instead of instantiating `X`, `Y`, or `Z` directly, you instantiate the corresponding concrete `Factory` (e.g. `FactoryX`) and call `create()` to obtain a product (typed as the interface `A`).
+- The client uses the product interface without knowing its concrete implementation.
 
-Esempio (logistica)
+Example (logistics)
 
-- Interfaccia comune: `MezzoDiTrasporto` con `carica()` e `scarica()`.
-- Classi concrete: `Camion`, `Nave`, `Aereo` implementano `MezzoDiTrasporto`.
-- Definiamo l'interfaccia `MezzoDiTrasportoFactory` con `create()`.
-- Implementazioni concrete: `CamionFactory`, `NaveFactory`, `AereoFactory`, ciascuna crea il rispettivo `MezzoDiTrasporto`.
+- Common interface: `TransportVehicle` with `load()` and `unload()`.
+- Concrete classes: `Truck`, `Ship`, `Airplane` implement `TransportVehicle`.
+- We define the `TransportVehicleFactory` interface with `create()`.
+- Concrete implementations: `TruckFactory`, `ShipFactory`, `AirplaneFactory`, each creates its respective `TransportVehicle`.
 
-ATTENZIONE: non confondere con lo *Simple Factory* — la `MezzoDiTrasportoFactory` qui è un'interfaccia/creator, non una classe con switch-case che istanzia direttamente diversi prodotti.
+WARNING: do not confuse with *Simple Factory* — the `TransportVehicleFactory` here is an interface/creator, not a class with a switch-case that directly instantiates different products.
 
-N.B.: da nessuna parte c'è bisogno di mettere una lista di classi concrete, perché appunto è tutto perfettamente disaccoppiato. 
+N.B.: there's no need to maintain a list of concrete classes anywhere, because everything is perfectly decoupled. 
 
 ## Diagrammi
 
-### Diagramma generico
+### Generic diagram
 
 ```mermaid
 classDiagram
@@ -68,8 +68,8 @@ classDiagram
     }
 
     %% Relazioni Gerarchiche
-    Product <|.. ConcreteProduct : implementa
-    Creator <|-- ConcreteCreator : estende
+    Product <|.. ConcreteProduct : implements
+    Creator <|-- ConcreteCreator : extends
 
     %% Relazione di Dipendenza (Il cuore del pattern)
     ConcreteCreator ..> ConcreteProduct : instantiates
@@ -85,9 +85,9 @@ classDiagram
 
 
 
-### Diagramma specifico
+### Specific diagram
 
-La cosa migliore è guardare questi diagramma dopo aver visto il codice, altrimenti potrebbe essere un po' difficile da capire. 
+The best approach is to look at these diagrams after reviewing the code, otherwise they might be a bit difficult to understand. 
 
 ```mermaid
 %%{init: {"layout": "elk"}}%%
@@ -125,15 +125,15 @@ classDiagram
     }
 
     %% Relazioni di Ereditarietà
-    DatabaseConnection <|-- MySQLConnection : implementa
-    DatabaseConnection <|-- MongoDBConnection : implementa
-    DatabaseManager <|-- ProductionMySQLManager : estende
-    DatabaseManager <|-- CloudMongoManager : estende
+    DatabaseConnection <|-- MySQLConnection : implements
+    DatabaseConnection <|-- MongoDBConnection : implements
+    DatabaseManager <|-- ProductionMySQLManager : extends
+    DatabaseManager <|-- CloudMongoManager : extends
 
-    %% Relazione di Dipendenza e Creazione
-    DatabaseManager ..> DatabaseConnection : usa
-    ProductionMySQLManager ..> MySQLConnection : crea
-    CloudMongoManager ..> MongoDBConnection : crea
+    %% Dependency and Creation relationships
+    DatabaseManager ..> DatabaseConnection : uses
+    ProductionMySQLManager ..> MySQLConnection : creates
+    CloudMongoManager ..> MongoDBConnection : creates
 
     %% Styling
     style DatabaseConnection fill:#1e272e,stroke:#0fbcf9,stroke-width:2px,color:#fff
@@ -141,62 +141,62 @@ classDiagram
     style MySQLConnection fill:#2f3542,stroke:#ced4da,color:#fff
     style MongoDBConnection fill:#2f3542,stroke:#ced4da,color:#fff
 ```
-### Diagramma di sequenza
+### Sequence diagram
 
 
 ```mermaid
 %%{init: {"layout": "elk"}}%%
 graph 
-    %% Definizione Stili Note
+    %% Note Styles Definition
     classDef note style fill:#2f3640,stroke:#fbc531,stroke-width:2px,stroke-dasharray: 5 5,color:#fbc531,font-style:italic;
     classDef action style fill:#2d3436,stroke:#0fbcf9,color:#fff;
     classDef logic style fill:#2d3436,stroke:#05c46b,color:#fff;
 
-    subgraph Client_Space [Ambiente Client]
+    subgraph Client_Space [Client Environment]
         direction TB
-        A[Inizio] --> B[Istanzia ProductionMySQLManager]
+        A[Start] --> B[Instantiate ProductionMySQLManager]
         
-        %% NOTA 1
-        N1{{<b>NOTA 1: Scelta del DB</b><br/>In questo preciso punto il Client<br/>decide quale database usare.<br/>Cambiando questa riga, cambia<br/>l'intero comportamento del sistema.}}
+        %% NOTE 1
+        N1{{<b>NOTE 1: DB Choice</b><br/>At this exact point the Client<br/>decides which database to use.<br/>Changing this line changes<br/>the entire system behavior.}}
         B -.-> N1
     end
 
-    subgraph Manager_Logic [DatabaseManager Base]
+    subgraph Manager_Logic [Base DatabaseManager]
         direction TB
-        C[Chiama initialize_system] --> D["db = self.create_database()"]
+        C[Call initialize_system] --> D["db = self.create_database()"]
         
-        %% NOTA 2
-        N2{{<b>NOTA 2: Astrazione </b><br/> Il metodo ritorna un oggetto<br/>'DatabaseConnection'. Il Manager<br/>non sa se è MySQL o Mongo,<br/>sa solo che rispetta l'interfaccia.}}
+        %% NOTE 2
+        N2{{<b>NOTE 2: Abstraction</b><br/>The method returns a<br/>'DatabaseConnection' object. The Manager<br/>doesn't know if it's MySQL or Mongo,<br/>only that it respects the interface.}}
         D -.-> N2
     end
 
-    subgraph Operation [Utilizzo Polimorfico]
+    subgraph Operation [Polymorphic Usage]
         direction TB
         H[db.open] --> I[db.query]
         
-        %% NOTA 3
-        N3{{<b>NOTA 3: Polimorfismo</b><br/>Questi metodi chiamati nel DataBaseManager funzionano a<br/>prescindere dal DB scelto perché<br/>tutte le classi derivano dalla<br/>stessa classe base astratta.}}
+        %% NOTE 3
+        N3{{<b>NOTE 3: Polymorphism</b><br/>These methods called in the DatabaseManager work<br/>regardless of the chosen DB because<br/>all classes derive from the<br/>same abstract base class.}}
         I -.-> N3
     end
 
-    %% Collegamenti tra i blocchi
+    %% Links between blocks
     B --> C
     D --> H
 
-    %% Assegnazione Classi
+    %% Class Assignment
     class B,H,I action;
     class C,D logic;
     class N1,N2,N3 note;
 
 ```
 
-### Vantaggi
+### Advantages
 
-L'adozione del Factory Method offre benefici strutturali significativi per la manutenibilità del software:
+Adopting the Factory Method offers significant structural benefits for software maintainability:
 
-- **Disaccoppiamento**: evita l'accoppiamento stretto tra la classe che utilizza il prodotto (creatore) e le classi concrete dei prodotti.
-- **Single Responsibility Principle**: sposta il codice di creazione in un unico punto del programma, facilitandone la gestione.
-- **Open/Closed Principle**: permette di introdurre nuovi prodotti senza modificare il codice client esistente.
+- **Decoupling**: avoids tight coupling between the class that uses the product (creator) and the concrete product classes.
+- **Single Responsibility Principle**: moves creation code to a single point in the program, making it easier to manage.
+- **Open/Closed Principle**: allows introducing new products without modifying existing client code.
 
 
 ### Svantaggi

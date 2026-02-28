@@ -1,33 +1,33 @@
 # Composite Pattern
 
-## Problema
+## Problem
 
-Questo pattern si applica a situazioni in cui si lavora con strutture dati ad albero, dove ogni nodo può essere un **nodo interno** o una **foglia**. La difficoltà nasce dal fatto che i due tipi hanno comportamenti diversi: una foglia esegue un'operazione specifica, mentre un nodo interno deve iterare sui propri figli per eseguire la stessa operazione.
+This pattern applies to situations where you work with tree data structures, where each node can be an **internal node** or a **leaf**. The difficulty arises because the two types have different behaviors: a leaf performs a specific operation, while an internal node must iterate over its children to perform the same operation.
 
-Gli approcci naïve tipici sono due, entrambi problematici:
-- **Raccolta in lista**: appiattire la struttura in una lista lineare per poi iterarla — difficile da gestire su strutture complesse e profonde.
-- **Catena di if/switch**: distinguere a runtime i tipi di nodo — fragile e difficile da mantenere, soprattutto quando si aggiungono nuovi tipi di nodo.
+The typical naïve approaches are two, both problematic:
+- **Collection in a list**: flattening the structure into a linear list and then iterating over it — hard to manage on complex and deep structures.
+- **Chain of if/switch**: distinguishing node types at runtime — fragile and hard to maintain, especially when adding new node types.
 
-Analogia reale: un catalogo e-commerce con prodotti (foglie) e categorie (nodi interni) che possono contenere altre categorie o prodotti. Calcolare il prezzo totale di un carrello, o applicare uno sconto a un'intera categoria, richiede di iterare sull'albero distinguendo foglie e nodi interni — complessità che esplode rapidamente.
+Real-world analogy: an e-commerce catalog with products (leaves) and categories (internal nodes) that can contain other categories or products. Calculating the total price of a cart, or applying a discount to an entire category, requires iterating over the tree distinguishing leaves and internal nodes — complexity that explodes rapidly.
 
 
-## Soluzione
+## Solution
 
-La soluzione è il pattern **Composite**, che permette di trattare uniformemente nodi interni e foglie, nascondendo la complessità della struttura sottostante. Il client interagisce con tutti i nodi tramite la stessa interfaccia, senza doversi preoccupare del tipo specifico.
+The solution is the **Composite** pattern, which allows treating internal nodes and leaves uniformly, hiding the complexity of the underlying structure. The client interacts with all nodes through the same interface, without worrying about the specific type.
 
-I tre attori:
+The three actors:
 
-1. **Component** (interfaccia comune): definisce i metodi condivisi da foglie e nodi interni (es. `operation()`, opzionalmente `add()`, `remove()`).
-2. **Leaf**: implementa `Component` ma non ha figli. I metodi `add()` e `remove()`, se presenti nell'interfaccia, non fanno nulla o lanciano un'eccezione.
-3. **Composite**: implementa `Component` e mantiene una lista di figli (di tipo `Component`, quindi può contenere sia foglie che altri Composite). Implementa `operation()` iterando sui figli e delegando la chiamata a ciascuno.
+1. **Component** (common interface): defines the methods shared by leaves and internal nodes (e.g. `operation()`, optionally `add()`, `remove()`).
+2. **Leaf**: implements `Component` but has no children. The `add()` and `remove()` methods, if present in the interface, do nothing or throw an exception.
+3. **Composite**: implements `Component` and maintains a list of children (of type `Component`, so it can contain both leaves and other Composites). Implements `operation()` by iterating over the children and delegating the call to each one.
 
-In questo modo, chiamare `operation()` sul nodo radice propaga automaticamente l'operazione sull'intera struttura, senza che il client debba distinguere tra i tipi di nodo.
+This way, calling `operation()` on the root node automatically propagates the operation over the entire structure, without the client having to distinguish between node types.
 
-> **N.B.**: i metodi `add()` e `remove()` possono essere definiti solo nella classe `Composite` e non nell'interfaccia `Component`. Questo evita metodi vuoti o eccezioni nella classe `Leaf`, a scapito però di un'interfaccia meno uniforme — è una scelta di design.
+> **N.B.**: the `add()` and `remove()` methods can be defined only in the `Composite` class and not in the `Component` interface. This avoids empty methods or exceptions in the `Leaf` class, at the cost of a less uniform interface — it's a design choice.
 
-## Diagrammi
+## Diagrams
 
-### Diagramma generico
+### Generic Diagram
 
 ```mermaid
 classDiagram
@@ -47,81 +47,81 @@ classDiagram
 
     Component <|-- Leaf
     Component <|-- Composite
-    Composite o-- Component : contiene
+    Composite o-- Component : contains
 ```
 
-### Diagramma specifico — Menu ristorante
+### Specific Diagram — Restaurant Menu
 
 ```mermaid
 classDiagram
-    class ComponenteMenu {
+    class MenuComponent {
         <<abstract>>
-        +nome: str
-        +mostra(indentazione)*
-        +conta_piatti()* int
-        +get_prezzi()* list~float~
-        +get_prezzo_medio() float
+        +name: str
+        +display(indentation)*
+        +count_dishes()* int
+        +get_prices()* list~float~
+        +get_average_price() float
     }
-    class Piatto {
-        +prezzo: float
-        +descrizione: str
-        +mostra(indentazione)
-        +conta_piatti() int
-        +get_prezzi() list~float~
+    class Dish {
+        +price: float
+        +description: str
+        +display(indentation)
+        +count_dishes() int
+        +get_prices() list~float~
     }
-    class SezioneMenu {
-        -_figli: list~ComponenteMenu~
-        +aggiungi(ComponenteMenu)
-        +rimuovi(ComponenteMenu)
-        +mostra(indentazione)
-        +conta_piatti() int
-        +get_prezzi() list~float~
+    class MenuSection {
+        -_children: list~MenuComponent~
+        +add(MenuComponent)
+        +remove(MenuComponent)
+        +display(indentation)
+        +count_dishes() int
+        +get_prices() list~float~
     }
 
-    ComponenteMenu <|-- Piatto : Leaf
-    ComponenteMenu <|-- SezioneMenu : Composite
-    SezioneMenu o-- ComponenteMenu : contiene
+    MenuComponent <|-- Dish : Leaf
+    MenuComponent <|-- MenuSection : Composite
+    MenuSection o-- MenuComponent : contains
 ```
 
-### Diagramma di sequenza
+### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Menu as Menu (SezioneMenu)
-    participant Primi as Primi (SezioneMenu)
-    participant Carbonara as Carbonara (Piatto)
-    participant Risotto as Risotto (Piatto)
-    participant Bevande as Bevande (SezioneMenu)
-    participant Birra as Birra (Piatto)
+    participant Menu as Menu (MenuSection)
+    participant FirstCourses as FirstCourses (MenuSection)
+    participant Carbonara as Carbonara (Dish)
+    participant Risotto as Risotto (Dish)
+    participant Drinks as Drinks (MenuSection)
+    participant Beer as Beer (Dish)
 
-    Client->>Menu: conta_piatti()
-    Menu->>Primi: conta_piatti()
-    Primi->>Carbonara: conta_piatti()
-    Carbonara-->>Primi: 1
-    Primi->>Risotto: conta_piatti()
-    Risotto-->>Primi: 1
-    Primi-->>Menu: 2
-    Menu->>Bevande: conta_piatti()
-    Bevande->>Birra: conta_piatti()
-    Birra-->>Bevande: 1
-    Bevande-->>Menu: 1
+    Client->>Menu: count_dishes()
+    Menu->>FirstCourses: count_dishes()
+    FirstCourses->>Carbonara: count_dishes()
+    Carbonara-->>FirstCourses: 1
+    FirstCourses->>Risotto: count_dishes()
+    Risotto-->>FirstCourses: 1
+    FirstCourses-->>Menu: 2
+    Menu->>Drinks: count_dishes()
+    Drinks->>Beer: count_dishes()
+    Beer-->>Drinks: 1
+    Drinks-->>Menu: 1
     Menu-->>Client: 3
 ```
 
-### Vantaggi
+### Advantages
 
-- **Uniformità**: il client non deve preoccuparsi se sta interagendo con un singolo oggetto o con un'intera struttura — tratta tutto come `Component`, eliminando i blocchi `if is_folder ... else ...`.
-- **Flessibilità ed estensibilità**: grazie all'Open/Closed Principle, si possono aggiungere nuovi tipi di foglie o contenitori senza toccare il codice client esistente.
-- **Gerarchie ricorsive pulite**: è il modo più naturale per rappresentare oggetti che contengono altri oggetti dello stesso tipo (es. file system, menu, organigrammi aziendali).
-- **Riduzione del boilerplate**: il client invoca un unico metodo sulla radice e l'operazione si propaga automaticamente sull'intera struttura.
+- **Uniformity**: the client doesn't need to worry about whether it's interacting with a single object or an entire structure — it treats everything as `Component`, eliminating the `if is_folder ... else ...` blocks.
+- **Flexibility and Extensibility**: thanks to the Open/Closed Principle, new types of leaves or containers can be added without touching existing client code.
+- **Clean Recursive Hierarchies**: it's the most natural way to represent objects that contain other objects of the same type (e.g. file systems, menus, corporate org charts).
+- **Boilerplate Reduction**: the client invokes a single method on the root and the operation propagates automatically over the entire structure.
 
 
-### Svantaggi
+### Disadvantages
 
-- **Design troppo generico**: è difficile limitare i componenti di un `Composite` tramite il sistema dei tipi. Se una `Scatola` dovesse contenere solo `Cibi`, non è possibile impedire a compile-time che venga inserito un `Martello` — il controllo va fatto a runtime, con meno sicurezza.
-- **Violazione dei principi SOLID (LSP e ISP)**:
-  - *Liskov Substitution Principle*: se `add()` e `remove()` sono nell'interfaccia comune, `Leaf` erediterà metodi che non può implementare correttamente (spesso lanciando eccezioni).
-  - *Interface Segregation Principle*: le foglie sono costrette a dipendere da metodi che non usano.
-- **Dilemma sicurezza vs uniformità**: rimuovere `add()` e `remove()` da `Leaf` risolve il problema SOLID, ma obbliga il client a fare cast per sapere se può aggiungere figli — perdendo l'uniformità che era il vantaggio principale del pattern.
-- **Overhead di memoria/performance**: in strutture molto profonde, la ricorsione continua e la gestione di molti piccoli oggetti possono avere un impatto sulle prestazioni se non ottimizzate.
+- **Overly Generic Design**: it's difficult to restrict the components of a `Composite` through the type system. If a `Box` should contain only `Foods`, it's not possible to prevent at compile-time that a `Hammer` gets inserted — the check must be done at runtime, with less safety.
+- **Violation of SOLID Principles (LSP and ISP)**:
+  - *Liskov Substitution Principle*: if `add()` and `remove()` are in the common interface, `Leaf` will inherit methods it can't implement correctly (often throwing exceptions).
+  - *Interface Segregation Principle*: leaves are forced to depend on methods they don't use.
+- **Safety vs Uniformity Dilemma**: removing `add()` and `remove()` from `Leaf` solves the SOLID problem, but forces the client to cast to know if it can add children — losing the uniformity that was the pattern's main advantage.
+- **Memory/Performance Overhead**: in very deep structures, continuous recursion and managing many small objects can impact performance if not optimized.

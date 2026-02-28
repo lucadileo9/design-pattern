@@ -1,124 +1,124 @@
 # ==========================================
-# IL PROBLEMA CHE IL COMPOSITE RISOLVE
+# THE PROBLEM THAT COMPOSITE SOLVES
 # ==========================================
-# Abbiamo una struttura ad albero: un catalogo e-commerce con
-# PRODOTTI (foglie) e CATEGORIE (nodi interni) che possono
-# contenere altri prodotti o sotto-categorie.
+# We have a tree structure: an e-commerce catalog with
+# PRODUCTS (leaves) and CATEGORIES (internal nodes) that can
+# contain other products or sub-categories.
 #
-# Vogliamo calcolare il prezzo totale di una categoria (sommando
-# ricorsivamente tutti i prodotti contenuti, anche in sotto-categorie).
+# We want to calculate the total price of a category (recursively
+# summing all contained products, even in sub-categories).
 #
-# Senza il pattern Composite, il client deve distinguere manualmente
-# tra prodotti e categorie — con if/isinstance ovunque.
+# Without the Composite pattern, the client must manually distinguish
+# between products and categories — with if/isinstance everywhere.
 
 
 # ==========================================
-# LE CLASSI — nessuna interfaccia comune
+# THE CLASSES — no common interface
 # ==========================================
-# Prodotto e Categoria sono classi completamente separate.
-# Non condividono un'interfaccia, non hanno un metodo comune.
-# Il client deve sapere esattamente con quale tipo sta parlando.
+# Product and Category are completely separate classes.
+# They don't share an interface, they have no common method.
+# The client must know exactly which type it's talking to.
 
-class Prodotto:
-    """Una foglia: un singolo prodotto con nome e prezzo."""
-    def __init__(self, nome: str, prezzo: float):
-        self.nome = nome
-        self.prezzo = prezzo
+class Product:
+    """A leaf: a single product with name and price."""
+    def __init__(self, name: str, price: float):
+        self.name = name
+        self.price = price
 
 
-class Categoria:
-    """Un nodo interno: contiene prodotti e/o sotto-categorie."""
-    def __init__(self, nome: str):
-        self.nome = nome
-        self.figli: list = []       # mix di Prodotto e Categoria — nessun tipo comune
+class Category:
+    """An internal node: contains products and/or sub-categories."""
+    def __init__(self, name: str):
+        self.name = name
+        self.children: list = []    # mix of Product and Category — no common type
 
-    def aggiungi(self, elemento):
-        self.figli.append(elemento)
+    def add(self, element):
+        self.children.append(element)
 
 
 # ==========================================
-# IL PROBLEMA: IL CLIENT FA TUTTO LUI
+# THE PROBLEM: THE CLIENT DOES EVERYTHING
 # ==========================================
-# Per calcolare il prezzo totale di una categoria, il client deve:
-#   1. Scorrere i figli
-#   2. Per OGNI figlio, controllare se è Prodotto o Categoria
-#   3. Se è Prodotto → prendere il prezzo
-#   4. Se è Categoria → chiamare ricorsivamente la stessa logica
+# To calculate the total price of a category, the client must:
+#   1. Iterate over children
+#   2. For EACH child, check if it's a Product or Category
+#   3. If it's a Product → take the price
+#   4. If it's a Category → recursively call the same logic
 #
-# Questa logica è nel CLIENT, non nell'albero. Se aggiungiamo
-# un nuovo tipo di nodo (es. "Bundle", "Pacchetto regalo"),
-# dobbiamo aggiornare OGNI funzione che attraversa l'albero.
+# This logic is in the CLIENT, not in the tree. If we add
+# a new node type (e.g. "Bundle", "Gift package"),
+# we must update EVERY function that traverses the tree.
 
-def calcola_prezzo_totale(elemento) -> float:
+def calculate_total_price(element) -> float:
     """
-    Funzione ricorsiva che il CLIENT deve scrivere e mantenere.
-    Richiede isinstance() per ogni tipo di nodo — fragile!
+    Recursive function that the CLIENT must write and maintain.
+    Requires isinstance() for each node type — fragile!
     """
-    if isinstance(elemento, Prodotto):
-        return elemento.prezzo
-    elif isinstance(elemento, Categoria):
-        totale = 0.0
-        for figlio in elemento.figli:
-            totale += calcola_prezzo_totale(figlio)      # ricorsione manuale
-        return totale
+    if isinstance(element, Product):
+        return element.price
+    elif isinstance(element, Category):
+        total = 0.0
+        for child in element.children:
+            total += calculate_total_price(child)   # manual recursion
+        return total
     else:
-        # Se aggiungiamo un nuovo tipo, questo ramo silenziosamente
-        # lo ignora 
+        # If we add a new type, this branch silently
+        # ignores it
         return 0.0
 
 
-def stampa_catalogo(elemento, indentazione: int = 0) -> None:
+def print_catalog(element, indentation: int = 0) -> None:
     """
-    Altra funzione che il CLIENT deve scrivere, con lo STESSO
-    pattern if/isinstance — codice duplicato per ogni operazione!
+    Another function that the CLIENT must write, with the SAME
+    if/isinstance pattern — duplicated code for every operation!
     """
-    prefisso = "  " * indentazione
-    if isinstance(elemento, Prodotto):
-        print(f"{prefisso}📦 {elemento.nome} — €{elemento.prezzo:.2f}")
-    elif isinstance(elemento, Categoria):
-        print(f"{prefisso}📁 {elemento.nome}")
-        for figlio in elemento.figli:
-            stampa_catalogo(figlio, indentazione + 1)
+    prefix = "  " * indentation
+    if isinstance(element, Product):
+        print(f"{prefix}📦 {element.name} — €{element.price:.2f}")
+    elif isinstance(element, Category):
+        print(f"{prefix}📁 {element.name}")
+        for child in element.children:
+            print_catalog(child, indentation + 1)
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
-# Ogni operazione sull'albero richiede la propria funzione
-# piena di if/isinstance. Se aggiungiamo un tipo "Bundle",
-# TUTTE queste funzioni vanno modificate.
+# Every operation on the tree requires its own function
+# full of if/isinstance. If we add a "Bundle" type,
+# ALL these functions need to be modified.
 
 if __name__ == "__main__":
 
-    # Costruzione dell'albero
-    laptop = Prodotto("Laptop Gaming", 1299.99)
-    mouse = Prodotto("Mouse Wireless", 34.99)
-    cuffie = Prodotto("Cuffie Bluetooth", 79.99)
-    monitor = Prodotto("Monitor 4K", 499.99)
-    webcam = Prodotto("Webcam HD", 59.99)
+    # Building the tree
+    laptop = Product("Laptop Gaming", 1299.99)
+    mouse = Product("Mouse Wireless", 34.99)
+    headphones = Product("Bluetooth Headphones", 79.99)
+    monitor = Product("Monitor 4K", 499.99)
+    webcam = Product("Webcam HD", 59.99)
 
-    informatica = Categoria("Informatica")
-    informatica.aggiungi(laptop)
-    informatica.aggiungi(mouse)
+    computers = Category("Computers")
+    computers.add(laptop)
+    computers.add(mouse)
 
-    accessori = Categoria("Accessori")
-    accessori.aggiungi(cuffie)
-    accessori.aggiungi(webcam)
+    accessories = Category("Accessories")
+    accessories.add(headphones)
+    accessories.add(webcam)
 
-    catalogo = Categoria("Catalogo")
-    catalogo.aggiungi(informatica)
-    catalogo.aggiungi(accessori)
-    catalogo.aggiungi(monitor)      # prodotto direttamente nella radice
+    catalog = Category("Catalog")
+    catalog.add(computers)
+    catalog.add(accessories)
+    catalog.add(monitor)            # product directly at the root
 
-    # Stampa
-    print("=== Catalogo ===")
-    stampa_catalogo(catalogo)
+    # Print
+    print("=== Catalog ===")
+    print_catalog(catalog)
 
-    # Prezzo totale — richiede la funzione con isinstance
-    print(f"\nPrezzo totale catalogo: €{calcola_prezzo_totale(catalogo):.2f}")
-    print(f"Prezzo totale 'Informatica': €{calcola_prezzo_totale(informatica):.2f}")
-    print(f"Prezzo singolo 'Laptop Gaming': €{calcola_prezzo_totale(laptop):.2f}")
+    # Total price — requires the function with isinstance
+    print(f"\nTotal catalog price: €{calculate_total_price(catalog):.2f}")
+    print(f"Total 'Computers' price: €{calculate_total_price(computers):.2f}")
+    print(f"Single 'Laptop Gaming' price: €{calculate_total_price(laptop):.2f}")
 
-    # PROBLEMA: se domani aggiungiamo un tipo "Bundle" (es. pacchetto
-    # laptop + mouse a prezzo scontato), dobbiamo modificare TUTTE le
-    # funzioni che attraversano l'albero. .
+    # PROBLEM: if tomorrow we add a "Bundle" type (e.g. laptop +
+    # mouse package at a discounted price), we must modify ALL the
+    # functions that traverse the tree.

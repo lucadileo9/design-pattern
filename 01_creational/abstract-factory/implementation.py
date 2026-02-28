@@ -1,136 +1,136 @@
 from abc import ABC, abstractmethod
 
 # ==========================================
-# 1. INTERFACCE DEI PRODOTTI (A e B)
+# 1. PRODUCT INTERFACES (A and B)
 # ==========================================
-# La differenza fondamentale rispetto al Factory Method è questa:
-# non abbiamo UN'unica interfaccia di prodotto, ma DUE (o più).
-# Ogni tipo di prodotto rappresenta una "dimensione" della famiglia.
-# Tutti i ProdottoA concreti parlano la stessa lingua (operazione()),
-# e lo stesso vale per tutti i ProdottoB (collabora()).
+# The fundamental difference from the Factory Method is this:
+# we don't have ONE single product interface, but TWO (or more).
+# Each product type represents a "dimension" of the family.
+# All concrete ProductA speak the same language (operation()),
+# and the same applies to all ProductB (collaborate()).
 
-class ProdottoA(ABC):
+class ProductA(ABC):
     @abstractmethod
-    def operazione(self) -> str:
-        """Funzionalità principale del prodotto di tipo A."""
+    def operation(self) -> str:
+        """Main functionality of type A product."""
         pass
 
-class ProdottoB(ABC):
+class ProductB(ABC):
     @abstractmethod
-    def collabora(self, a: ProdottoA) -> str:
+    def collaborate(self, a: ProductA) -> str:
         """
-        Il prodotto B può interagire con il prodotto A della stessa famiglia.
-        Notare che il parametro è l'interfaccia astratta, non la classe concreta:
-        B non sa se sta collaborando con AX, AY o AZ.
+        Product B can interact with Product A of the same family.
+        Note that the parameter is the abstract interface, not the concrete class:
+        B doesn't know if it's collaborating with AX, AY, or AZ.
         """
         pass
 
 # ==========================================
-# 2. PRODOTTI CONCRETI — Famiglia X
+# 2. CONCRETE PRODUCTS — Family X
 # ==========================================
 
-class ProdottoAX(ProdottoA):
-    def operazione(self) -> str:
-        return "Risultato del Prodotto A della famiglia X"
+class ProductAX(ProductA):
+    def operation(self) -> str:
+        return "Result from Product A of family X"
 
-class ProdottoBX(ProdottoB):
-    def collabora(self, a: ProdottoA) -> str:
-        # BX accetta l'interfaccia astratta, non sa se a è AX, AY o AZ
-        return f"Prodotto B (X) collabora con → {a.operazione()}"
-
-# ==========================================
-# 3. PRODOTTI CONCRETI — Famiglia Y
-# ==========================================
-
-class ProdottoAY(ProdottoA):
-    def operazione(self) -> str:
-        return "Risultato del Prodotto A della famiglia Y"
-
-class ProdottoBY(ProdottoB):
-    def collabora(self, a: ProdottoA) -> str:
-        return f"Prodotto B (Y) collabora con → {a.operazione()}"
+class ProductBX(ProductB):
+    def collaborate(self, a: ProductA) -> str:
+        # BX accepts the abstract interface, doesn't know if a is AX, AY, or AZ
+        return f"Product B (X) collaborates with → {a.operation()}"
 
 # ==========================================
-# 4. PRODOTTI CONCRETI — Famiglia Z
+# 3. CONCRETE PRODUCTS — Family Y
 # ==========================================
 
-class ProdottoAZ(ProdottoA):
-    def operazione(self) -> str:
-        return "Risultato del Prodotto A della famiglia Z"
+class ProductAY(ProductA):
+    def operation(self) -> str:
+        return "Result from Product A of family Y"
 
-class ProdottoBZ(ProdottoB):
-    def collabora(self, a: ProdottoA) -> str:
-        return f"Prodotto B (Z) collabora con → {a.operazione()}"
+class ProductBY(ProductB):
+    def collaborate(self, a: ProductA) -> str:
+        return f"Product B (Y) collaborates with → {a.operation()}"
 
 # ==========================================
-# 5. LA ABSTRACT FACTORY
+# 4. CONCRETE PRODUCTS — Family Z
 # ==========================================
-# Questa è la vera differenza rispetto al Factory Method:
-# invece di un solo factory_method(), qui dichiariamo UN metodo
-# di creazione PER OGNI tipo di prodotto della famiglia.
+
+class ProductAZ(ProductA):
+    def operation(self) -> str:
+        return "Result from Product A of family Z"
+
+class ProductBZ(ProductB):
+    def collaborate(self, a: ProductA) -> str:
+        return f"Product B (Z) collaborates with → {a.operation()}"
+
+# ==========================================
+# 5. THE ABSTRACT FACTORY
+# ==========================================
+# This is the real difference from the Factory Method:
+# instead of a single factory_method(), here we declare ONE creation
+# method FOR EACH product type in the family.
 #
-# Ogni factory concreta sarà quindi responsabile di creare
-# un'intera famiglia coerente — non un singolo oggetto.
+# Each concrete factory will therefore be responsible for creating
+# an entire consistent family — not a single object.
 
 class AbstractFactory(ABC):
     @abstractmethod
-    def create_prodotto_a(self) -> ProdottoA:
+    def create_product_a(self) -> ProductA:
         pass
 
     @abstractmethod
-    def create_prodotto_b(self) -> ProdottoB:
+    def create_product_b(self) -> ProductB:
         pass
 
 # ==========================================
-# 6. FACTORY CONCRETE (una per famiglia)
+# 6. CONCRETE FACTORIES (one per family)
 # ==========================================
-# Ogni factory concreta implementa ENTRAMBI i metodi di creazione
-# e garantisce che i prodotti restituiti appartengano alla stessa famiglia.
-# È strutturalmente impossibile ottenere AX con BY da questa factory.
+# Each concrete factory implements BOTH creation methods
+# and guarantees that the returned products belong to the same family.
+# It's structurally impossible to get AX with BY from this factory.
 
 class FactoryX(AbstractFactory):
-    def create_prodotto_a(self) -> ProdottoA:
-        return ProdottoAX()
+    def create_product_a(self) -> ProductA:
+        return ProductAX()
 
-    def create_prodotto_b(self) -> ProdottoB:
-        return ProdottoBX()
+    def create_product_b(self) -> ProductB:
+        return ProductBX()
 
 class FactoryY(AbstractFactory):
-    def create_prodotto_a(self) -> ProdottoA:
-        return ProdottoAY()
+    def create_product_a(self) -> ProductA:
+        return ProductAY()
 
-    def create_prodotto_b(self) -> ProdottoB:
-        return ProdottoBY()
+    def create_product_b(self) -> ProductB:
+        return ProductBY()
 
 class FactoryZ(AbstractFactory):
-    def create_prodotto_a(self) -> ProdottoA:
-        return ProdottoAZ()
+    def create_product_a(self) -> ProductA:
+        return ProductAZ()
 
-    def create_prodotto_b(self) -> ProdottoB:
-        return ProdottoBZ()
+    def create_product_b(self) -> ProductB:
+        return ProductBZ()
 
 # ==========================================
-# 7. CODICE CLIENT
+# 7. CLIENT CODE
 # ==========================================
-# Il client riceve una AbstractFactory e lavora solo con le interfacce
-# astratte ProdottoA e ProdottoB. Non nomina mai AX, BY o qualsiasi
-# classe concreta: la compatibilità è garantita dalla factory stessa.
+# The client receives an AbstractFactory and works only with the abstract
+# interfaces ProductA and ProductB. It never names AX, BY, or any
+# concrete class: compatibility is guaranteed by the factory itself.
 
-def codice_client(factory: AbstractFactory):
-    print("Client: Non so quale famiglia mi è stata passata, ma so come usarla.")
-    # Chiediamo alla factory l'intera famiglia — sempre coerente
-    a = factory.create_prodotto_a()
-    b = factory.create_prodotto_b()
+def client_code(factory: AbstractFactory):
+    print("Client: I don't know which family was passed to me, but I know how to use it.")
+    # We ask the factory for the entire family — always consistent
+    a = factory.create_product_a()
+    b = factory.create_product_b()
 
-    print(f"  ProdottoA → {a.operazione()}")
-    print(f"  ProdottoB → {b.collabora(a)}")
+    print(f"  ProductA → {a.operation()}")
+    print(f"  ProductB → {b.collaborate(a)}")
 
 if __name__ == "__main__":
-    print("--- Famiglia X ---")
-    codice_client(FactoryX())
+    print("--- Family X ---")
+    client_code(FactoryX())
 
-    print("\n--- Famiglia Y ---")
-    codice_client(FactoryY())
+    print("\n--- Family Y ---")
+    client_code(FactoryY())
 
-    print("\n--- Famiglia Z ---")
-    codice_client(FactoryZ())
+    print("\n--- Family Z ---")
+    client_code(FactoryZ())

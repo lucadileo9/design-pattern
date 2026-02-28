@@ -1,22 +1,22 @@
 """
-Iterator Pattern - ESEMPIO REALE: Organigramma aziendale
+Iterator Pattern - REAL EXAMPLE: Corporate Org Chart
 =========================================================
-Scenario: una grande azienda ha un organigramma gerarchico (un albero).
-A seconda del contesto, vogliamo attraversarlo in modi diversi:
+Scenario: a large company has a hierarchical org chart (a tree).
+Depending on the context, we want to traverse it in different ways:
 
-  - Pre-order (DFS): si visita il manager *prima* del suo team.
-    → Utile per: report top-down, stampe gerarchiche.
+  - Pre-order (DFS): visit the manager *before* their team.
+    → Useful for: top-down reports, hierarchical printouts.
 
-  - BFS (breadth-first): si visita livello per livello.
-    → Utile per: organigrammi visivi, analisi per fascia gerarchica.
+  - BFS (breadth-first): visit level by level.
+    → Useful for: visual org charts, analysis by hierarchical tier.
 
-  - Post-order: si visita il team *prima* del manager.
-    → Utile per: calcoli bottom-up (es. headcount cumulativo per team).
+  - Post-order: visit the team *before* the manager.
+    → Useful for: bottom-up calculations (e.g., cumulative headcount per team).
 
-OGNI algoritmo di attraversamento è incapsulato nel proprio Iterator.
-Il client usa sempre la stessa interfaccia: has_next() + next().
-Cambiare strategia = cambiare solo il parametro passato a create_iterator().
-E ovviamente il client non sa nulla di stack, queue, o ricorsione: interagisce solo con l'iteratore.
+EACH traversal algorithm is encapsulated in its own Iterator.
+The client always uses the same interface: has_next() + next().
+Changing strategy = changing only the parameter passed to create_iterator().
+And of course the client knows nothing about stacks, queues, or recursion: it only interacts with the iterator.
 """
 
 from __future__ import annotations
@@ -24,10 +24,10 @@ from abc import ABC, abstractmethod
 from collections import deque
 
 
-# ── Interfacce ───────────────────────────────────────────────────────────────
+# ── Interfaces ───────────────────────────────────────────────────────────────
 
 class Iterator(ABC):
-    """Interfaccia comune per tutti gli iteratori."""
+    """Common interface for all iterators."""
 
     @abstractmethod
     def has_next(self) -> bool:
@@ -39,20 +39,20 @@ class Iterator(ABC):
 
 
 class Aggregate(ABC):
-    """Interfaccia comune per le strutture iterabili."""
+    """Common interface for iterable structures."""
 
     @abstractmethod
     def create_iterator(self, strategy: str = "preorder") -> Iterator:
         pass
 
 
-# ── Struttura dati ───────────────────────────────────────────────────────────
+# ── Data Structure ───────────────────────────────────────────────────────────
 
 class Employee:
     def __init__(self, name: str, role: str):
         self.name = name
         self.role = role
-        self.level = 0               # profondità nell'albero (0 = CEO)
+        self.level = 0               # depth in the tree (0 = CEO)
         self.reports: list[Employee] = []
 
     def add_report(self, employee: "Employee") -> None:
@@ -72,15 +72,15 @@ class Organization(Aggregate):
             return BFSIterator(self.ceo)
         if strategy == "postorder":
             return PostOrderIterator(self.ceo)
-        raise ValueError(f"Strategia sconosciuta: '{strategy}'")
+        raise ValueError(f"Unknown strategy: '{strategy}'")
 
 
-# ── Iteratori concreti ───────────────────────────────────────────────────────
+# ── Concrete Iterators ───────────────────────────────────────────────────────
 
 class PreOrderIterator(Iterator):
     """
-    DFS pre-order: visita il nodo prima dei suoi figli (stack esplicito).
-    Utile per produrre un output gerarchico top-down dall'organigramma.
+    DFS pre-order: visits the node before its children (explicit stack).
+    Useful for producing a top-down hierarchical output from the org chart.
     """
 
     def __init__(self, root: Employee):
@@ -91,7 +91,7 @@ class PreOrderIterator(Iterator):
 
     def next(self) -> Employee:
         node = self._stack.pop()
-        # Figli in ordine inverso → pop() li restituisce nell'ordine originale
+        # Children in reverse order → pop() returns them in original order
         for child in reversed(node.reports):
             self._stack.append(child)
         return node
@@ -99,8 +99,8 @@ class PreOrderIterator(Iterator):
 
 class BFSIterator(Iterator):
     """
-    Breadth-first search: visita livello per livello (coda FIFO).
-    Utile per analizzare la struttura per fascia gerarchica.
+    Breadth-first search: visits level by level (FIFO queue).
+    Useful for analyzing the structure by hierarchical tier.
     """
 
     def __init__(self, root: Employee):
@@ -118,10 +118,10 @@ class BFSIterator(Iterator):
 
 class PostOrderIterator(Iterator):
     """
-    DFS post-order: visita i figli prima del nodo padre.
-    Costruisce la sequenza completa in anticipo tramite DFS ricorsivo,
-    poi la espone uno alla volta tramite has_next() / next().
-    Utile per calcoli bottom-up (aggregati, costi, headcount).
+    DFS post-order: visits children before the parent node.
+    Builds the complete sequence in advance via recursive DFS,
+    then exposes it one at a time via has_next() / next().
+    Useful for bottom-up calculations (aggregates, costs, headcount).
     """
 
     def __init__(self, root: Employee):
@@ -132,7 +132,7 @@ class PostOrderIterator(Iterator):
     def _build(self, node: Employee) -> None:
         for child in node.reports:
             self._build(child)
-        self._nodes.append(node)    # nodo aggiunto DOPO i figli
+        self._nodes.append(node)    # node added AFTER children
 
     def has_next(self) -> bool:
         return self._index < len(self._nodes)
@@ -143,13 +143,13 @@ class PostOrderIterator(Iterator):
         return node
 
 
-# ── Codice client ────────────────────────────────────────────────────────────
+# ── Client Code ──────────────────────────────────────────────────────────────
 
 INDENT = "  "
 
 
 def main():
-    # Costruzione dell'organigramma (top-down, così i livelli sono calcolati correttamente)
+    # Building the org chart (top-down, so levels are calculated correctly)
     ceo = Employee("Laura Rossi", "CEO")
 
     cto = Employee("Marco Bianchi", "CTO")
@@ -181,11 +181,11 @@ def main():
     org = Organization("TechCorp Italia", ceo)
 
     # ─────────────────────────────────────────────────────────────────────────
-    # Vista 1 — Pre-order: gerarchia top-down
-    # Il client usa has_next() + next(); non sa nulla di stack o DFS.
+    # View 1 — Pre-order: top-down hierarchy
+    # The client uses has_next() + next(); it knows nothing about stacks or DFS.
     # ─────────────────────────────────────────────────────────────────────────
     print(f"{'─' * 52}")
-    print(f"  {org.name} — Vista gerarchica  [pre-order]")
+    print(f"  {org.name} — Hierarchical view  [pre-order]")
     print(f"{'─' * 52}")
 
     iterator = org.create_iterator("preorder")
@@ -196,14 +196,14 @@ def main():
         print(f"{indent}{marker}{emp.name}  [{emp.role}]")
 
     # ─────────────────────────────────────────────────────────────────────────
-    # Vista 2 — BFS: per livello gerarchico
-    # Stessa interfaccia, algoritmo completamente diverso interno.
+    # View 2 — BFS: by hierarchical level
+    # Same interface, completely different internal algorithm.
     # ─────────────────────────────────────────────────────────────────────────
     level_labels = {0: "Executive", 1: "C-Suite", 2: "Management", 3: "Team"}
     current_level = -1
 
     print(f"\n{'─' * 52}")
-    print(f"  {org.name} — Per livello gerarchico  [BFS]")
+    print(f"  {org.name} — By hierarchical level  [BFS]")
     print(f"{'─' * 52}")
 
     iterator = org.create_iterator("bfs")
@@ -211,37 +211,37 @@ def main():
         emp = iterator.next()
         if emp.level != current_level:
             current_level = emp.level
-            label = level_labels.get(current_level, f"Livello {current_level}")
+            label = level_labels.get(current_level, f"Level {current_level}")
             print(f"\n  ┌─ {label} ─┐")
         print(f"  │  - {emp.name}  ({emp.role})")
 
     # ─────────────────────────────────────────────────────────────────────────
-    # Vista 3 — Post-order: foglie prima, radice per ultima
-    # Utile per calcoli bottom-up: quando processiamo un manager,
-    # tutti i suoi riporti diretti sono già stati processati.
+    # View 3 — Post-order: leaves first, root last
+    # Useful for bottom-up calculations: when we process a manager,
+    # all their direct reports have already been processed.
     # ─────────────────────────────────────────────────────────────────────────
     print(f"\n{'─' * 52}")
-    print(f"  {org.name} — Processiamo bottom-up  [post-order]")
+    print(f"  {org.name} — Processing bottom-up  [post-order]")
     print(f"{'─' * 52}\n")
 
-    headcount: dict[str, int] = {}     # headcount cumulativo per ogni nodo
+    headcount: dict[str, int] = {}     # cumulative headcount for each node
 
     iterator = org.create_iterator("postorder")
     while iterator.has_next():
         emp = iterator.next()
-        # Quando arriviamo qui, i figli sono già stati inseriti in headcount
+        # When we get here, children have already been inserted in headcount
         team_size = 1 + sum(headcount[r.name] for r in emp.reports)
         headcount[emp.name] = team_size
 
         indent = INDENT * emp.level
         if emp.reports:
-            print(f"{indent}▸ {emp.name}  [{emp.role}]  → team totale: {team_size} persone")
+            print(f"{indent}▸ {emp.name}  [{emp.role}]  → total team: {team_size} people")
         else:
             print(f"{indent}  {emp.name}  [{emp.role}]")
 
-    # Il client non ha mai toccato stack, queue, o ricorsione.
-    # Ha usato solo has_next() + next() con tre strategie diverse,
-    # ognuna incapsulata nel proprio Iterator.
+    # The client never touched stacks, queues, or recursion.
+    # It used only has_next() + next() with three different strategies,
+    # each encapsulated in its own Iterator.
 
 
 if __name__ == "__main__":

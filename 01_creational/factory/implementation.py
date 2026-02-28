@@ -1,99 +1,101 @@
 from abc import ABC, abstractmethod
 
 # ==========================================
-# 1. DEFINIZIONE DEL PRODOTTO (INTERFACCIA)
+# 1. PRODUCT DEFINITION (INTERFACE)
 # ==========================================
-# Come abbiamo visto lo scopo di questa classe è definire l'interfaccia comune 
-# per tutti i prodotti che la factory può creare. Questa interfaccia verrà poi usata 
-# dal client per interagire con i prodotti senza conoscere la loro classe concreta
-class Prodotto(ABC):
+# As we've seen, the purpose of this class is to define the common interface
+# for all products the factory can create. This interface will then be used
+# by the client to interact with products without knowing their concrete class.
+class Product(ABC):
     @abstractmethod
-    def operazione(self) -> str:
-        """Ogni prodotto deve saper eseguire un'operazione."""
+    def operation(self) -> str:
+        """Every product must be able to perform an operation."""
         pass
 
 # ==========================================
-# 2. PRODOTTI CONCRETI (X, Y, Z)
+# 2. CONCRETE PRODUCTS (X, Y, Z)
 # ==========================================
-# Queste classi forniscono implementazioni diverse del metodo operazione().
+# These classes provide different implementations of the operation() method.
 
-class ProdottoX(Prodotto):
-    def operazione(self) -> str:
-        return "Risultato del Prodotto X"
+class ProductX(Product):
+    def operation(self) -> str:
+        return "Result from Product X"
 
-class ProdottoY(Prodotto):
-    def operazione(self) -> str:
-        return "Risultato del Prodotto Y"
+class ProductY(Product):
+    def operation(self) -> str:
+        return "Result from Product Y"
 
-class ProdottoZ(Prodotto):
-    def operazione(self) -> str:
-        return "Risultato del Prodotto Z"
+class ProductZ(Product):
+    def operation(self) -> str:
+        return "Result from Product Z"
 
 # ==========================================
-# 3. IL CREATORE (LA FACTORY ASTRATTA)
+# 3. THE CREATOR (THE ABSTRACT FACTORY)
 # ==========================================
-# Questa qui è la factory astratta che dichiara il factory method, che deve essere implementato
-# dalle sottoclassi concrete. Il creatore può anche contenere logica di business che dipende dai prodotti creati, 
-# ma non conosce la classe concreta dei prodotti.
-class Creatore(ABC):
+# This is the abstract factory that declares the factory method, which must be implemented
+# by the concrete subclasses. The creator may also contain business logic that depends on
+# the created products, but it doesn't know the concrete class of the products.
+class Creator(ABC):
     @abstractmethod
-    def factory_method(self) -> Prodotto:
-        """Le sottoclassi implementeranno questo metodo per creare oggetti."""
+    def factory_method(self) -> Product:
+        """Subclasses will implement this method to create objects."""
         pass
 
-    def esegui_business_logic(self):
+    def execute_business_logic(self):
         """
-        Nota: La responsabilità primaria del creatore non è solo creare prodotti,
-        ma spesso contiene logica di business che dipende da essi.
+        Note: The creator's primary responsibility is not just to create products,
+        but it often contains business logic that depends on them.
         """
-        # Chiamiamo il factory method per creare un oggetto Prodotto.
-        prodotto = self.factory_method()
+        # We call the factory method to create a Product object.
+        product = self.factory_method()
         
-        # Ora usiamo il prodotto senza sapere esattamente di quale classe sia.
-        risultato = prodotto.operazione()
-        print(f"Creatore: Ho lavorato con il prodotto e ottenuto: {risultato}")
+        # Now we use the product without knowing exactly which class it is.
+        result = product.operation()
+        print(f"Creator: I worked with the product and got: {result}")
 
 # ==========================================
-# 4. CREATORI CONCRETI
+# 4. CONCRETE CREATORS
 # ==========================================
-# Ogni sottoclasse decide quale prodotto istanziare.
-# Attenzione: il punto è che il Client userà una factory astratta, istanzierà una sottoclasse concreta, e chiamerà 
-# il metodo esegui_business_logic() senza sapere quale prodotto concreto è stato creato. Ma come vediamo al client non 
-# interessa dietro le quinte quel che succede, interessa solo il risultato finale.
-# In realtà dietro le quinte quel che è successo è che il client ha eseguito la funzione, la quale a sua volta
-# ha chiamato il factory method, che ha creato un prodotto concreto (che dipende dalla factory concreta che è stata istanziata),
-# a sua volta quel prodotto ha eseguito la sua operazione, e anche qui il metodo operazione
-# è stato chiamato senza sapere quale prodotto concreto fosse, e alla fine il risultato è stato stampato.
+# Each subclass decides which product to instantiate.
+# Note: the point is that the Client will use an abstract factory, instantiate a concrete
+# subclass, and call the execute_business_logic() method without knowing which concrete
+# product was created. As we can see, the client doesn't care about what happens behind
+# the scenes, only about the final result.
+# In reality, behind the scenes what happened is that the client executed the function,
+# which in turn called the factory method, which created a concrete product (depending on
+# which concrete factory was instantiated), then that product executed its operation, and
+# here too the operation method was called without knowing which concrete product it was,
+# and finally the result was printed.
 
-class CreatoreX(Creatore):
-    def factory_method(self) -> Prodotto:
-        return ProdottoX()
+class CreatorX(Creator):
+    def factory_method(self) -> Product:
+        return ProductX()
 
-class CreatoreY(Creatore):
-    def factory_method(self) -> Prodotto:
-        return ProdottoY()
+class CreatorY(Creator):
+    def factory_method(self) -> Product:
+        return ProductY()
 
-class CreatoreZ(Creatore):
-    def factory_method(self) -> Prodotto:
-        return ProdottoZ()
+class CreatorZ(Creator):
+    def factory_method(self) -> Product:
+        return ProductZ()
 
 # ==========================================
-# 5. CODICE CLIENT
+# 5. CLIENT CODE
 # ==========================================
-# Il client lavora con i creatori tramite la loro interfaccia base[cite: 63, 64].
+# The client works with creators through their base interface.
 
-def codice_client(creatore: Creatore):
-    print("Client: Non so chi mi ha creato il prodotto, ma so come usarlo.")
-    creatore.esegui_business_logic()
+def client_code(creator: Creator):
+    print("Client: I don't know who created the product for me, but I know how to use it.")
+    creator.execute_business_logic()
 
 if __name__ == "__main__":
-    # Per eseguire questo esempio basta:
+    # To run this example:
     # python example.py
-    print("--- Avvio con Creatore X ---")
-    codice_client(CreatoreX())
+    print("--- Starting with Creator X ---")
+    client_code(CreatorX())
     
-    print("\n--- Avvio con Creatore Y ---")
-    codice_client(CreatoreY())
+    print("\n--- Starting with Creator Y ---")
+    client_code(CreatorY())
     
-    print("\n--- Avvio con Creatore Z ---")
-    codice_client(CreatoreZ())
+    print("\n--- Starting with Creator Z ---")
+    client_code(CreatorZ())

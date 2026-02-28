@@ -1,46 +1,46 @@
 # Facade Pattern
 
-## Problema
+## Problem
 
-Ipotizziamo di trovarci in una situazione già di default abbastanza complessa, con la necessità di interagire con tante classi e oggetti diversi, ognuno con la propria interfaccia e modalità di utilizzo. Per eseguire una semplice operazione potremmo dover fare:
+Let's imagine a situation that is already quite complex by default, where we need to interact with many different classes and objects, each with its own interface and usage mode. To perform a simple operation we might have to:
 
-- operazione A su classe `X` (es. un login)
-- operazione B su classe `X` (es. una richiesta di dati)
-- operazione C su classe `Y` (es. un altro login)
-- operazione D su classe `Y` (es. una richiesta di dati)
-- operazione E: fondere i dati ottenuti da `X` e `Y`
-- operazione F: passare i dati alla classe `Z` (es. un sistema di visualizzazione)
+- operation A on class `X` (e.g. a login)
+- operation B on class `X` (e.g. a data request)
+- operation C on class `Y` (e.g. another login)
+- operation D on class `Y` (e.g. a data request)
+- operation E: merge the data obtained from `X` and `Y`
+- operation F: pass the data to class `Z` (e.g. a display system)
 
-Gestire tutto questo lato client è scomodo, difficile da mantenere e da capire. Se volessimo cambiare una delle classi o aggiungere una nuova operazione, dovremmo modificare tutto il codice client, con un alto rischio di introdurre bug.
+Managing all of this on the client side is inconvenient, hard to maintain and hard to understand. If we wanted to change one of the classes or add a new operation, we'd have to modify all the client code, with a high risk of introducing bugs.
 
-Un'analogia reale potrebbe essere quella dell'organizzzzione di una festa di laurea in un hotel, siccome per organizzare il tutto dovremmo:
-- prenotare la sala con il responsabile dell'hotel
-- prenotare il catering con il responsabile del catering
-- prenotare la musica con il responsabile della musica
-- prenotare i fiori con il responsabile dei fiori
+A real-world analogy could be organizing a graduation party at a hotel, since to organize everything we'd have to:
+- book the hall with the hotel manager
+- book the catering with the catering manager
+- book the music with the music manager
+- book the flowers with the flower manager
 
-Ovviamente è poco realizzabile, e nel caso in cui volessimo cambiare qualcosa (ad esempio il catering) dovremmo contattare innanzitutto il responsabile del catering, ma anche (ipoteticamente) il responsabile della sala e/o della musica, per assicurarci che tutto sia compatibile e che non ci siano problemi di coordinamento.
+Obviously it's impractical, and if we wanted to change something (e.g. the catering) we'd have to contact the catering manager first, but also (hypothetically) the hall and/or music managers, to make sure everything is compatible and there are no coordination problems.
 
-## Soluzione
+## Solution
 
-La soluzione è introdurre un oggetto **Facade** che nasconda la complessità del sistema sottostante, fornendo un'interfaccia semplificata al client.
+The solution is to introduce a **Facade** object that hides the complexity of the underlying system, providing a simplified interface to the client.
 
-Nel nostro esempio, il **Facade** si occuperà di eseguire tutte le operazioni (A, B, C, D, E, F) in modo trasparente: il client chiama un'unica operazione (es. `execute()`) e il Facade gestisce tutto il resto. Se un'operazione interna cambia, si modifica solo il Facade — il codice client rimane invariato.
+In our example, the **Facade** will handle executing all operations (A, B, C, D, E, F) transparently: the client calls a single operation (e.g. `execute()`) and the Facade manages everything else. If an internal operation changes, only the Facade is modified — the client code remains unchanged.
 
-Nell'analogia della festa di laurea, il Facade è il **Wedding Planner**: noi gli diciamo cosa vogliamo, lui coordina sala, catering, musica e fiori. Se vogliamo cambiare il catering, lo diciamo solo a lui.
+In the graduation party analogy, the Facade is the **Wedding Planner**: we tell them what we want, and they coordinate the hall, catering, music and flowers. If we want to change the catering, we only tell them.
 
-> **N.B.**: il Facade non introduce nuove funzionalità o comportamenti. La complessità del sistema sottostante non sparisce — viene semplicemente nascosta dietro un'interfaccia più semplice e gestibile.
+> **N.B.**: the Facade does not introduce new functionality or behaviors. The complexity of the underlying system doesn't disappear — it is simply hidden behind a simpler and more manageable interface.
 
-**N.B.**: Una buona Facade non dovrebbe impedire l'accesso al sottosistema complesso. Se un "client esperto" avesse bisogno di un controllo granulare che la Facade non offre, dovrebbe comunque poter interagire direttamente con le classi originali (X, Y o Z). La Facade è una comodità, non una prigione
+**N.B.**: A good Facade should not prevent access to the complex subsystem. If an "expert client" needed granular control that the Facade doesn't offer, they should still be able to interact directly with the original classes (X, Y or Z). The Facade is a convenience, not a prison.
 
-## Diagrammi
+## Diagrams
 
-### Diagramma generico
+### Generic Diagram
 
 ```mermaid
 classDiagram
     class Client {
-        <<codice applicativo>>
+        <<application code>>
     }
     class Facade {
         -subsystemA
@@ -62,16 +62,16 @@ classDiagram
         +operationC2()
     }
 
-    Client --> Facade : usa
-    Facade *-- SubsystemA : crea e coordina
-    Facade *-- SubsystemB : crea e coordina
-    Facade *-- SubsystemC : crea e coordina
+    Client --> Facade : uses
+    Facade *-- SubsystemA : creates and coordinates
+    Facade *-- SubsystemB : creates and coordinates
+    Facade *-- SubsystemC : creates and coordinates
 
-    note for Facade "Espone un metodo semplice.\nOrchestra internamente A → B → C.\nGestisce errori e rollback."
-    note for Client "Conosce SOLO la Facade.\nNon sa che A, B, C esistono."
+    note for Facade "Exposes a simple method.\nInternally orchestrates A → B → C.\nHandles errors and rollback."
+    note for Client "Knows ONLY the Facade.\nDoesn't know A, B, C exist."
 ```
 
-### Diagramma specifico
+### Specific Diagram
 
 ```mermaid
 classDiagram
@@ -126,11 +126,11 @@ classDiagram
     CheckoutFacade *-- ShippingService
     CheckoutFacade *-- NotificationService
 
-    CheckoutFacade ..> CartItem : riceve
-    CheckoutFacade ..> OrderResult : restituisce
+    CheckoutFacade ..> CartItem : receives
+    CheckoutFacade ..> OrderResult : returns
 ```
 
-### Diagramma di sequenza
+### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -143,58 +143,58 @@ sequenceDiagram
 
     Client ->>+ Facade: complete_order(items, email, address, card)
 
-    Note over Facade: Passo 1 — Verifica disponibilità
-    loop per ogni item nel carrello
+    Note over Facade: Step 1 — Check availability
+    loop for each item in the cart
         Facade ->> Catalog: check_availability(product_id, qty)
         Catalog -->> Facade: bool
     end
 
-    Note over Facade: Passo 2 — Riserva stock
-    loop per ogni item
+    Note over Facade: Step 2 — Reserve stock
+    loop for each item
         Facade ->> Catalog: reserve_stock(product_id, qty)
     end
 
-    Note over Facade: Passo 3 — Pagamento
+    Note over Facade: Step 3 — Payment
     Facade ->> Payment: process_payment(card, total)
 
-    alt pagamento accettato
+    alt payment accepted
         Payment -->> Facade: transaction_id
 
-        Note over Facade: Passo 4 — Spedizione
+        Note over Facade: Step 4 — Shipping
         Facade ->> Shipping: create_shipment(address, n_items)
         Shipping -->> Facade: tracking_code
 
-        Note over Facade: Passo 5 — Conferma
+        Note over Facade: Step 5 — Confirmation
         Facade ->> Email: send_confirmation(email, order_id, total, tracking)
         Facade ->>- Client: OrderResult(success=True)
 
-    else pagamento rifiutato
+    else payment declined
         Payment -->> Facade: None
         Note over Facade: ↩ ROLLBACK
-        loop per ogni item riservato
+        loop for each reserved item
             Facade ->> Catalog: release_stock(product_id, qty)
         end
         Facade ->> Email: send_error(email, reason)
         Facade -->> Client: OrderResult(success=False)
     end
 ```
-Come si può vedere, il client chiama un unico metodo `complete_order()`, tutta la complessità è nascosta all'interno del Facade, che si occupa di orchestrare le chiamate ai vari servizi e gestire errori e rollback in caso di problemi.
+As you can see, the client calls a single method `complete_order()`, all the complexity is hidden inside the Facade, which handles orchestrating the calls to the various services and managing errors and rollback in case of problems.
 
-### Vantaggi
+### Advantages
 
-Il Facade è uno degli strumenti migliori per combattere il "codice a spaghetti":
+The Facade is one of the best tools for fighting "spaghetti code":
 
-- **Riduzione dell'accoppiamento**: il client non conosce le classi del sottosistema. Se si vuole sostituire la `Classe X` con una nuova versione o libreria, sarà necessario modificare solo il Facade — il client rimarrà intatto e ignaro del cambiamento.
-- **Semplicità d'uso**: riduce drasticamente la curva di apprendimento. Invece di imparare 10 API diverse, gli sviluppatori devono conoscere solo i 2-3 metodi esposti dal Facade.
-- **Migliore organizzazione a livelli**: nelle architetture moderne, il Facade funge da "punto di ingresso" per un intero modulo, definendo chiaramente cosa è pubblico e cosa è un dettaglio di implementazione privato.
-- **Prevenzione di errori**: automatizzando l'ordine corretto delle chiamate (prima A, poi B, poi C), il Facade evita che il client dimentichi un passaggio critico (es. effettuare il login prima di richiedere i dati).
+- **Reduced coupling**: the client doesn't know the subsystem classes. If you want to replace `Class X` with a new version or library, you only need to modify the Facade — the client will remain intact and unaware of the change.
+- **Ease of use**: drastically reduces the learning curve. Instead of learning 10 different APIs, developers only need to know the 2-3 methods exposed by the Facade.
+- **Better layered organization**: in modern architectures, the Facade acts as an "entry point" for an entire module, clearly defining what is public and what is a private implementation detail.
+- **Error prevention**: by automating the correct order of calls (first A, then B, then C), the Facade prevents the client from forgetting a critical step (e.g. logging in before requesting data).
 
 
-### Svantaggi
+### Disadvantages
 
-Se usato male, il Facade può introdurre problemi:
+If used poorly, the Facade can introduce problems:
 
-- **Rischio "God Object"**: se il sottosistema è enorme, il Facade rischia di diventare una classe gigantesca che fa troppe cose e "sa" troppo, violando il Single Responsibility Principle.
-- **Barriera all'accesso (se mal progettato)**: un incapsulamento troppo rigido potrebbe impedire ai client avanzati di eseguire operazioni specifiche che il Facade non ha previsto.
-- **Manutenzione del Facade stesso**: ogni volta che il sottosistema cambia in modo radicale, il Facade va aggiornato — diventa un ulteriore strato di codice da mantenere e testare.
-- **Falsa sensazione di semplicità**: nascondere la complessità non significa eliminarla. Se il sottosistema è inefficiente, il Facade darà solo l'illusione che tutto funzioni bene, rendendo il debugging più difficile per chi non conosce i dettagli interni.
+- **"God Object" risk**: if the subsystem is huge, the Facade risks becoming a massive class that does too much and "knows" too much, violating the Single Responsibility Principle.
+- **Access barrier (if poorly designed)**: overly rigid encapsulation could prevent advanced clients from performing specific operations that the Facade didn't anticipate.
+- **Maintaining the Facade itself**: every time the subsystem changes radically, the Facade must be updated — it becomes an additional layer of code to maintain and test.
+- **False sense of simplicity**: hiding complexity doesn't mean eliminating it. If the subsystem is inefficient, the Facade will only give the illusion that everything works well, making debugging harder for those who don't know the internal details.

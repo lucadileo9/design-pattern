@@ -1,21 +1,21 @@
 """
-Iterator Pattern - LA SOLUZIONE
+Iterator Pattern - THE SOLUTION
 =================================
-Stessa biblioteca di problem.py, ma ora la logica di attraversamento
-è incapsulata nelle classi dedicate (Iterator / Aggregate).
+Same library as problem.py, but now the traversal logic
+is encapsulated in dedicated classes (Iterator / Aggregate).
 
-Il client usa sempre e solo has_next() + next() — non sa nulla
-della struttura interna, e non cambierà se la struttura cambia.
+The client only ever uses has_next() + next() — it knows nothing
+about the internal structure, and won't change if the structure changes.
 """
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
 
-# ── Interfacce ───────────────────────────────────────────────────────────────
+# ── Interfaces ───────────────────────────────────────────────────────────────
 
 class Iterator(ABC):
-    """Interfaccia comune per tutti gli iteratori."""
+    """Common interface for all iterators."""
 
     @abstractmethod
     def has_next(self) -> bool:
@@ -27,14 +27,14 @@ class Iterator(ABC):
 
 
 class Aggregate(ABC):
-    """Interfaccia comune per tutte le collezioni iterabili."""
+    """Common interface for all iterable collections."""
 
     @abstractmethod
     def create_iterator(self) -> Iterator:
         pass
 
 
-# ── Struttura dati ───────────────────────────────────────────────────────────
+# ── Data Structure ───────────────────────────────────────────────────────────
 
 class Book:
     def __init__(self, title: str, author: str):
@@ -63,12 +63,12 @@ class Library(Aggregate):
         return LibraryIterator(self.sections)
 
 
-# ── Iteratore concreto ───────────────────────────────────────────────────────
+# ── Concrete Iterator ────────────────────────────────────────────────────────
 
 class LibraryIterator(Iterator):
     """
-    Tutta la complessità dell'attraversamento vive qui,
-    non nel client. Il client non sa nulla di sezioni o loop annidati.
+    All the traversal complexity lives here,
+    not in the client. The client knows nothing about sections or nested loops.
     """
 
     def __init__(self, sections: list[Section]):
@@ -77,12 +77,12 @@ class LibraryIterator(Iterator):
         self._book_index = 0
 
     def has_next(self) -> bool:
-        # Avanza tra le sezioni finché non trova un libro disponibile
+        # Advance through sections until a book is available
         while self._section_index < len(self._sections):
             section = self._sections[self._section_index]
             if self._book_index < len(section.books):
                 return True
-            # Sezione esaurita: passa alla successiva
+            # Section exhausted: move to the next one
             self._section_index += 1
             self._book_index = 0
         return False
@@ -93,22 +93,22 @@ class LibraryIterator(Iterator):
         return book
 
 
-# ── Codice client ────────────────────────────────────────────────────────────
+# ── Client Code ──────────────────────────────────────────────────────────────
 
 def main():
-    # Costruiamo la stessa biblioteca di problem.py
-    library = Library("Biblioteca Centrale")
+    # Build the same library as in problem.py
+    library = Library("Central Library")
 
-    fiction = Section("Narrativa")
+    fiction = Section("Fiction")
     fiction.add_book(Book("Il nome della rosa", "Umberto Eco"))
     fiction.add_book(Book("Se questo è un uomo", "Primo Levi"))
     fiction.add_book(Book("I Promessi Sposi", "Alessandro Manzoni"))
 
-    science = Section("Scienza")
+    science = Section("Science")
     science.add_book(Book("Breve storia del tempo", "Stephen Hawking"))
     science.add_book(Book("Il gene egoista", "Richard Dawkins"))
 
-    philosophy = Section("Filosofia")
+    philosophy = Section("Philosophy")
     philosophy.add_book(Book("La repubblica", "Platone"))
     philosophy.add_book(Book("Critica della ragion pura", "Immanuel Kant"))
     philosophy.add_book(Book("Essere e tempo", "Martin Heidegger"))
@@ -117,28 +117,28 @@ def main():
     library.add_section(science)
     library.add_section(philosophy)
 
-    # Il client usa solo has_next() + next(): non sa nulla di sezioni o
-    #    loop annidati. Se la struttura interna cambia, questo codice non cambia.
+    # The client only uses has_next() + next(): it knows nothing about sections
+    #    or nested loops. If the internal structure changes, this code stays the same.
     print(f"=== {library.name} ===\n")
     iterator = library.create_iterator()
     while iterator.has_next():
         book = iterator.next()
         print(f"  - {book.title} ({book.author})")
 
-    # Ricerca: stessa interfaccia, zero conoscenza della struttura interna.
-    print("\n--- Ricerca: libri di autori italiani ---")
+    # Search: same interface, zero knowledge of the internal structure.
+    print("\n--- Search: books by Italian authors ---")
     italian_authors = {"Umberto Eco", "Primo Levi", "Alessandro Manzoni"}
-    iterator = library.create_iterator()          # nuovo iteratore, posizione indipendente
+    iterator = library.create_iterator()          # new iterator, independent position
     while iterator.has_next():
         book = iterator.next()
         if book.author in italian_authors:
             print(f"  ✓ {book.title} — {book.author}")
 
-    # Se domani aggiungessimo un livello (Piani → Sezioni → Libri),
-    #    basta creare un nuovo FloorIterator e aggiornare create_iterator().
-    #    Il codice client qui sopra rimane identico.
-    # Da notare inoltre che il pattern non tocca la complessità intrinseca dell'attraversamento: 
-    # se la struttura è complessa, anche l'iteratore sarà complesso. Ma almeno il client è semplice e stabile.
+    # If tomorrow we added a level (Floors → Sections → Books),
+    #    we'd just create a new FloorIterator and update create_iterator().
+    #    The client code above would remain identical.
+    # Also note that the pattern does not reduce the intrinsic complexity of traversal:
+    # if the structure is complex, the iterator will be complex too. But at least the client is simple and stable.
 
 
 if __name__ == "__main__":

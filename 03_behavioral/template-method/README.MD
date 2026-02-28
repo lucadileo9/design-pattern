@@ -1,28 +1,28 @@
 # Template Method Pattern
 
-## Problema
+## Problem
 
-Ipotizziamo di trovarci in una situazione in cui abbiamo una **serie di algoritmi** che condividono tanti passaggi in comune, ma con alcune differenze specifiche, soprattutto in alcuni step specifici. Essendo algoritmi diversi quel che facciamo è andare a implementare ogni algoritmo in una classe diversa, ma questo porta a una **duplicazione di codice** enorme, con tutti i problemi che ne conseguono: difficile da mantenere, estendere e testare.
+Imagine a situation where we have a **series of algorithms** that share many common steps, but with some specific differences, especially in certain specific steps. Since they are different algorithms, what we do is implement each algorithm in a separate class, but this leads to **enormous code duplication**, with all the resulting problems: hard to maintain, extend, and test.
 
-> **Analogia**: è come se dovessimo scrivere una ricetta per fare la pasta al pomodoro, e poi una ricetta per fare la pasta al pesto. Le due ricette condividono tanti passaggi in comune (es. cuocere la pasta, scolare, impiattare), ma differiscono in alcuni passaggi specifici (es. preparare il sugo al pomodoro o al pesto). Se scriviamo due ricette separate, finiamo per duplicare tutti i passaggi comuni, rendendo il tutto difficile da mantenere e da aggiornare (ad esempio se vogliamo cambiare il modo in cui cuociamo la pasta, dobbiamo modificare entrambe le ricette).
+> **Analogy**: it's as if we had to write a recipe for pasta with tomato sauce, and then a recipe for pasta with pesto. The two recipes share many common steps (e.g., cook the pasta, drain, plate), but differ in some specific steps (e.g., prepare the tomato sauce or the pesto). If we write two separate recipes, we end up duplicating all the common steps, making everything hard to maintain and update (for example, if we want to change how we cook the pasta, we have to modify both recipes).
 
-## Soluzione
+## Solution
 
-La soluzione è il pattern **Template Method**: si crea una **classe astratta** che definisce la struttura generale dell'algoritmo tramite un metodo template che chiama i vari passaggi in ordine. I passaggi comuni vengono implementati direttamente nella classe astratta, mentre i passaggi specifici vengono lasciati come metodi astratti da implementare nelle classi concrete. In questo modo si evita la duplicazione di codice e si rende il sistema più flessibile e facile da estendere.
+The solution is the **Template Method** pattern: we create an **abstract class** that defines the general structure of the algorithm through a template method that calls the various steps in order. The common steps are implemented directly in the abstract class, while the specific steps are left as abstract methods to be implemented in the concrete classes. This way we avoid code duplication and make the system more flexible and easy to extend.
 
-I tre attori:
+The three actors:
 
-1. **`AbstractClass`**: definisce il `template_method()` che chiama i passaggi in ordine. I passaggi comuni sono implementati qui; i passaggi specifici sono dichiarati come metodi astratti (`step_A()`, `step_B()`).
-2. **`ConcreteClass`**: estende `AbstractClass` e implementa solo i metodi astratti, lasciando intatta la struttura generale.
-3. **Client**: istanzia una `ConcreteClass` e chiama il `template_method()`, che esegue l'algoritmo completo delegando i passi specifici alla sottoclasse.
+1. **`AbstractClass`**: defines the `template_method()` that calls the steps in order. The common steps are implemented here; the specific steps are declared as abstract methods (`step_A()`, `step_B()`).
+2. **`ConcreteClass`**: extends `AbstractClass` and implements only the abstract methods, leaving the general structure intact.
+3. **Client**: instantiates a `ConcreteClass` and calls the `template_method()`, which executes the complete algorithm delegating the specific steps to the subclass.
 
-> **N.B.**: il metodo template è spesso `final` (o comunque non sovrascrivibile), per garantire che la struttura generale dell'algoritmo rimanga intatta e che i passaggi specifici vengano ridefiniti solo nei punti previsti.
+> **N.B.**: the template method is often `final` (or otherwise non-overridable), to ensure that the general structure of the algorithm remains intact and that specific steps are only redefined at the intended points.
 
-> **Analogia**: la classe astratta è la ricetta generale per fare la pasta, che definisce i passaggi comuni (cuocere la pasta, scolare, impiattare) e lascia i passaggi specifici (preparare il condimento) come metodi astratti. Le classi concrete sono le ricette specifiche per la pasta al pomodoro e la pasta al pesto: implementano il sugo, ma ereditano la struttura generale dalla classe astratta.
+> **Analogy**: the abstract class is the general recipe for making pasta, which defines the common steps (cook the pasta, drain, plate) and leaves the specific steps (prepare the sauce) as abstract methods. The concrete classes are the specific recipes for tomato pasta and pesto pasta: they implement the sauce, but inherit the general structure from the abstract class.
 
-## Diagrammi
+## Diagrams
 
-### Diagramma generico
+### Generic Diagram
 
 ```mermaid
 classDiagram
@@ -46,76 +46,76 @@ classDiagram
 
     AbstractClass <|-- ConcreteClassA : extends
     AbstractClass <|-- ConcreteClassB : extends
-    Client --> AbstractClass : usa
+    Client --> AbstractClass : uses
 ```
 
-### Diagramma specifico — Pipeline di Importazione Dati
+### Specific Diagram — Data Import Pipeline
 
 ```mermaid
 classDiagram
-    class ImportatoreDati {
+    class DataImporter {
         <<abstract>>
-        +nome_sorgente: str
-        +importa() list~Record~
-        -_leggi_sorgente()* list~Record~
-        -_pulisci_dati(records) list~Record~
-        -_salva_nel_db(records)
+        +source_name: str
+        +import_data() list~Record~
+        -_read_source()* list~Record~
+        -_clean_data(records) list~Record~
+        -_save_to_db(records)
     }
     class CSVImporter {
-        -_contenuto: str
-        -_leggi_sorgente() list~Record~
+        -_content: str
+        -_read_source() list~Record~
     }
     class SQLImporter {
-        -_risultati: list~tuple~
-        -_leggi_sorgente() list~Record~
+        -_results: list~tuple~
+        -_read_source() list~Record~
     }
     class Record {
         +timestamp: str
-        +livello: str
-        +messaggio: str
-        +sorgente: str
+        +level: str
+        +message: str
+        +source: str
     }
 
-    ImportatoreDati <|-- CSVImporter : extends
-    ImportatoreDati <|-- SQLImporter : extends
-    ImportatoreDati ..> Record : produce
+    DataImporter <|-- CSVImporter : extends
+    DataImporter <|-- SQLImporter : extends
+    DataImporter ..> Record : produces
 ```
 
-### Diagramma di sequenza
+### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant CSV as CSVImporter
-    participant Base as ImportatoreDati (base)
+    participant Base as DataImporter (base)
 
-    Client->>CSV: importa()
-    Note over CSV,Base: Il template method nella classe base<br/>definisce l'ordine degli step
+    Client->>CSV: import_data()
+    Note over CSV,Base: The template method in the base class<br/>defines the order of steps
 
-    CSV->>CSV: _leggi_sorgente()
-    Note right of CSV: Step 1 — specifico:<br/>parsing del file CSV
+    CSV->>CSV: _read_source()
+    Note right of CSV: Step 1 — specific:<br/>CSV file parsing
 
-    CSV->>Base: _pulisci_dati(records)
-    Note right of Base: Step 2 — comune:<br/>rimuove vuoti e duplicati
-    Base-->>CSV: records puliti
+    CSV->>Base: _clean_data(records)
+    Note right of Base: Step 2 — common:<br/>removes empty and duplicates
+    Base-->>CSV: cleaned records
 
-    CSV->>Base: _salva_nel_db(records)
-    Note right of Base: Step 3 — comune:<br/>salva nel database
+    CSV->>Base: _save_to_db(records)
+    Note right of Base: Step 3 — common:<br/>saves to database
 
-    CSV-->>Client: records importati
+    CSV-->>Client: imported records
 ```
 
-### Vantaggi
+### Advantages
 
-- **Eliminazione della duplicazione (DRY)**: il codice comune si scrive una volta sola nella superclasse, riducendo drasticamente i bug derivanti dal copia-incolla.
-- **Inversione del controllo (Hollywood Principle)**: il `template_method()` gestisce centralmente il flusso. Le sottoclassi non devono preoccuparsi di *quando* eseguire ogni passo — devono solo definire *come* eseguire i propri.
-- **Standardizzazione dei processi**: garantisce che certi passaggi critici vengano sempre eseguiti (es. apertura/chiusura connessione, logging), indipendentemente dalla sottoclasse.
-- **Facilità di manutenzione**: cambiare l'ordine dei passi dell'algoritmo si fa in un unico punto nella classe base e tutte le sottoclassi si aggiornano automaticamente.
+- **Elimination of duplication (DRY)**: the common code is written once in the superclass, drastically reducing bugs from copy-paste.
+- **Inversion of control (Hollywood Principle)**: the `template_method()` centrally manages the flow. Subclasses don't need to worry about *when* to execute each step — they only need to define *how* to execute their own.
+- **Process standardization**: ensures that certain critical steps are always executed (e.g., opening/closing connections, logging), regardless of the subclass.
+- **Ease of maintenance**: changing the order of algorithm steps is done in a single place in the base class and all subclasses automatically update.
 
-### Svantaggi
+### Disadvantages
 
-- **Rigidità dell'ereditarietà**: a differenza dello Strategy, il Template Method è legato all'ereditarietà singola. Se la classe estende già qualcos'altro, il pattern non è applicabile. Inoltre la struttura è fissa a compile-time: non si possono cambiare i passi a runtime.
-- **Rischio di violazione del Liskov Substitution Principle (LSP)**: se la classe base impone metodi astratti che alcune sottoclassi non usano, lo sviluppatore è costretto a lasciarli vuoti o a lanciare `NotImplementedException` — segnale di un design fragile.
-- **Fragile Base Class**: modificare la classe base può avere effetti collaterali inaspettati su tutte le sottoclassi. Più grande è la gerarchia, più è difficile prevedere cosa cambierà.
-- **Limiti alla personalizzazione**: il client è vincolato ai "buchi" previsti nella classe astratta. Se servisse cambiare l'ordine di due passi, bisognerebbe riscrivere l'intero `template_method()`, annullando il vantaggio del pattern.
+- **Inheritance rigidity**: unlike Strategy, the Template Method is tied to single inheritance. If the class already extends something else, the pattern is not applicable. Moreover, the structure is fixed at compile-time: steps cannot be changed at runtime.
+- **Risk of Liskov Substitution Principle (LSP) violation**: if the base class imposes abstract methods that some subclasses don't use, the developer is forced to leave them empty or throw `NotImplementedException` — a sign of fragile design.
+- **Fragile Base Class**: modifying the base class can have unexpected side effects on all subclasses. The larger the hierarchy, the harder it is to predict what will change.
+- **Customization limits**: the client is constrained to the "hooks" provided in the abstract class. If the order of two steps needed to be changed, the entire `template_method()` would need to be rewritten, negating the pattern's advantage.
 

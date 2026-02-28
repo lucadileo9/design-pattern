@@ -2,172 +2,172 @@ import threading
 import time
 
 # =======================================================================
-# CONTESTO: perché esiste il Singleton in questo esempio?
+# CONTEXT: why does the Singleton exist in this example?
 # =======================================================================
-# Un connection pool è una risorsa costosa: aprire connessioni a un DB
-# richiede handshake di rete, autenticazione, allocazione di memoria.
-# Se ogni parte dell'applicazione ne creasse uno proprio, avremmo
-# decine di pool separati che consumano risorse inutilmente.
+# A connection pool is an expensive resource: opening connections to a DB
+# requires network handshakes, authentication, memory allocation.
+# If every part of the application created its own, we'd have
+# dozens of separate pools consuming resources needlessly.
 #
-# La soluzione: esiste UN SOLO pool condiviso da tutta l'app.
-# Chiunque lo chieda ottiene sempre lo stesso oggetto — mai una copia.
-# Questo è esattamente il compito del Singleton.
+# The solution: there exists ONE SINGLE pool shared by the entire app.
+# Whoever requests it always gets the same object — never a copy.
+# This is exactly the Singleton's job.
 # =======================================================================
 
 
 # ==========================================
-# FASE 1 — IL MECCANISMO BASE DEL SINGLETON
+# PHASE 1 — THE BASIC SINGLETON MECHANISM
 # ==========================================
-# In Python, quando scrivi   obj = MiaClasse()   vengono chiamati
-# due metodi in sequenza:
+# In Python, when you write   obj = MyClass()   two methods are called
+# in sequence:
 #
-#   1. __new__(cls)  → CREA l'oggetto in memoria, chiamato prima di __init__ in automatico
-#   2. __init__(self) → INIZIALIZZA l'oggetto già creato (tipicamente sovrascritto dallo sviluppatore)
+#   1. __new__(cls)  → CREATES the object in memory, called before __init__ automatically
+#   2. __init__(self) → INITIALIZES the already created object (typically overridden by the developer)
 #
-# Di solito non si tocca __new__ e Python lo gestisce da solo.
-# Nel Singleton lo sovrascriviamo per INTERCETTARE la creazione
-# e restituire sempre la stessa istanza invece di crearne una nuova.
+# Usually you don't touch __new__ and Python handles it on its own.
+# In the Singleton we override it to INTERCEPT the creation
+# and always return the same instance instead of creating a new one.
 #
-# _istanza è un attributo di CLASSE, essendo condiviso
-# da tutti e funge da "memoria" — ricorda se l'oggetto esiste già.
+# _instance is a CLASS attribute, being shared
+# by all and acts as "memory" — it remembers if the object already exists.
 
 class DatabaseConnectionPool:
 
-    _istanza = None          # Nessun pool ancora creato
-    _lock = threading.Lock() # Protegge la creazione in contesti multi-thread
+    _instance = None          # No pool created yet
+    _lock = threading.Lock()  # Protects creation in multi-thread contexts
 
     def __new__(cls):
         # ---------------------------------------------------------------
-        # Ogni volta che qualcuno scrive DatabaseConnectionPool(),
-        # Python passa di qui PRIMA di fare qualsiasi altra cosa.
+        # Every time someone writes DatabaseConnectionPool(),
+        # Python passes through here BEFORE doing anything else.
         #
-        # Se _istanza è None → è la prima volta, creiamo l'oggetto.
-        # Se _istanza esiste già → restituiamo quello esistente, stop.
+        # If _instance is None → it's the first time, we create the object.
+        # If _instance already exists → we return the existing one, stop.
         # ---------------------------------------------------------------
-        # 1° check 
-        if cls._istanza is None:
+        # 1st check
+        if cls._instance is None:
             with cls._lock:
-                # 2° check — dentro il lock: un altro thread potrebbe aver
-                # già creato l'istanza nell'attimo tra il primo controllo
-                # e l'acquisizione del lock. Ricontrolliamo per sicurezza.
-                if cls._istanza is None:
-                    print("[Pool] Prima chiamata: creo il pool e apro le connessioni.")
-                    # super().__new__(cls) è la chiamata "normale" che Python farebbe
-                    # se non avessimo sovrascritto __new__. La chiamiamo noi
-                    # esplicitamente UNA sola volta, e salviamo il risultato.
-                    cls._istanza = super().__new__(cls)
+                # 2nd check — inside the lock: another thread might have
+                # already created the instance in the moment between the first check
+                # and acquiring the lock. We recheck for safety.
+                if cls._instance is None:
+                    print("[Pool] First call: creating the pool and opening connections.")
+                    # super().__new__(cls) is the "normal" call that Python would make
+                    # if we hadn't overridden __new__. We call it ourselves
+                    # explicitly ONE time only, and save the result.
+                    cls._instance = super().__new__(cls)
 
-                    # Inizializziamo lo stato del pool (fatto una volta sola)
-                    cls._istanza.connessioni_disponibili = ["Conn_1", "Conn_2", "Conn_3"]
-                    cls._istanza.connessioni_in_uso = []
+                    # Initialize the pool state (done only once)
+                    cls._instance.available_connections = ["Conn_1", "Conn_2", "Conn_3"]
+                    cls._instance.in_use_connections = []
 
-        # In entrambi i casi, restituiamo SEMPRE la stessa istanza
-        return cls._istanza
+        # In both cases, we ALWAYS return the same instance
+        return cls._instance
 
     # -------------------------------------------------------
-    # I metodi di business del pool (non c'entrano col Singleton)
+    # Business methods of the pool (unrelated to the Singleton)
     # -------------------------------------------------------
 
-    def ottieni_connessione(self):
-        with self._lock: # Questo mi assicura che solo un thread alla volta modifichi le liste
-            if not self.connessioni_disponibili:
-                print("[Pool] ATTENZIONE: nessuna connessione libera, riprova più tardi.")
+    def get_connection(self):
+        with self._lock:  # This ensures that only one thread at a time modifies the lists
+            if not self.available_connections:
+                print("[Pool] WARNING: no free connections, try again later.")
                 return None
-            conn = self.connessioni_disponibili.pop()
-            self.connessioni_in_uso.append(conn)
-            print(f"[Pool] Erogata {conn} | Libere: {len(self.connessioni_disponibili)} | In uso: {len(self.connessioni_in_uso)}")
+            conn = self.available_connections.pop()
+            self.in_use_connections.append(conn)
+            print(f"[Pool] Provided {conn} | Available: {len(self.available_connections)} | In use: {len(self.in_use_connections)}")
             return conn
 
-    def rilascia_connessione(self, conn):
-        with self._lock: # Anche qui, proteggiamo la modifica delle liste con il lock
-            self.connessioni_in_uso.remove(conn)
-            self.connessioni_disponibili.append(conn)
-            print(f"[Pool] Rilasciata {conn} | Libere: {len(self.connessioni_disponibili)} | In uso: {len(self.connessioni_in_uso)}")
+    def release_connection(self, conn):
+        with self._lock:  # Here too, we protect the list modification with the lock
+            self.in_use_connections.remove(conn)
+            self.available_connections.append(conn)
+            print(f"[Pool] Released {conn} | Available: {len(self.available_connections)} | In use: {len(self.in_use_connections)}")
 
 
 # ==========================================
-# FASE 2 — VERIFICA CHE SIA DAVVERO UNA SOLA ISTANZA
+# PHASE 2 — VERIFYING IT'S TRULY A SINGLE INSTANCE
 # ==========================================
-# Creiamo il pool da tre "luoghi" diversi dell'applicazione.
-# Ci aspettiamo che siano tutti lo stesso oggetto in memoria.
+# We create the pool from three different "places" in the application.
+# We expect them all to be the same object in memory.
 
 print("=" * 55)
-print("  FASE 2 — Verifica unicità dell'istanza")
+print("  PHASE 2 — Verifying instance uniqueness")
 print("=" * 55)
 
-pool_dal_modulo_auth    = DatabaseConnectionPool()  # crea il pool
-pool_dal_modulo_report  = DatabaseConnectionPool()  # ottiene lo stesso
-pool_dal_modulo_api     = DatabaseConnectionPool()  # ottiene lo stesso
+pool_from_auth_module    = DatabaseConnectionPool()  # creates the pool
+pool_from_report_module  = DatabaseConnectionPool()  # gets the same one
+pool_from_api_module     = DatabaseConnectionPool()  # gets the same one
 
-# is confronta gli indirizzi in memoria, non i valori
-print(f"auth   is report : {pool_dal_modulo_auth is pool_dal_modulo_report}")   # True
-print(f"report is api    : {pool_dal_modulo_report is pool_dal_modulo_api}")     # True
-print(f"id auth   : {id(pool_dal_modulo_auth)}")
-print(f"id report : {id(pool_dal_modulo_report)}")
-print(f"id api    : {id(pool_dal_modulo_api)}")
+# `is` compares memory addresses, not values
+print(f"auth   is report : {pool_from_auth_module is pool_from_report_module}")   # True
+print(f"report is api    : {pool_from_report_module is pool_from_api_module}")     # True
+print(f"id auth   : {id(pool_from_auth_module)}")
+print(f"id report : {id(pool_from_report_module)}")
+print(f"id api    : {id(pool_from_api_module)}")
 
 
 # ==========================================
-# FASE 3 — PROBLEMA: IL MULTITHREADING
+# PHASE 3 — THE PROBLEM: MULTITHREADING
 # ==========================================
-# In un'applicazione reale più thread partono contemporaneamente.
-# Senza precauzioni, due thread potrebbero entrambi leggere
-# cls._istanza is None → True nello stesso istante, e creare
-# DUE pool distinti — rompendo l'unicità del Singleton.
+# In a real application, multiple threads start concurrently.
+# Without precautions, two threads could both read
+# cls._instance is None → True at the same moment, and create
+# TWO distinct pools — breaking the Singleton's uniqueness.
 #
-# La soluzione è il "double-checked locking":
+# The solution is "double-checked locking":
 #
-#   1° check  → senza lock (veloce): se l'istanza esiste già,
-#               la maggior parte dei thread esce subito.
-#   lock      → solo se l'istanza non esiste ancora, acquisisce
-#               il lock per bloccare gli altri thread.
-#   2° check  → dentro il lock: ricontrolla perché un altro thread
-#               potrebbe aver creato l'istanza nell'attimo tra
-#               il 1° check e l'acquisizione del lock.
+#   1st check → without lock (fast): if the instance already exists,
+#               most threads exit immediately.
+#   lock      → only if the instance doesn't exist yet, acquires
+#               the lock to block other threads.
+#   2nd check → inside the lock: rechecks because another thread
+#               might have created the instance in the moment between
+#               the 1st check and acquiring the lock.
 #
-#  Nella funzione __new__ i due `if cls._istanza is None`
-# sono esattamente questi due controlli.
+#  In the __new__ function the two `if cls._instance is None`
+# are exactly these two checks.
 
 print("\n" + "=" * 55)
-print("  FASE 3 — Simulazione con 5 thread concorrenti")
+print("  PHASE 3 — Simulation with 5 concurrent threads")
 print("=" * 55)
 
-def lavoro_thread(id_thread):
-    # Ogni thread esegue questa funzione in modo indipendente e concorrente.
+def thread_work(thread_id):
+    # Each thread executes this function independently and concurrently.
 
-    # La chiamata DatabaseConnectionPool() vuole creare un nuovo pool,
-    # ma il __new__ che abbiamo sovrascritto intercetta la chiamata
-    # e restituisce sempre e solo cls._istanza — lo stesso oggetto per tutti.
+    # The call DatabaseConnectionPool() tries to create a new pool,
+    # but the __new__ we overrode intercepts the call
+    # and always returns only cls._instance — the same object for everyone.
     pool = DatabaseConnectionPool()
 
-    # Verifichiamo che ogni thread abbia ricevuto ESATTAMENTE lo stesso oggetto
-    # in memoria: id() restituisce l'indirizzo RAM dell'istanza.
-    # Tutti i thread stamperanno lo stesso numero → stessa istanza.
-    print(f"[Thread-{id_thread}] pool id: {id(pool)}")
+    # We verify that each thread received EXACTLY the same object
+    # in memory: id() returns the RAM address of the instance.
+    # All threads will print the same number → same instance.
+    print(f"[Thread-{thread_id}] pool id: {id(pool)}")
 
-    # Ogni thread tenta di prendere una connessione dal pool condiviso.
-    # ottieni_connessione() usa il lock internamente, quindi anche qui
-    # non ci sono race condition: un solo thread alla volta modifica
-    # le liste connessioni_disponibili / connessioni_in_uso.
-    conn = pool.ottieni_connessione()
+    # Each thread tries to get a connection from the shared pool.
+    # get_connection() uses the lock internally, so here too
+    # there are no race conditions: only one thread at a time modifies
+    # the available_connections / in_use_connections lists.
+    conn = pool.get_connection()
     if conn:
-        time.sleep(0.5)  # simula il tempo di esecuzione di una query
-        # Dopo aver finito, la connessione viene restituita al pool
-        # così gli altri thread in attesa possono usarla.
-        pool.rilascia_connessione(conn)
+        time.sleep(0.5)  # simulates query execution time
+        # After finishing, the connection is returned to the pool
+        # so other waiting threads can use it.
+        pool.release_connection(conn)
 
-# Creiamo 5 thread che partono quasi simultaneamente.
-# È questo il caso critico: tutti e 5 chiameranno DatabaseConnectionPool()
-# nello stesso istante, e senza il double-checked locking potrebbero
-# creare istanze duplicate. Con il lock, solo il primo crea — gli altri aspettano
-# e poi trovano cls._istanza già valorizzata.
-threads = [threading.Thread(target=lavoro_thread, args=(i,)) for i in range(5)]
+# We create 5 threads that start almost simultaneously.
+# This is the critical case: all 5 will call DatabaseConnectionPool()
+# at the same moment, and without double-checked locking they could
+# create duplicate instances. With the lock, only the first one creates — the others wait
+# and then find cls._instance already set.
+threads = [threading.Thread(target=thread_work, args=(i,)) for i in range(5)]
 for t in threads:
-    t.start()   # avvia il thread (esecuzione asincrona da qui in poi)
+    t.start()   # starts the thread (asynchronous execution from here on)
 for t in threads:
-    t.join()    # aspetta che TUTTI i thread abbiano finito prima di proseguire
+    t.join()    # waits for ALL threads to finish before proceeding
 
-print("\nTutti i thread hanno usato lo stesso pool.")
-# Chiamiamo DatabaseConnectionPool() un'ultima volta solo per leggere lo stato.
-# Non crea nulla — restituisce come sempre l'istanza già esistente.
-print(f"Connessioni libere alla fine: {DatabaseConnectionPool().connessioni_disponibili}")
+print("\nAll threads used the same pool.")
+# We call DatabaseConnectionPool() one last time just to read the state.
+# It creates nothing — it returns as always the already existing instance.
+print(f"Available connections at the end: {DatabaseConnectionPool().available_connections}")

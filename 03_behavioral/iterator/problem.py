@@ -1,16 +1,16 @@
 """
-Iterator Pattern - IL PROBLEMA
+Iterator Pattern - THE PROBLEM
 ================================
-Abbiamo una biblioteca con più sezioni, e ogni sezione contiene una lista di libri.
-Vogliamo stampare tutti i titoli disponibili.
+We have a library with multiple sections, and each section contains a list of books.
+We want to print all the available titles.
 
-Il problema: il client deve conoscere la struttura interna della biblioteca
-(sezioni → libri), gestire i loop annidati da solo, e se la struttura cambia
-(es. aggiungiamo sotto-sezioni) il codice client va riscritto.
+The problem: the client must know the internal structure of the library
+(sections → books), manage the nested loops on its own, and if the structure changes
+(e.g., we add sub-sections) the client code must be rewritten.
 """
 
 
-# ── Struttura dati ──────────────────────────────────────────────────────────
+# ── Data Structure ──────────────────────────────────────────────────────────
 
 class Book:
     def __init__(self, title: str, author: str):
@@ -36,22 +36,22 @@ class Library:
         self.sections.append(section)
 
 
-# ── Codice client ────────────────────────────────────────────────────────────
+# ── Client Code ──────────────────────────────────────────────────────────────
 
 def main():
-    # Costruiamo la biblioteca
-    library = Library("Biblioteca Centrale")
+    # Build the library
+    library = Library("Central Library")
 
-    fiction = Section("Narrativa")
+    fiction = Section("Fiction")
     fiction.add_book(Book("Il nome della rosa", "Umberto Eco"))
     fiction.add_book(Book("Se questo è un uomo", "Primo Levi"))
     fiction.add_book(Book("I Promessi Sposi", "Alessandro Manzoni"))
 
-    science = Section("Scienza")
+    science = Section("Science")
     science.add_book(Book("Breve storia del tempo", "Stephen Hawking"))
     science.add_book(Book("Il gene egoista", "Richard Dawkins"))
 
-    philosophy = Section("Filosofia")
+    philosophy = Section("Philosophy")
     philosophy.add_book(Book("La repubblica", "Platone"))
     philosophy.add_book(Book("Critica della ragion pura", "Immanuel Kant"))
     philosophy.add_book(Book("Essere e tempo", "Martin Heidegger"))
@@ -60,26 +60,26 @@ def main():
     library.add_section(science)
     library.add_section(philosophy)
 
-    # PROBLEMA: il client deve sapere che la biblioteca ha sezioni,
-    #     e che le sezioni hanno libri. Conosce tutta la struttura interna.
+    # PROBLEM: the client must know that the library has sections,
+    #     and that sections have books. It knows the entire internal structure.
     print(f"=== {library.name} ===\n")
-    for section in library.sections:               # il client gestisce il 1° livello
+    for section in library.sections:               # the client handles the 1st level
         print(f"  [{section.name}]")
-        for book in section.books:                 # il client gestisce il 2° livello
+        for book in section.books:                 # the client handles the 2nd level
             print(f"    - {book.title} ({book.author})")
 
-    # Se volessimo cercare un libro specifico, la logica di ricerca
-    #     (con tutti i loop annidati) è ancora responsabilità del client:
-    print("\n--- Ricerca: libri di autori italiani ---")
+    # If we wanted to search for a specific book, the search logic
+    #     (with all the nested loops) is still the client's responsibility:
+    print("\n--- Search: books by Italian authors ---")
     italian_authors = {"Umberto Eco", "Primo Levi", "Alessandro Manzoni"}
-    for section in library.sections:               # loop annidato ripetuto
+    for section in library.sections:               # repeated nested loop
         for book in section.books:
             if book.author in italian_authors:
                 print(f"  ✓ {book.title} — {book.author}")
 
-    # Se domani aggiungessimo una struttura a tre livelli
-    #     (Biblioteca → Piani → Sezioni → Libri), TUTTI i loop qui sopra
-    #     andrebbero riscritti. 
+    # If tomorrow we added a three-level structure
+    #     (Library → Floors → Sections → Books), ALL the loops above
+    #     would need to be rewritten.
 
 if __name__ == "__main__":
     main()

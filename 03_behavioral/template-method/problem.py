@@ -1,162 +1,162 @@
 # ==========================================
-# IL PROBLEMA CHE IL TEMPLATE METHOD RISOLVE
+# THE PROBLEM THAT TEMPLATE METHOD SOLVES
 # ==========================================
-# Abbiamo tre algoritmi (A, B, C) che eseguono una pipeline
-# di 4 step su una lista di numeri. Gli step 1 e 4 sono
-# IDENTICI in tutti gli algoritmi, mentre gli step 2 e 3
-# differiscono.
+# We have three algorithms (A, B, C) that execute a pipeline
+# of 4 steps on a list of numbers. Steps 1 and 4 are
+# IDENTICAL across all algorithms, while steps 2 and 3
+# differ.
 #
-# Senza il pattern, ogni algoritmo reimplementa TUTTI gli
-# step — inclusi quelli comuni. Il risultato: duplicazione
-# massiccia. Se domani cambia lo step 1, dobbiamo modificare
-# TUTTE le classi.
+# Without the pattern, each algorithm reimplements ALL the
+# steps — including the common ones. The result: massive
+# duplication. If tomorrow step 1 changes, we must modify
+# ALL the classes.
 
 from typing import Any
 
 
 # ==========================================
-# LE CLASSI — ogni algoritmo è a sé stante
+# THE CLASSES — each algorithm is standalone
 # ==========================================
-# Nessuna classe base, nessuna condivisione di codice.
-# step1() e step4() sono copia-incollati identici ovunque.
+# No base class, no code sharing.
+# step1() and step4() are copy-pasted identically everywhere.
 
-class AlgoritmoA:
-    """Ordina i dati e raddoppia ogni valore."""
+class AlgorithmA:
+    """Sorts data and doubles every value."""
 
-    def esegui(self, dati: list[int]) -> list[int]:
+    def execute(self, data: list[int]) -> list[int]:
 
-        # --- step 1: validazione e caricamento (COMUNE) ---
-        print(f"[AlgoritmoA] Step 1 — Validazione e caricamento")
-        if not dati:
-            print("  ⚠️ Lista vuota, nulla da elaborare")
+        # --- step 1: validation and loading (COMMON) ---
+        print(f"[AlgorithmA] Step 1 — Validation and loading")
+        if not data:
+            print("  ⚠️ Empty list, nothing to process")
             return []
-        dati_lavoro = dati.copy()
-        print(f"  Dati ricevuti: {dati_lavoro}")
+        working_data = data.copy()
+        print(f"  Data received: {working_data}")
 
-        # --- step 2: elaborazione (SPECIFICA A) ---
-        print(f"[AlgoritmoA] Step 2 — Ordinamento crescente")
-        dati_lavoro.sort()
-        print(f"  Risultato: {dati_lavoro}")
+        # --- step 2: processing (SPECIFIC A) ---
+        print(f"[AlgorithmA] Step 2 — Ascending sort")
+        working_data.sort()
+        print(f"  Result: {working_data}")
 
-        # --- step 3: trasformazione (SPECIFICA A) ---
-        print(f"[AlgoritmoA] Step 3 — Raddoppio valori")
-        dati_lavoro = [x * 2 for x in dati_lavoro]
-        print(f"  Risultato: {dati_lavoro}")
+        # --- step 3: transformation (SPECIFIC A) ---
+        print(f"[AlgorithmA] Step 3 — Doubling values")
+        working_data = [x * 2 for x in working_data]
+        print(f"  Result: {working_data}")
 
-        # --- step 4: output finale (COMUNE) ---
-        print(f"[AlgoritmoA] Step 4 — Risultato finale")
-        print(f"  ✅ Pipeline completata → {dati_lavoro}")
-        print(f"  📊 Elementi: {len(dati_lavoro)}, Somma: {sum(dati_lavoro)}")
-        return dati_lavoro
+        # --- step 4: final output (COMMON) ---
+        print(f"[AlgorithmA] Step 4 — Final result")
+        print(f"  ✅ Pipeline completed → {working_data}")
+        print(f"  📊 Elements: {len(working_data)}, Sum: {sum(working_data)}")
+        return working_data
 
 
-class AlgoritmoB:
-    """Inverte l'ordine e somma coppie adiacenti."""
+class AlgorithmB:
+    """Reverses order and sums adjacent pairs."""
 
-    def esegui(self, dati: list[int]) -> list[int]:
+    def execute(self, data: list[int]) -> list[int]:
 
-        # --- step 1: validazione e caricamento (COMUNE — COPIA!) ---
-        # ↑↑↑ Identico ad AlgoritmoA — codice duplicato!
-        print(f"[AlgoritmoB] Step 1 — Validazione e caricamento")
-        if not dati:
-            print("  ⚠️ Lista vuota, nulla da elaborare")
+        # --- step 1: validation and loading (COMMON — COPY!) ---
+        # ↑↑↑ Identical to AlgorithmA — duplicated code!
+        print(f"[AlgorithmB] Step 1 — Validation and loading")
+        if not data:
+            print("  ⚠️ Empty list, nothing to process")
             return []
-        dati_lavoro = dati.copy()
-        print(f"  Dati ricevuti: {dati_lavoro}")
+        working_data = data.copy()
+        print(f"  Data received: {working_data}")
 
-        # --- step 2: elaborazione (SPECIFICA B) ---
-        print(f"[AlgoritmoB] Step 2 — Inversione ordine")
-        dati_lavoro.reverse()
-        print(f"  Risultato: {dati_lavoro}")
+        # --- step 2: processing (SPECIFIC B) ---
+        print(f"[AlgorithmB] Step 2 — Reversing order")
+        working_data.reverse()
+        print(f"  Result: {working_data}")
 
-        # --- step 3: trasformazione (SPECIFICA B) ---
-        print(f"[AlgoritmoB] Step 3 — Somma coppie adiacenti")
-        risultato = []
-        for i in range(0, len(dati_lavoro) - 1, 2):
-            risultato.append(dati_lavoro[i] + dati_lavoro[i + 1])
-        if len(dati_lavoro) % 2 == 1:
-            risultato.append(dati_lavoro[-1])   # elemento dispari rimane
-        dati_lavoro = risultato
-        print(f"  Risultato: {dati_lavoro}")
+        # --- step 3: transformation (SPECIFIC B) ---
+        print(f"[AlgorithmB] Step 3 — Summing adjacent pairs")
+        result = []
+        for i in range(0, len(working_data) - 1, 2):
+            result.append(working_data[i] + working_data[i + 1])
+        if len(working_data) % 2 == 1:
+            result.append(working_data[-1])   # odd element remains
+        working_data = result
+        print(f"  Result: {working_data}")
 
-        # --- step 4: output finale (COMUNE — COPIA!) ---
-        # ↑↑↑ Identico ad AlgoritmoA — codice duplicato!
-        print(f"[AlgoritmoB] Step 4 — Risultato finale")
-        print(f"  ✅ Pipeline completata → {dati_lavoro}")
-        print(f"  📊 Elementi: {len(dati_lavoro)}, Somma: {sum(dati_lavoro)}")
-        return dati_lavoro
+        # --- step 4: final output (COMMON — COPY!) ---
+        # ↑↑↑ Identical to AlgorithmA — duplicated code!
+        print(f"[AlgorithmB] Step 4 — Final result")
+        print(f"  ✅ Pipeline completed → {working_data}")
+        print(f"  📊 Elements: {len(working_data)}, Sum: {sum(working_data)}")
+        return working_data
 
 
-class AlgoritmoC:
-    """Filtra i pari e eleva al quadrato."""
+class AlgorithmC:
+    """Filters even numbers and squares them."""
 
-    def esegui(self, dati: list[int]) -> list[int]:
+    def execute(self, data: list[int]) -> list[int]:
 
-        # --- step 1: validazione e caricamento (COMUNE — COPIA!) ---
-        # ↑↑↑ Identico ad A e B — terza copia dello stesso codice!
-        print(f"[AlgoritmoC] Step 1 — Validazione e caricamento")
-        if not dati:
-            print("  ⚠️ Lista vuota, nulla da elaborare")
+        # --- step 1: validation and loading (COMMON — COPY!) ---
+        # ↑↑↑ Identical to A and B — third copy of the same code!
+        print(f"[AlgorithmC] Step 1 — Validation and loading")
+        if not data:
+            print("  ⚠️ Empty list, nothing to process")
             return []
-        dati_lavoro = dati.copy()
-        print(f"  Dati ricevuti: {dati_lavoro}")
+        working_data = data.copy()
+        print(f"  Data received: {working_data}")
 
-        # --- step 2: elaborazione (SPECIFICA C) ---
-        print(f"[AlgoritmoC] Step 2 — Filtra solo i pari")
-        dati_lavoro = [x for x in dati_lavoro if x % 2 == 0]
-        print(f"  Risultato: {dati_lavoro}")
+        # --- step 2: processing (SPECIFIC C) ---
+        print(f"[AlgorithmC] Step 2 — Filter only even numbers")
+        working_data = [x for x in working_data if x % 2 == 0]
+        print(f"  Result: {working_data}")
 
-        # --- step 3: trasformazione (SPECIFICA C) ---
-        print(f"[AlgoritmoC] Step 3 — Elevamento al quadrato")
-        dati_lavoro = [x ** 2 for x in dati_lavoro]
-        print(f"  Risultato: {dati_lavoro}")
+        # --- step 3: transformation (SPECIFIC C) ---
+        print(f"[AlgorithmC] Step 3 — Squaring")
+        working_data = [x ** 2 for x in working_data]
+        print(f"  Result: {working_data}")
 
-        # --- step 4: output finale (COMUNE — COPIA!) ---
-        # ↑↑↑ Identico ad A e B — terza copia dello stesso codice!
-        print(f"[AlgoritmoC] Step 4 — Risultato finale")
-        print(f"  ✅ Pipeline completata → {dati_lavoro}")
-        print(f"  📊 Elementi: {len(dati_lavoro)}, Somma: {sum(dati_lavoro)}")
-        return dati_lavoro
+        # --- step 4: final output (COMMON — COPY!) ---
+        # ↑↑↑ Identical to A and B — third copy of the same code!
+        print(f"[AlgorithmC] Step 4 — Final result")
+        print(f"  ✅ Pipeline completed → {working_data}")
+        print(f"  📊 Elements: {len(working_data)}, Sum: {sum(working_data)}")
+        return working_data
 
 
 # ==========================================
-# IL PROBLEMA: DUPLICAZIONE OVUNQUE
+# THE PROBLEM: DUPLICATION EVERYWHERE
 # ==========================================
-# Step 1 (validazione) → copiato 3 volte
-# Step 4 (output)      → copiato 3 volte
+# Step 1 (validation) → copied 3 times
+# Step 4 (output)     → copied 3 times
 #
-# Se domani cambiamo la validazione (es. aggiungiamo un log),
-# dobbiamo modificare TUTTE E TRE le classi. E se aggiungiamo
-# AlgoritmoD, dobbiamo copiare di nuovo step 1 e step 4.
+# If tomorrow we change the validation (e.g., add a log),
+# we must modify ALL THREE classes. And if we add
+# AlgorithmD, we must copy step 1 and step 4 again.
 #
-# Inoltre il metodo esegui() contiene sia logica comune che
-# logica specifica mescolata insieme — difficile da leggere.
+# Moreover, the execute() method contains both common logic
+# and specific logic mixed together — hard to read.
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
 
 if __name__ == "__main__":
 
     print("=" * 50)
-    print("  TEMPLATE METHOD — Il problema (senza pattern)")
+    print("  TEMPLATE METHOD — The problem (without pattern)")
     print("=" * 50)
 
-    dati = [3, 7, 2, 8, 4, 1, 6]
+    data = [3, 7, 2, 8, 4, 1, 6]
 
-    print("\n--- AlgoritmoA ---")
-    a = AlgoritmoA()
-    a.esegui(dati)
+    print("\n--- AlgorithmA ---")
+    a = AlgorithmA()
+    a.execute(data)
 
-    print("\n--- AlgoritmoB ---")
-    b = AlgoritmoB()
-    b.esegui(dati)
+    print("\n--- AlgorithmB ---")
+    b = AlgorithmB()
+    b.execute(data)
 
-    print("\n--- AlgoritmoC ---")
-    c = AlgoritmoC()
-    c.esegui(dati)
+    print("\n--- AlgorithmC ---")
+    c = AlgorithmC()
+    c.execute(data)
 
-    # Problema evidente: se vogliamo cambiare il messaggio dello
-    # step 1 o il formato dello step 4, dobbiamo toccare TUTTE le classi.
-    # E ogni nuova classe richiede di copiare gli stessi blocchi.
+    # Obvious problem: if we want to change the step 1 message
+    # or the step 4 format, we have to touch ALL the classes.
+    # And every new class requires copying the same blocks.

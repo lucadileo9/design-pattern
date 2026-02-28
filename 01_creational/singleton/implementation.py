@@ -1,30 +1,30 @@
-# --- SOLUZIONE CON SINGLETON ---
+# --- SOLUTION WITH SINGLETON ---
 
-class CassaComuneSingleton:
-    _istanza = None  # Campo statico per memorizzare l'unica istanza 
+class SharedFundSingleton:
+    _instance = None  # Static field to store the unique instance
 
     def __new__(cls):
-        # Se l'istanza non esiste ancora, la creiamo 
-        if cls._istanza is None:
-            print("\n--- Creazione dell'UNICA cassa comune per tutta la gita ---")
-            cls._istanza = super(CassaComuneSingleton, cls).__new__(cls)
-            cls._istanza.soldi = 100 # Inizializzazione unica 
-        return cls._istanza # Restituiamo sempre la stessa istanza
+        # If the instance doesn't exist yet, we create it
+        if cls._instance is None:
+            print("\n--- Creation of the ONLY shared fund for the entire trip ---")
+            cls._instance = super(SharedFundSingleton, cls).__new__(cls)
+            cls._instance.money = 100  # One-time initialization
+        return cls._instance  # We always return the same instance
 
-    def paga_gelato(self, importo):
-        self.soldi -= importo
-        print(f"Pagati {importo}€. Residuo cassa condivisa: {self.soldi}€")
+    def pay_ice_cream(self, amount):
+        self.money -= amount
+        print(f"Paid {amount}€. Remaining shared fund: {self.money}€")
 
-# Studente A prova a creare la cassa
-cassa_a = CassaComuneSingleton()
-cassa_a.paga_gelato(10)
+# Student A tries to create the fund
+fund_a = SharedFundSingleton()
+fund_a.pay_ice_cream(10)
 
-# Studente B prova a creare la cassa
-# Non riceverà un nuovo oggetto, ma quello creato dallo studente A! 
-cassa_b = CassaComuneSingleton()
-cassa_b.paga_gelato(10)
+# Student B tries to create the fund
+# They won't receive a new object, but the one created by student A!
+fund_b = SharedFundSingleton()
+fund_b.pay_ice_cream(10)
 
-print(f"Identità oggetto A: {id(cassa_a)}")
-print(f"Identità oggetto B: {id(cassa_b)}")
-print(f"Entrambi vedono il saldo corretto: {cassa_a.soldi}€") 
-# Ora il saldo è 80€ perché entrambi hanno attinto dalla stessa fonte! 
+print(f"Object identity A: {id(fund_a)}")
+print(f"Object identity B: {id(fund_b)}")
+print(f"Both see the correct balance: {fund_a.money}€")
+# Now the balance is 80€ because both drew from the same source!

@@ -1,29 +1,29 @@
 # Strategy Pattern
 
-## Problema
+## Problem
 
-Ipotizziamo di trovarci in una situazione in cui abbiamo una **famiglia di algoritmi** o comportamenti simili, ma con differenze specifiche. Questi algoritmi vengono usati dal nostro codice client, ed è quindi il client a specificare man mano quale algoritmo usare e quando. Di conseguenza la classe che implementa quegli algoritmi deve conoscere tutti i possibili algoritmi, deve avere metodi diversi per algoritmi diversi, e deve essere modificata ogni volta che si aggiunge un nuovo algoritmo. Questo porta a un codice difficile da mantenere, estendere e testare.
+Imagine a situation where we have a **family of algorithms** or similar behaviors, but with specific differences. These algorithms are used by our client code, and it's the client that specifies which algorithm to use and when. Consequently, the class implementing those algorithms must know all possible algorithms, must have different methods for different algorithms, and must be modified every time a new algorithm is added. This leads to code that is hard to maintain, extend, and test.
 
-Analogia: è come se noi dovessimo scegliere se visitare la città usando l'auto, la bicicletta o i mezzi pubblici, e chiamiamo una singola "guida" la quale deve fornirci tutte le informazioni per ogni mezzo di trasporto, e deve essere aggiornata ogni volta che viene aggiunto un nuovo mezzo (es. scooter elettrico). La guida diventa un "coltellino svizzero" con tutte le informazioni, ma è difficile da mantenere e da usare, o banalmente per un essere umano è difficile ricordare tutte quelle informazioni.
+Analogy: it's as if we had to choose whether to visit the city by car, bicycle, or public transport, and we call a single "guide" who must provide all the information for every means of transport, and must be updated every time a new one is added (e.g., electric scooter). The guide becomes a "Swiss army knife" with all the information, but it's hard to maintain and use — or simply, for a human it's hard to remember all that information.
 
-## Soluzione
+## Solution
 
-La soluzione è il pattern **Strategy**: si crea una classe dedicata per ogni algoritmo specifico, e una classe **contesto** che contiene un riferimento a una strategia e delega a essa l'esecuzione. In questo modo il client può scegliere quale strategia usare a runtime, senza dover modificare il contesto o le classi degli algoritmi. L'aggiunta di una nuova strategia è semplice: basta creare una nuova classe che implementa l'interfaccia `Strategy`, rendendo il sistema aperto all'estensione ma chiuso alla modifica (**Open/Closed Principle**).
+The solution is the **Strategy** pattern: we create a dedicated class for each specific algorithm, and a **context** class that holds a reference to a strategy and delegates execution to it. This way the client can choose which strategy to use at runtime, without modifying the context or the algorithm classes. Adding a new strategy is simple: just create a new class that implements the `Strategy` interface, making the system open for extension but closed for modification (**Open/Closed Principle**).
 
-I quattro attori:
+The four actors:
 
-1. **`Strategy`** (interfaccia): definisce il metodo astratto comune a tutti gli algoritmi (es. `execute()`). Il `Context` e il client conoscono solo questa interfaccia.
-2. **`ConcreteStrategy`**: implementa `Strategy` con un algoritmo specifico (es. `ConcreteStrategyA`, `ConcreteStrategyB`). Ogni variante vive nella propria classe isolata.
-3. **`Context`**: mantiene un riferimento a un'istanza di `Strategy` e delega l'esecuzione tramite `execute_strategy()`. Espone `set_strategy()` per cambiare algoritmo a runtime.
-4. **Client**: istanzia il `Context` e sceglie quale `ConcreteStrategy` assegnargli, senza toccare né il contesto né le altre strategie.
+1. **`Strategy`** (interface): defines the abstract method common to all algorithms (e.g., `execute()`). The `Context` and the client only know this interface.
+2. **`ConcreteStrategy`**: implements `Strategy` with a specific algorithm (e.g., `ConcreteStrategyA`, `ConcreteStrategyB`). Each variant lives in its own isolated class.
+3. **`Context`**: maintains a reference to a `Strategy` instance and delegates execution via `execute_strategy()`. Exposes `set_strategy()` to change the algorithm at runtime.
+4. **Client**: instantiates the `Context` and chooses which `ConcreteStrategy` to assign to it, without touching either the context or the other strategies.
 
-> **N.B.**: la classe `Context` spesso viene inizializzata con dei dati che poi vengono usati dalle strategie per eseguire i loro algoritmi; in questo modo le strategie sono più flessibili e possono operare su dati diversi a seconda del contesto in cui vengono usate.
+> **N.B.**: the `Context` class is often initialized with data that the strategies then use to run their algorithms; this way strategies are more flexible and can operate on different data depending on the context in which they are used.
 
-> **Analogia**: invece di avere una guida che contiene tutte le informazioni, abbiamo una guida che ci dice "Ecco le opzioni di trasporto disponibili, scegli quella che preferisci". Il client sceglie una strategia (es. "Usa l'auto") e fornisce la strategia concreta alla classe contesto; la guida userà quell'esperto per fare tutte le operazioni necessarie. Se viene aggiunto un nuovo mezzo di trasporto, basta aggiungere una nuova classe esperta — le classi esistenti non vanno toccate.
+> **Analogy**: instead of having a guide that contains all the information, we have a guide that says "Here are the available transport options, choose the one you prefer." The client picks a strategy (e.g., "Use the car") and provides the concrete strategy to the context class; the guide will use that expert to perform all the necessary operations. If a new means of transport is added, just add a new expert class — the existing classes don't need to be touched.
 
-## Diagrammi
+## Diagrams
 
-### Diagramma generico
+### Generic Diagram
 
 ```mermaid
 classDiagram
@@ -50,96 +50,96 @@ classDiagram
     Strategy <|.. ConcreteStrategyA : implements
     Strategy <|.. ConcreteStrategyB : implements
     Strategy <|.. ConcreteStrategyC : implements
-    Context o-- Strategy : delega a
-    Client --> Context : configura
-    Client --> Strategy : sceglie
+    Context o-- Strategy : delegates to
+    Client --> Context : configures
+    Client --> Strategy : chooses
 ```
 
-### Diagramma specifico — Pagamento E-commerce
+### Specific Diagram — E-commerce Payment
 
 ```mermaid
 classDiagram
-    class MetodoPagamento {
+    class PaymentMethod {
         <<abstract>>
-        +paga(importo: float)* bool
-        +descrizione()* str
+        +pay(amount: float)* bool
+        +description()* str
     }
-    class CartaDiCredito {
-        +numero_carta: str
+    class CreditCard {
+        +card_number: str
         +cvv: str
-        +paga(importo: float) bool
-        +descrizione() str
+        +pay(amount: float) bool
+        +description() str
     }
     class PayPal {
         +email: str
-        +paga(importo: float) bool
-        +descrizione() str
+        +pay(amount: float) bool
+        +description() str
     }
-    class Criptovaluta {
+    class Cryptocurrency {
         +wallet: str
-        +paga(importo: float) bool
-        +descrizione() str
+        +pay(amount: float) bool
+        +description() str
     }
-    class Ordine {
-        +articoli: list~ArticoloCarrello~
-        -_metodo_pagamento: MetodoPagamento
-        +aggiungi(nome, prezzo, quantita)
-        +get_totale() float
-        +imposta_pagamento(MetodoPagamento)
-        +paga() bool
+    class Order {
+        +items: list~CartItem~
+        -_payment_method: PaymentMethod
+        +add(name, price, quantity)
+        +get_total() float
+        +set_payment(PaymentMethod)
+        +pay() bool
     }
-    class ArticoloCarrello {
-        +nome: str
-        +prezzo: float
-        +quantita: int
+    class CartItem {
+        +name: str
+        +price: float
+        +quantity: int
     }
 
-    MetodoPagamento <|.. CartaDiCredito : implements
-    MetodoPagamento <|.. PayPal : implements
-    MetodoPagamento <|.. Criptovaluta : implements
-    Ordine o-- MetodoPagamento : delega a
-    Ordine *-- ArticoloCarrello : contiene
+    PaymentMethod <|.. CreditCard : implements
+    PaymentMethod <|.. PayPal : implements
+    PaymentMethod <|.. Cryptocurrency : implements
+    Order o-- PaymentMethod : delegates to
+    Order *-- CartItem : contains
 ```
 
-### Diagramma di sequenza
+### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Ordine
-    participant Carta as CartaDiCredito
+    participant Order
+    participant Card as CreditCard
     participant PP as PayPal
 
-    Client->>Ordine: aggiungi("Webcam HD", 59.99)
-    Client->>Ordine: imposta_pagamento(Carta)
-    Client->>Ordine: paga()
-    Ordine->>Ordine: get_totale() → €59.99
-    Ordine->>Carta: paga(59.99)
-    Carta-->>Ordine: False (dati non validi)
-    Ordine-->>Client: ⚠️ Pagamento fallito
+    Client->>Order: add("Webcam HD", 59.99)
+    Client->>Order: set_payment(Card)
+    Client->>Order: pay()
+    Order->>Order: get_total() → €59.99
+    Order->>Card: pay(59.99)
+    Card-->>Order: False (invalid data)
+    Order-->>Client: ⚠️ Payment failed
 
-    Note over Client: L'utente cambia metodo a runtime
+    Note over Client: The user changes method at runtime
 
-    Client->>Ordine: imposta_pagamento(PayPal)
-    Client->>Ordine: paga()
-    Ordine->>Ordine: get_totale() → €59.99
-    Ordine->>PP: paga(59.99)
-    PP-->>Ordine: True
-    Ordine-->>Client: ✅ Ordine completato
+    Client->>Order: set_payment(PayPal)
+    Client->>Order: pay()
+    Order->>Order: get_total() → €59.99
+    Order->>PP: pay(59.99)
+    PP-->>Order: True
+    Order-->>Client: ✅ Order completed
 ```
 
 
-### Vantaggi
+### Advantages
 
-- **Rispetto dell'Open/Closed Principle**: puoi introdurre nuovi algoritmi (nuove strategie) senza toccare una singola riga di codice delle strategie esistenti o del `Context`. Questo riduce drasticamente il rischio di introdurre regressioni.
-- **Isolamento della complessità (Separation of Concerns)**: ogni strategia è una "scatola nera" che si occupa di una sola cosa. Il codice del `Context` rimane pulito e si concentra sulla logica di alto livello, mentre i dettagli tecnici dell'algoritmo rimangono confinati nelle classi `ConcreteStrategy`.
-- **Eliminazione dei "Conditional Bloat"**: si eliminano gli infiniti blocchi `if-else` o `switch` che rendono i metodi lunghi e difficili da leggere. Il polimorfismo fa il lavoro: si chiama `strategy.execute()` e il linguaggio sa già quale codice eseguire.
-- **Testabilità superiore**: ogni strategia essendo una classe separata può essere testata in totale isolamento con unit test dedicati, senza dover configurare l'intero ambiente.
-- **Cambio di comportamento a runtime**: a differenza del Template Method (statico, deciso alla compilazione), lo Strategy permette di cambiare comportamento mentre l'app è in esecuzione — basta passare un nuovo oggetto strategia al contesto.
+- **Open/Closed Principle compliance**: you can introduce new algorithms (new strategies) without touching a single line of code in the existing strategies or the `Context`. This drastically reduces the risk of introducing regressions.
+- **Complexity isolation (Separation of Concerns)**: each strategy is a "black box" that deals with one thing only. The `Context` code stays clean and focuses on high-level logic, while the technical details of the algorithm remain confined within the `ConcreteStrategy` classes.
+- **Elimination of "Conditional Bloat"**: the endless `if-else` or `switch` blocks that make methods long and hard to read are eliminated. Polymorphism does the work: you call `strategy.execute()` and the language already knows which code to run.
+- **Superior testability**: since each strategy is a separate class, it can be tested in complete isolation with dedicated unit tests, without having to configure the entire environment.
+- **Runtime behavior change**: unlike the Template Method (static, decided at compile time), the Strategy allows changing behavior while the app is running — just pass a new strategy object to the context.
 
-### Svantaggi
+### Disadvantages
 
-- **Aumento del numero di classi (Class Explosion)**: se gli algoritmi sono molto semplici e cambiano raramente, creare un'interfaccia e più classi concrete può essere over-engineering. A volte una semplice funzione o una lambda sono sufficienti.
-- **Il client deve "sapere troppo"**: per scegliere la strategia corretta, il client deve conoscere le differenze tra di esse, annullando in parte il beneficio dell'astrazione.
-- **Overhead di comunicazione**: il `Context` e la `Strategy` devono scambiarsi dati. Se la strategia ha bisogno di molti dati dal contesto, devi passarli come argomenti o passare l'intero oggetto contesto, creando un accoppiamento indesiderato.
-- **Complessità di comprensione per i neofiti**: seguire il flusso del codice è più difficile rispetto a un file sequenziale con `if-else` — bisogna saltare tra diverse classi e interfacce per capire cosa avviene.
+- **Increased number of classes (Class Explosion)**: if the algorithms are very simple and rarely change, creating an interface and multiple concrete classes can be over-engineering. Sometimes a simple function or a lambda is enough.
+- **The client must "know too much"**: to choose the correct strategy, the client must know the differences between them, partially negating the benefit of abstraction.
+- **Communication overhead**: the `Context` and the `Strategy` must exchange data. If the strategy needs a lot of data from the context, you must pass it as arguments or pass the entire context object, creating unwanted coupling.
+- **Comprehension complexity for beginners**: following the code flow is harder compared to a sequential file with `if-else` — you need to jump between different classes and interfaces to understand what happens.

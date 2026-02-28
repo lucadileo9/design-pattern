@@ -1,23 +1,23 @@
-# --- CODICE PROBLEMATICO (SENZA SINGLETON) ---
+# --- PROBLEMATIC CODE (WITHOUT SINGLETON) ---
 
-class CassaComune:
+class SharedFund:
     def __init__(self):
-        self.soldi = 100  # Budget iniziale della gita
-        print("Aperta una nuova cassa comune!")
+        self.money = 100  # Initial trip budget
+        print("Opened a new shared fund!")
 
-    def paga_gelato(self, importo):
-        self.soldi -= importo
-        print(f"Pagati {importo}€. Residuo in questa cassa: {self.soldi}€")
+    def pay_ice_cream(self, amount):
+        self.money -= amount
+        print(f"Paid {amount}€. Remaining in this fund: {self.money}€")
 
-# Studente A vuole pagare un gelato
-cassa_studente_a = CassaComune() 
-cassa_studente_a.paga_gelato(10)
+# Student A wants to pay for ice cream
+fund_student_a = SharedFund()
+fund_student_a.pay_ice_cream(10)
 
-# Studente B vuole pagare un gelato
-# PROBLEMA: Lo studente B crea una NUOVA cassa invece di usare la stessa! [cite: 8, 10]
-cassa_studente_b = CassaComune() 
-cassa_studente_b.paga_gelato(10)
+# Student B wants to pay for ice cream
+# PROBLEM: Student B creates a NEW fund instead of using the same one!
+fund_student_b = SharedFund()
+fund_student_b.pay_ice_cream(10)
 
-print(f"Lo studente A vede in cassa: {cassa_studente_a.soldi}€")
-print(f"Lo studente B vede in cassa: {cassa_studente_b.soldi}€")
-# Risultato: I soldi non sono stati scalati dalla stessa fonte. Abbiamo un'incoerenza.
+print(f"Student A sees in fund: {fund_student_a.money}€")
+print(f"Student B sees in fund: {fund_student_b.money}€")
+# Result: The money was not deducted from the same source. We have an inconsistency.

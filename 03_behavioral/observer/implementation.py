@@ -1,156 +1,156 @@
 # ==========================================
-# OBSERVER PATTERN — SOLUZIONE
+# OBSERVER PATTERN — SOLUTION
 # ==========================================
-# Invece di far controllare i clienti ripetutamente (polling),
-# è il NEGOZIO a notificare i clienti quando arriva un prodotto.
+# Instead of having customers check repeatedly (polling),
+# it is the SHOP that notifies customers when a product arrives.
 #
-# Il negozio (Subject) mantiene una lista di clienti registrati
-# (Observer) e chiama il loro metodo aggiorna() automaticamente
-# quando aggiunge un nuovo prodotto al magazzino.
+# The shop (Subject) maintains a list of registered customers
+# (Observers) and calls their update() method automatically
+# when it adds a new product to the inventory.
 #
-# I clienti non devono più fare nulla: si registrano una volta
-# e vengono avvisati solo quando serve.
+# Customers no longer have to do anything: they register once
+# and get notified only when needed.
 
 from abc import ABC, abstractmethod
 
 
 # ==========================================
-# OBSERVER — interfaccia comune
+# OBSERVER — common interface
 # ==========================================
-# Tutti gli observer implementano aggiorna(). Il Subject non
-# conosce i dettagli — sa solo che può chiamare questo metodo.
+# All observers implement update(). The Subject doesn't
+# know the details — it only knows it can call this method.
 
 class Observer(ABC):
-    """Interfaccia per chi vuole essere notificato dal negozio."""
+    """Interface for anyone who wants to be notified by the shop."""
 
     @abstractmethod
-    def aggiorna(self, prodotto: str) -> None:
-        """Chiamato dal Subject quando arriva un nuovo prodotto."""
+    def update(self, product: str) -> None:
+        """Called by the Subject when a new product arrives."""
         ...
 
 
 # ==========================================
-# SUBJECT — il negozio che notifica
+# SUBJECT — the shop that notifies
 # ==========================================
-# Il negozio mantiene una lista di observer e li avvisa
-# automaticamente ogni volta che arriva un nuovo prodotto.
-# Non sa chi sono, non gli interessa — chiama aggiorna() e basta.
+# The shop maintains a list of observers and notifies them
+# automatically every time a new product arrives.
+# It doesn't know who they are, it doesn't care — it calls update() and that's it.
 
-class Negozio:
-    """Subject: gestisce il magazzino e notifica gli observer."""
+class Shop:
+    """Subject: manages the inventory and notifies observers."""
 
-    def __init__(self, nome: str):
-        self.nome = nome
-        self.prodotti_disponibili: list[str] = []
-        self._observer: list[Observer] = []
+    def __init__(self, name: str):
+        self.name = name
+        self.available_products: list[str] = []
+        self._observers: list[Observer] = []
 
-    # --- Gestione observer ---
+    # --- Observer management ---
 
-    def registra(self, observer: Observer) -> None:
-        """Un cliente si iscrive alle notifiche."""
-        self._observer.append(observer)
+    def register(self, observer: Observer) -> None:
+        """A customer subscribes to notifications."""
+        self._observers.append(observer)
 
-    def rimuovi(self, observer: Observer) -> None:
-        """Un cliente si cancella dalle notifiche."""
-        self._observer.remove(observer)
+    def remove(self, observer: Observer) -> None:
+        """A customer unsubscribes from notifications."""
+        self._observers.remove(observer)
 
-    # --- Logica di business ---
+    # --- Business logic ---
 
-    def aggiungi_prodotto(self, prodotto: str) -> None:
-        """Aggiunge un prodotto e NOTIFICA tutti gli observer."""
-        self.prodotti_disponibili.append(prodotto)
-        print(f"[{self.nome}] Nuovo prodotto in magazzino: '{prodotto}'")
-        self._notifica(prodotto)
+    def add_product(self, product: str) -> None:
+        """Adds a product and NOTIFIES all observers."""
+        self.available_products.append(product)
+        print(f"[{self.name}] New product in stock: '{product}'")
+        self._notify(product)
 
-    def _notifica(self, prodotto: str) -> None:
-        """Chiama aggiorna() su ogni observer registrato."""
-        for observer in self._observer:
-            observer.aggiorna(prodotto)
+    def _notify(self, product: str) -> None:
+        """Calls update() on every registered observer."""
+        for observer in self._observers:
+            observer.update(product)
 
 
 # ==========================================
-# OBSERVER CONCRETI — i clienti
+# CONCRETE OBSERVERS — the customers
 # ==========================================
-# Ogni cliente reagisce alla notifica a modo suo.
-# Il negozio non sa cosa fanno — chiama aggiorna() e basta.
+# Each customer reacts to the notification in their own way.
+# The shop doesn't know what they do — it calls update() and that's it.
 
-class Cliente(Observer):
-    """Un cliente interessato a un prodotto specifico."""
+class Customer(Observer):
+    """A customer interested in a specific product."""
 
-    def __init__(self, nome: str, prodotto_desiderato: str):
-        self.nome = nome
-        self.prodotto_desiderato = prodotto_desiderato
+    def __init__(self, name: str, desired_product: str):
+        self.name = name
+        self.desired_product = desired_product
 
-    def aggiorna(self, prodotto: str) -> None:
-        """Reagisce solo se il prodotto è quello che aspetta."""
-        if prodotto == self.prodotto_desiderato:
-            print(f"  [{self.nome}] Il '{prodotto}' è arrivato! Vado a comprarlo!")
+    def update(self, product: str) -> None:
+        """Reacts only if the product is the one they're waiting for."""
+        if product == self.desired_product:
+            print(f"  [{self.name}] The '{product}' has arrived! I'm going to buy it!")
         else:
-            print(f"  [{self.nome}] '{prodotto}'? Non mi interessa.")
+            print(f"  [{self.name}] '{product}'? Not interested.")
 
-# N.B.: si tratta solamente di un altro osservatore, ma con un metodo di aggiornamento diverso
-class Rivenditore(Observer):
-    """Un rivenditore che vuole sapere di TUTTI i nuovi arrivi."""
+# N.B.: this is simply another observer, but with a different update method
+class Reseller(Observer):
+    """A reseller who wants to know about ALL new arrivals."""
 
-    def __init__(self, nome: str):
-        self.nome = nome
-        self.prodotti_visti: list[str] = []
+    def __init__(self, name: str):
+        self.name = name
+        self.seen_products: list[str] = []
 
-    def aggiorna(self, prodotto: str) -> None:
-        """Prende nota di ogni nuovo prodotto (compra all'ingrosso)."""
-        self.prodotti_visti.append(prodotto)
-        print(f"  [{self.nome}] Nuovo arrivo '{prodotto}' — lo aggiungo alla lista acquisti.")
+    def update(self, product: str) -> None:
+        """Takes note of every new product (buys wholesale)."""
+        self.seen_products.append(product)
+        print(f"  [{self.name}] New arrival '{product}' — adding it to the purchase list.")
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
-# I clienti si registrano UNA VOLTA. Il negozio li avvisa
-# automaticamente — zero polling, zero sprechi.
+# Customers register ONCE. The shop notifies them
+# automatically — zero polling, zero waste.
 
 if __name__ == "__main__":
 
-    negozio = Negozio("Elettronica Express")
+    shop = Shop("Electronics Express")
 
-    # --- Creazione observer ---
-    mario = Cliente("Mario", "PlayStation 6")
-    giulia = Cliente("Giulia", "iPhone 20")
-    luca = Cliente("Luca", "PlayStation 6")
-    ingrosso = Rivenditore("TechBuy Ingrosso")
+    # --- Create observers ---
+    mario = Customer("Mario", "PlayStation 6")
+    giulia = Customer("Giulia", "iPhone 20")
+    luca = Customer("Luca", "PlayStation 6")
+    wholesale = Reseller("TechBuy Wholesale")
 
-    # --- Registrazione (una sola volta) ---
-    negozio.registra(mario)
-    negozio.registra(giulia)
-    negozio.registra(luca)
-    negozio.registra(ingrosso)
+    # --- Registration (just once) ---
+    shop.register(mario)
+    shop.register(giulia)
+    shop.register(luca)
+    shop.register(wholesale)
 
     print("=" * 50)
-    print("  OBSERVER — il negozio avvisa i clienti")
+    print("  OBSERVER — the shop notifies customers")
     print("=" * 50)
 
-    # --- Arriva un prodotto: il negozio notifica TUTTI ---
-    print("\n--- Arriva 'PlayStation 6' ---")
-    negozio.aggiungi_prodotto("PlayStation 6")
-    # Mario e Luca reagiscono, Giulia ignora, Ingrosso prende nota
+    # --- A product arrives: the shop notifies EVERYONE ---
+    print("\n--- 'PlayStation 6' arrives ---")
+    shop.add_product("PlayStation 6")
+    # Mario and Luca react, Giulia ignores, Wholesale takes note
 
-    # --- Arriva un altro prodotto ---
-    print("\n--- Arriva 'iPhone 20' ---")
-    negozio.aggiungi_prodotto("iPhone 20")
-    # Giulia reagisce, Mario e Luca ignorano, Ingrosso prende nota
+    # --- Another product arrives ---
+    print("\n--- 'iPhone 20' arrives ---")
+    shop.add_product("iPhone 20")
+    # Giulia reacts, Mario and Luca ignore, Wholesale takes note
 
-    # --- Rimozione di un observer (Luca ha già comprato) ---
-    print("\n--- Luca si cancella dalle notifiche ---")
-    negozio.rimuovi(luca)
+    # --- Removing an observer (Luca already bought) ---
+    print("\n--- Luca unsubscribes from notifications ---")
+    shop.remove(luca)
 
-    print("\n--- Arriva 'Samsung Galaxy S30' ---")
-    negozio.aggiungi_prodotto("Samsung Galaxy S30")
-    # Luca NON viene più notificato
+    print("\n--- 'Samsung Galaxy S30' arrives ---")
+    shop.add_product("Samsung Galaxy S30")
+    # Luca is NO LONGER notified
 
-    # --- Riepilogo del rivenditore ---
-    print(f"\n[{ingrosso.nome}] Prodotti visti oggi: {ingrosso.prodotti_visti}")
+    # --- Reseller summary ---
+    print(f"\n[{wholesale.name}] Products seen today: {wholesale.seen_products}")
 
-# La cosa importante da notare è che lato client tutto quello che viene fatto è solo aggiungere il nuovo prodotto
-# alla lista dei prodotti disponibili, senza preoccuparsi di chi è interessato o meno.
-# Il negozio si occupa di notificare in automatico tutti i clienti registrati
-# e ogni cliente decide se reagire o meno alla notifica, senza che il negozio debba saperlo,
-# permettendo un disaccoppiamento totale tra le due parti. 
+# The important thing to notice is that on the client side all that's done is adding the new product
+# to the available products list, without worrying about who is interested or not.
+# The shop takes care of automatically notifying all registered customers
+# and each customer decides whether or not to react to the notification, without the shop needing to know,
+# allowing total decoupling between the two parts. 

@@ -1,88 +1,88 @@
 # ==========================================
-# IL PROBLEMA CHE LO STRATEGY RISOLVE
+# THE PROBLEM THAT STRATEGY SOLVES
 # ==========================================
-# Abbiamo una classe Contesto che deve eseguire un'operazione,
-# ma quell'operazione può essere svolta in modi diversi
-# (algoritmo A, B, C…).
+# We have a Context class that must perform an operation,
+# but that operation can be done in different ways
+# (algorithm A, B, C…).
 #
-# Senza il pattern Strategy, il Contesto contiene TUTTA la
-# logica di tutti gli algoritmi, selezionati con if/elif.
-# Aggiungere un nuovo algoritmo → modificare il Contesto.
+# Without the Strategy pattern, the Context contains ALL the
+# logic for all algorithms, selected with if/elif.
+# Adding a new algorithm → modifying the Context.
 
 
 # ==========================================
-# IL CONTESTO — un "coltellino svizzero" sovraccarico
+# THE CONTEXT — an overloaded "Swiss army knife"
 # ==========================================
-# Conosce TUTTI gli algoritmi. Ogni nuovo algoritmo richiede
-# di modificare questa classe.
+# Knows ALL the algorithms. Each new algorithm requires
+# modifying this class.
 
-class Contesto:
-    """Contesto che esegue l'operazione in base al tipo richiesto."""
+class Context:
+    """Context that executes the operation based on the requested type."""
 
-    def __init__(self, dati: list[int]):
-        self.dati = dati
+    def __init__(self, data: list[int]):
+        self.data = data
 
-    def esegui(self, tipo_algoritmo: str) -> None:
+    def execute(self, algorithm_type: str) -> None:
         """
-        Il client sceglie l'algoritmo passando una stringa.
-        Il Contesto deve conoscere ogni possibile algoritmo
-        e implementarlo internamente — tutto in un unico metodo.
+        The client chooses the algorithm by passing a string.
+        The Context must know every possible algorithm
+        and implement it internally — all in a single method.
         """
 
-        # --- INIZIO DEL DISASTRO ---
-        # Ogni algoritmo è un ramo if/elif. Se ne aggiungiamo
-        # uno nuovo, dobbiamo modificare QUESTO metodo.
+        # --- START OF THE DISASTER ---
+        # Each algorithm is an if/elif branch. If we add
+        # a new one, we must modify THIS method.
 
-        if tipo_algoritmo == "A":
-            # Algoritmo A: somma tutti gli elementi
-            risultato = sum(self.dati)
-            print(f"Algoritmo A (somma): {risultato}")
+        if algorithm_type == "A":
+            # Algorithm A: sums all elements
+            result = sum(self.data)
+            print(f"Algorithm A (sum): {result}")
 
-        elif tipo_algoritmo == "B":
-            # Algoritmo B: trova il massimo
-            risultato = max(self.dati)
-            print(f"Algoritmo B (massimo): {risultato}")
+        elif algorithm_type == "B":
+            # Algorithm B: finds the maximum
+            result = max(self.data)
+            print(f"Algorithm B (maximum): {result}")
 
-        elif tipo_algoritmo == "C":
-            # Algoritmo C: conta gli elementi pari
-            risultato = sum(1 for x in self.dati if x % 2 == 0)
-            print(f"Algoritmo C (conta pari): {risultato}")
+        elif algorithm_type == "C":
+            # Algorithm C: counts even elements
+            result = sum(1 for x in self.data if x % 2 == 0)
+            print(f"Algorithm C (count even): {result}")
 
         else:
-            raise ValueError(f"Algoritmo '{tipo_algoritmo}' sconosciuto!")
+            raise ValueError(f"Algorithm '{algorithm_type}' unknown!")
 
-        # --- FINE DEL DISASTRO ---
-        # Se domani serve un algoritmo D (es. media, prodotto, filtro),
-        # bisogna aggiungere un altro elif QUI e sperare di non
-        # rompere nulla degli algoritmi esistenti.
+        # --- END OF THE DISASTER ---
+        # If tomorrow we need an algorithm D (e.g., average, product, filter),
+        # we must add another elif HERE and hope we don't
+        # break any of the existing algorithms.
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
-# Il client deve conoscere le stringhe "A", "B", "C" e il
-# Contesto deve implementarli tutti. Entrambi sono fragili.
+# The client must know the strings "A", "B", "C" and the
+# Context must implement them all. Both are fragile.
 
 if __name__ == "__main__":
 
-    contesto = Contesto([3, 7, 2, 8, 4, 1, 6])
+    context = Context([3, 7, 2, 8, 4, 1, 6])
 
     print("=" * 45)
-    print("  SENZA STRATEGY — if/elif nel Contesto")
+    print("  WITHOUT STRATEGY — if/elif in Context")
     print("=" * 45)
 
-    contesto.esegui("A")    # somma
-    contesto.esegui("B")    # massimo
-    contesto.esegui("C")    # conta pari
+    context.execute("A")    # sum
+    context.execute("B")    # maximum
+    context.execute("C")    # count even
 
-    # Se proviamo un algoritmo non previsto → errore
+    # If we try an unforeseen algorithm → error
     try:
-        contesto.esegui("D")
+        context.execute("D")
     except ValueError as e:
-        print(f"\nErrore: {e}")
+        print(f"\nError: {e}")
 
-    # PROBLEMI:
-    # 1. Il Contesto è un unico blocco monolitico con tutti gli algoritmi.
-    # 2. Aggiungere un algoritmo D richiede di modificare esegui() → viola OCP.
-    # 3. Impossibile testare un algoritmo in isolamento.
-    # 4. Il client usa stringhe magiche ("A", "B") → fragile e senza type-safety.
+    # PROBLEMS:
+    # 1. The Context is a single monolithic block with all algorithms.
+    # 2. Adding an algorithm D requires modifying execute() → violates OCP.
+    # 3. Impossible to test an algorithm in isolation.
+    # 4. The client uses magic strings ("A", "B") → fragile and without type-safety.

@@ -1,194 +1,194 @@
 # ==========================================
-# STRATEGY — Esempio reale: Pagamento E-commerce
+# STRATEGY — Real Example: E-commerce Payment
 # ==========================================
-# Un ordine (Contesto) deve essere pagato. Il metodo di pagamento
-# viene scelto dall'utente al momento del checkout (a runtime).
+# An order (Context) must be paid. The payment method
+# is chosen by the user at checkout time (at runtime).
 #
-# L'ordine non sa COME avviene il pagamento — sa solo che la
-# strategia scelta ha un metodo paga() che restituisce True/False.
-# Aggiungere "Apple Pay" domani → nuova classe, zero modifiche.
+# The order doesn't know HOW the payment happens — it only knows
+# that the chosen strategy has a pay() method that returns True/False.
+# Adding "Apple Pay" tomorrow → new class, zero modifications.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 
 # ==========================================
-# STRATEGY — interfaccia comune
+# STRATEGY — common interface
 # ==========================================
 
-class MetodoPagamento(ABC):
-    """Interfaccia: ogni metodo di pagamento implementa paga()."""
+class PaymentMethod(ABC):
+    """Interface: every payment method implements pay()."""
 
     @abstractmethod
-    def paga(self, importo: float) -> bool:
-        """Esegue il pagamento. Restituisce True se andato a buon fine."""
+    def pay(self, amount: float) -> bool:
+        """Processes the payment. Returns True if successful."""
         ...
 
     @abstractmethod
-    def descrizione(self) -> str:
-        """Nome leggibile del metodo di pagamento."""
+    def description(self) -> str:
+        """Human-readable name of the payment method."""
         ...
 
 
 # ==========================================
-# STRATEGIE CONCRETE
+# CONCRETE STRATEGIES
 # ==========================================
 
-class CartaDiCredito(MetodoPagamento):
-    """Pagamento con carta: valida numero e CVV, contatta il gateway."""
+class CreditCard(PaymentMethod):
+    """Card payment: validates number and CVV, contacts the gateway."""
 
-    def __init__(self, numero_carta: str, cvv: str):
-        self.numero_carta = numero_carta
+    def __init__(self, card_number: str, cvv: str):
+        self.card_number = card_number
         self.cvv = cvv
 
-    def paga(self, importo: float) -> bool:
-        # Simulazione: carta valida se ha 16 cifre e cvv 3 cifre
-        if len(self.numero_carta) != 16 or len(self.cvv) != 3:
-            print(f"  ❌ Carta rifiutata: dati non validi")
+    def pay(self, amount: float) -> bool:
+        # Simulation: card is valid if it has 16 digits and cvv 3 digits
+        if len(self.card_number) != 16 or len(self.cvv) != 3:
+            print(f"  ❌ Card declined: invalid data")
             return False
 
-        mascherata = "****-****-****-" + self.numero_carta[-4:]
-        print(f"  💳 Contatto gateway bancario...")
-        print(f"  💳 Addebito di €{importo:.2f} sulla carta {mascherata}")
+        masked = "****-****-****-" + self.card_number[-4:]
+        print(f"  💳 Contacting bank gateway...")
+        print(f"  💳 Charging €{amount:.2f} to card {masked}")
         return True
 
-    def descrizione(self) -> str:
-        return f"Carta di Credito (****{self.numero_carta[-4:]})"
+    def description(self) -> str:
+        return f"Credit Card (****{self.card_number[-4:]})"
 
 
-class PayPal(MetodoPagamento):
-    """Pagamento PayPal: verifica email, reindirizza al portale."""
+class PayPal(PaymentMethod):
+    """PayPal payment: verifies email, redirects to the portal."""
 
     def __init__(self, email: str):
         self.email = email
 
-    def paga(self, importo: float) -> bool:
+    def pay(self, amount: float) -> bool:
         if "@" not in self.email:
-            print(f"  ❌ PayPal: email non valida")
+            print(f"  ❌ PayPal: invalid email")
             return False
 
-        print(f"  🅿️ Reindirizzamento a PayPal...")
-        print(f"  🅿️ Pagamento di €{importo:.2f} confermato da {self.email}")
+        print(f"  🅿️ Redirecting to PayPal...")
+        print(f"  🅿️ Payment of €{amount:.2f} confirmed by {self.email}")
         return True
 
-    def descrizione(self) -> str:
+    def description(self) -> str:
         return f"PayPal ({self.email})"
 
 
-class Criptovaluta(MetodoPagamento):
-    """Pagamento crypto: genera indirizzo wallet, attende conferma."""
+class Cryptocurrency(PaymentMethod):
+    """Crypto payment: generates wallet address, awaits confirmation."""
 
     def __init__(self, wallet: str):
         self.wallet = wallet
 
-    def paga(self, importo: float) -> bool:
+    def pay(self, amount: float) -> bool:
         if len(self.wallet) < 10:
-            print(f"  ❌ Crypto: indirizzo wallet non valido")
+            print(f"  ❌ Crypto: invalid wallet address")
             return False
 
-        indirizzo_corto = self.wallet[:6] + "..." + self.wallet[-4:]
-        print(f"  🪙 Invio a wallet {indirizzo_corto}...")
-        print(f"  🪙 Transazione di €{importo:.2f} confermata sulla blockchain")
+        short_address = self.wallet[:6] + "..." + self.wallet[-4:]
+        print(f"  🪙 Sending to wallet {short_address}...")
+        print(f"  🪙 Transaction of €{amount:.2f} confirmed on the blockchain")
         return True
 
-    def descrizione(self) -> str:
+    def description(self) -> str:
         return f"Crypto ({self.wallet[:6]}...{self.wallet[-4:]})"
 
 
 # ==========================================
-# CONTESTO — l'ordine
+# CONTEXT — the order
 # ==========================================
-# L'ordine gestisce il carrello e il totale. Quando è il momento
-# di pagare, delega alla strategia corrente — senza if/elif.
-# Ovviamente non è detto che la classe context si occupi SOLO 
-# delle strategie, ma anche di altra logica di business (es. gestione carrello, calcolo totale).
+# The order manages the cart and the total. When it's time
+# to pay, it delegates to the current strategy — without if/elif.
+# Of course, the context class doesn't necessarily handle ONLY
+# the strategies, but also other business logic (e.g., cart management, total calculation).
 
 @dataclass
-class ArticoloCarrello:
-    nome: str
-    prezzo: float
-    quantita: int = 1
+class CartItem:
+    name: str
+    price: float
+    quantity: int = 1
 
 
-class Ordine:
-    """Contesto: gestisce il carrello e delega il pagamento alla strategia."""
+class Order:
+    """Context: manages the cart and delegates payment to the strategy."""
 
     def __init__(self):
-        self.articoli: list[ArticoloCarrello] = []
-        self._metodo_pagamento: MetodoPagamento | None = None
+        self.items: list[CartItem] = []
+        self._payment_method: PaymentMethod | None = None
 
-    def aggiungi(self, nome: str, prezzo: float, quantita: int = 1) -> None:
-        self.articoli.append(ArticoloCarrello(nome, prezzo, quantita))
+    def add(self, name: str, price: float, quantity: int = 1) -> None:
+        self.items.append(CartItem(name, price, quantity))
 
-    def get_totale(self) -> float:
-        return sum(a.prezzo * a.quantita for a in self.articoli)
+    def get_total(self) -> float:
+        return sum(item.price * item.quantity for item in self.items)
 
-    def imposta_pagamento(self, metodo: MetodoPagamento) -> None:
-        """L'utente sceglie il metodo di pagamento al checkout."""
-        self._metodo_pagamento = metodo
+    def set_payment(self, method: PaymentMethod) -> None:
+        """The user chooses the payment method at checkout."""
+        self._payment_method = method
 
-    def paga(self) -> bool:
-        """Delega il pagamento alla strategia — zero logica qui dentro."""
-        if not self.articoli:
-            print("Carrello vuoto!")
+    def pay(self) -> bool:
+        """Delegates payment to the strategy — zero logic in here."""
+        if not self.items:
+            print("Empty cart!")
             return False
 
-        if self._metodo_pagamento is None:
-            print("Nessun metodo di pagamento selezionato!")
+        if self._payment_method is None:
+            print("No payment method selected!")
             return False
 
-        totale = self.get_totale()
+        total = self.get_total()
         print(f"\n--- Checkout ---")
-        print(f"Totale: €{totale:.2f}")
-        print(f"Metodo: {self._metodo_pagamento.descrizione()}")
+        print(f"Total: €{total:.2f}")
+        print(f"Method: {self._payment_method.description()}")
 
-        successo = self._metodo_pagamento.paga(totale)
+        success = self._payment_method.pay(total)
 
-        if successo:
-            print(f"  ✅ Ordine completato!")
+        if success:
+            print(f"  ✅ Order completed!")
         else:
-            print(f"  ⚠️ Pagamento fallito, riprova.")
+            print(f"  ⚠️ Payment failed, please try again.")
 
-        return successo
+        return success
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
 
 if __name__ == "__main__":
 
     print("=" * 50)
-    print("  STRATEGY — Pagamento E-commerce")
+    print("  STRATEGY — E-commerce Payment")
     print("=" * 50)
 
-    # --- Scenario 1: pagamento con carta ---
-    ordine1 = Ordine()
-    ordine1.aggiungi("Tastiera meccanica", 89.99)
-    ordine1.aggiungi("Mouse wireless", 34.99)
+    # --- Scenario 1: card payment ---
+    order1 = Order()
+    order1.add("Mechanical keyboard", 89.99)
+    order1.add("Wireless mouse", 34.99)
 
-    ordine1.imposta_pagamento(CartaDiCredito("1234567890123456", "789"))
-    ordine1.paga()
+    order1.set_payment(CreditCard("1234567890123456", "789"))
+    order1.pay()
 
-    # --- Scenario 2: pagamento con PayPal ---
-    ordine2 = Ordine()
-    ordine2.aggiungi("Monitor 27\"", 349.00)
+    # --- Scenario 2: PayPal payment ---
+    order2 = Order()
+    order2.add("27\" Monitor", 349.00)
 
-    ordine2.imposta_pagamento(PayPal("mario@example.com"))
-    ordine2.paga()
+    order2.set_payment(PayPal("mario@example.com"))
+    order2.pay()
 
-    # --- Scenario 3: pagamento con Criptovaluta ---
-    ordine3 = Ordine()
-    ordine3.aggiungi("SSD 1TB", 79.99)
-    ordine3.aggiungi("RAM 16GB", 54.99, 2)
+    # --- Scenario 3: cryptocurrency payment ---
+    order3 = Order()
+    order3.add("SSD 1TB", 79.99)
+    order3.add("RAM 16GB", 54.99, 2)
 
-    ordine3.imposta_pagamento(Criptovaluta("0xABCDEF1234567890ABCD"))
-    ordine3.paga()
+    order3.set_payment(Cryptocurrency("0xABCDEF1234567890ABCD"))
+    order3.pay()
 
-    # --- Scenario 4: carta non valida ---
-    ordine4 = Ordine()
-    ordine4.aggiungi("Cavo USB-C", 9.99)
+    # --- Scenario 4: invalid card ---
+    order4 = Order()
+    order4.add("USB-C cable", 9.99)
 
-    ordine4.imposta_pagamento(CartaDiCredito("123", "7"))   # dati troppo corti
-    ordine4.paga()
+    order4.set_payment(CreditCard("123", "7"))   # data too short
+    order4.pay()
 

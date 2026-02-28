@@ -1,14 +1,14 @@
 # ==========================================
-# FACADE PATTERN — Esempio Reale
-# Sistema di Checkout E-commerce
+# FACADE PATTERN — Real Example
+# E-commerce Checkout System
 # ==========================================
 #
-# Scenario: completare un ordine online coinvolge 4 sottosistemi
-# (catalogo, pagamento, spedizione, notifiche) che devono essere
-# orchestrati nella sequenza corretta.
+# Scenario: completing an online order involves 4 subsystems
+# (catalog, payment, shipping, notifications) that must be
+# orchestrated in the correct sequence.
 #
-# Senza la Facade il client dovrebbe gestire tutto manualmente.
-# Con la Facade chiama UN metodo: facade.complete_order()
+# Without the Facade the client would have to manage everything manually.
+# With the Facade it calls ONE method: facade.complete_order()
 
 from __future__ import annotations
 
@@ -18,12 +18,12 @@ from typing import Optional
 
 
 # ==========================================
-# 0. STRUTTURE DATI
+# 0. DATA STRUCTURES
 # ==========================================
 
 @dataclass
 class CartItem:
-    """Un prodotto nel carrello."""
+    """A product in the cart."""
     product_id: str
     name: str
     quantity: int
@@ -36,7 +36,7 @@ class CartItem:
 
 @dataclass
 class OrderResult:
-    """Risultato restituito dalla Facade al client."""
+    """Result returned by the Facade to the client."""
     success: bool
     order_id: Optional[str] = None
     tracking_code: Optional[str] = None
@@ -45,111 +45,111 @@ class OrderResult:
 
 
 # ==========================================
-# 1. SOTTOSISTEMA — Catalogo / Inventario
+# 1. SUBSYSTEM — Catalog / Inventory
 # ==========================================
 
 class CatalogService:
-    """Gestisce la disponibilità dei prodotti."""
+    """Manages product availability."""
 
     def __init__(self):
-        # Inventario simulato: product_id → quantità
+        # Simulated inventory: product_id → quantity
         self._stock: dict[str, int] = {
             "LAPTOP-001": 10,
             "MOUSE-042":  50,
             "MONITOR-27":  5,
-            "WEBCAM-HD":   0,   # esaurito
+            "WEBCAM-HD":   0,   # out of stock
         }
 
     def check_availability(self, product_id: str, quantity: int) -> bool:
-        """Verifica se il prodotto è disponibile."""
+        """Checks if the product is available."""
         available = self._stock.get(product_id, 0)
         ok = available >= quantity
-        print(f"  [Catalogo] {product_id} × {quantity}: "
-              f"{'✓ disponibile' if ok else f'✗ solo {available} rimasti'}")
+        print(f"  [Catalog] {product_id} × {quantity}: "
+              f"{'✓ available' if ok else f'✗ only {available} left'}")
         return ok
 
     def reserve_stock(self, product_id: str, quantity: int):
-        """Decrementa lo stock (riserva)."""
+        """Decrements stock (reservation)."""
         self._stock[product_id] -= quantity
-        print(f"  [Catalogo] Stock riservato: {product_id} × {quantity}")
+        print(f"  [Catalog] Stock reserved: {product_id} × {quantity}")
 
     def release_stock(self, product_id: str, quantity: int):
-        """Ripristina lo stock (rollback)."""
+        """Restores stock (rollback)."""
         self._stock[product_id] += quantity
-        print(f"  [Catalogo] ↩ Stock rilasciato: {product_id} × {quantity}")
+        print(f"  [Catalog] ↩ Stock released: {product_id} × {quantity}")
 
 
 # ==========================================
-# 2. SOTTOSISTEMA — Pagamenti
+# 2. SUBSYSTEM — Payments
 # ==========================================
 
 class PaymentService:
-    """Simula un gateway di pagamento (es. Stripe)."""
+    """Simulates a payment gateway (e.g. Stripe)."""
 
-    # Carte bloccate per simulare fallimenti
+    # Blocked cards to simulate failures
     _BLOCKED = {"0000-0000-0000-0000"}
 
     def process_payment(self, card_number: str, amount: float) -> Optional[str]:
         """
-        Tenta di addebitare l'importo sulla carta.
-        Restituisce un transaction_id se va a buon fine, None se rifiutato.
+        Attempts to charge the amount to the card.
+        Returns a transaction_id if successful, None if declined.
         """
         if card_number in self._BLOCKED:
-            print(f"  [Pagamento] ✗ Carta ****{card_number[-4:]} rifiutata")
+            print(f"  [Payment] ✗ Card ****{card_number[-4:]} declined")
             return None
 
         txn_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
-        print(f"  [Pagamento] ✓ Addebito €{amount:.2f} su ****{card_number[-4:]} → {txn_id}")
+        print(f"  [Payment] ✓ Charge €{amount:.2f} on ****{card_number[-4:]} → {txn_id}")
         return txn_id
 
 
 # ==========================================
-# 3. SOTTOSISTEMA — Spedizioni
+# 3. SUBSYSTEM — Shipping
 # ==========================================
 
 class ShippingService:
-    """Crea spedizioni e genera codici tracking."""
+    """Creates shipments and generates tracking codes."""
 
     def create_shipment(self, address: str, n_items: int) -> str:
-        """Crea una spedizione e restituisce il codice tracking."""
+        """Creates a shipment and returns the tracking code."""
         tracking = f"TRK-{uuid.uuid4().hex[:8].upper()}"
-        print(f"  [Spedizione] ✓ Spedizione creata: {tracking}")
-        print(f"               Destinazione: {address}")
-        print(f"               Articoli: {n_items} pezzi")
+        print(f"  [Shipping] ✓ Shipment created: {tracking}")
+        print(f"              Destination: {address}")
+        print(f"              Items: {n_items} pieces")
         return tracking
 
 
 # ==========================================
-# 4. SOTTOSISTEMA — Notifiche
+# 4. SUBSYSTEM — Notifications
 # ==========================================
 
 class NotificationService:
-    """Invia email di conferma o errore."""
+    """Sends confirmation or error emails."""
 
     @staticmethod
     def send_confirmation(email: str, order_id: str, total: float, tracking: str):
-        """Email di conferma ordine con tracking."""
-        print(f"  [Email] ✉ Conferma a {email}: ordine {order_id}, €{total:.2f}, tracking {tracking}")
+        """Order confirmation email with tracking."""
+        print(f"  [Email] ✉ Confirmation to {email}: order {order_id}, €{total:.2f}, tracking {tracking}")
 
     @staticmethod
     def send_error(email: str, reason: str):
-        """Email di errore."""
-        print(f"  [Email] ✉ Errore a {email}: {reason}")
+        """Error email."""
+        print(f"  [Email] ✉ Error to {email}: {reason}")
 
 
 # ==========================================
-# 5. LA FACADE — CheckoutFacade
+# 5. THE FACADE — CheckoutFacade
 # ==========================================
-# Orchestra i 4 sottosistemi in sequenza, gestisce il rollback
-# se qualcosa va storto, e restituisce un unico OrderResult.
+# Orchestrates the 4 subsystems in sequence, handles rollback
+# if something goes wrong, and returns a single OrderResult.
 #
-# Il client NON conosce nessun sottosistema. Chiama solo:
+# The client does NOT know any subsystem. It only calls:
 #   facade.complete_order(items, email, address, card_number)
 
 class CheckoutFacade:
     """
-    Facade per il checkout e-commerce.
-    Un unico metodo complete_order() nasconde 4 sottosistemi.
+    Facade for e-commerce checkout.
+    A single method complete_order() hides 4 subsystems.
     """
 
     def __init__(self):
@@ -166,58 +166,58 @@ class CheckoutFacade:
         card_number: str,
     ) -> OrderResult:
         """
-        Completa l'ordine orchestrando i sottosistemi:
-          1. Verifica disponibilità
-          2. Riserva stock
-          3. Processa pagamento  (se fallisce → rollback stock)
-          4. Crea spedizione
-          5. Invia conferma
+        Completes the order by orchestrating the subsystems:
+          1. Check availability
+          2. Reserve stock
+          3. Process payment  (if it fails → rollback stock)
+          4. Create shipment
+          5. Send confirmation
         """
         print(f"\n{'='*55}")
-        print(f"  CHECKOUT — Ordine per {email}")
+        print(f"  CHECKOUT — Order for {email}")
         print(f"{'='*55}")
 
-        # --- 1. Verifica disponibilità ---
-        print("\n📦 Passo 1 — Verifica disponibilità")
+        # --- 1. Check availability ---
+        print("\n📦 Step 1 — Check availability")
         for item in items:
             if not self._catalog.check_availability(item.product_id, item.quantity):
-                msg = f"Prodotto '{item.name}' non disponibile"
+                msg = f"Product '{item.name}' not available"
                 self._notifications.send_error(email, msg)
                 return OrderResult(success=False, message=msg)
 
-        # --- 2. Riserva stock ---
-        print("\n📦 Passo 2 — Riserva stock")
+        # --- 2. Reserve stock ---
+        print("\n📦 Step 2 — Reserve stock")
         reserved: list[CartItem] = []
         for item in items:
             self._catalog.reserve_stock(item.product_id, item.quantity)
             reserved.append(item)
 
-        # --- 3. Pagamento ---
+        # --- 3. Payment ---
         total = sum(item.subtotal for item in items)
-        print(f"\n💳 Passo 3 — Pagamento (totale: €{total:.2f})")
+        print(f"\n💳 Step 3 — Payment (total: €{total:.2f})")
         txn_id = self._payment.process_payment(card_number, total)
 
         if txn_id is None:
-            # Rollback: rilascia lo stock riservato
-            print("\n  ↩ ROLLBACK — Rilascio stock")
+            # Rollback: release the reserved stock
+            print("\n  ↩ ROLLBACK — Releasing stock")
             for item in reserved:
                 self._catalog.release_stock(item.product_id, item.quantity)
-            msg = "Pagamento rifiutato"
+            msg = "Payment declined"
             self._notifications.send_error(email, msg)
             return OrderResult(success=False, message=msg)
 
-        # --- 4. Spedizione ---
-        print("\n🚚 Passo 4 — Creazione spedizione")
+        # --- 4. Shipping ---
+        print("\n🚚 Step 4 — Create shipment")
         n_items = sum(item.quantity for item in items)
         tracking = self._shipping.create_shipment(address, n_items)
 
-        # --- 5. Conferma ---
+        # --- 5. Confirmation ---
         order_id = f"ORD-{uuid.uuid4().hex[:8].upper()}"
-        print(f"\n✉️  Passo 5 — Conferma ordine {order_id}")
+        print(f"\n✉️  Step 5 — Order confirmation {order_id}")
         self._notifications.send_confirmation(email, order_id, total, tracking)
 
         print(f"\n{'='*55}")
-        print(f"  ✅ ORDINE COMPLETATO")
+        print(f"  ✅ ORDER COMPLETED")
         print(f"{'='*55}")
 
         return OrderResult(
@@ -225,73 +225,73 @@ class CheckoutFacade:
             order_id=order_id,
             tracking_code=tracking,
             total=total,
-            message="Ordine completato con successo",
+            message="Order completed successfully",
         )
 
 
 # ==========================================
-# 6. CODICE CLIENT
+# 6. CLIENT CODE
 # ==========================================
-# Il client prepara i dati e chiama UN metodo.
-# Non conosce nessun sottosistema, non gestisce rollback.
+# The client prepares the data and calls ONE method.
+# It doesn't know any subsystem, doesn't handle rollback.
 
-def codice_client(facade: CheckoutFacade):
+def client_code(facade: CheckoutFacade):
 
-    # --- Scenario 1: ordine che va a buon fine ---
+    # --- Scenario 1: order that succeeds ---
     print("\n" + "─" * 55)
-    print("  SCENARIO 1: Ordine standard (successo)")
+    print("  SCENARIO 1: Standard order (success)")
     print("─" * 55)
 
-    carrello = [
+    cart = [
         CartItem("LAPTOP-001", "Laptop Gaming Pro", 1, 1299.99),
         CartItem("MOUSE-042",  "Mouse Wireless",    2,   34.99),
     ]
 
-    risultato = facade.complete_order(
-        items=carrello,
+    result = facade.complete_order(
+        items=cart,
         email="marco.rossi@email.it",
         address="Via Roma 42, Milano",
         card_number="4532-1234-5678-9012",
     )
 
-    print(f"\n  → success={risultato.success}, order={risultato.order_id}, "
-          f"tracking={risultato.tracking_code}, totale=€{risultato.total:.2f}")
+    print(f"\n  → success={result.success}, order={result.order_id}, "
+          f"tracking={result.tracking_code}, total=€{result.total:.2f}")
 
-    # --- Scenario 2: carta rifiutata → rollback automatico ---
+    # --- Scenario 2: card declined → automatic rollback ---
     print("\n\n" + "─" * 55)
-    print("  SCENARIO 2: Carta rifiutata (rollback automatico)")
+    print("  SCENARIO 2: Card declined (automatic rollback)")
     print("─" * 55)
 
-    carrello_2 = [
+    cart_2 = [
         CartItem("MONITOR-27", "Monitor 4K 27\"", 2, 499.99),
     ]
 
-    risultato_2 = facade.complete_order(
-        items=carrello_2,
+    result_2 = facade.complete_order(
+        items=cart_2,
         email="laura.bianchi@email.it",
         address="Corso Vittorio 15, Torino",
-        card_number="0000-0000-0000-0000",   # carta bloccata
+        card_number="0000-0000-0000-0000",   # blocked card
     )
 
-    print(f"\n  → success={risultato_2.success}, messaggio='{risultato_2.message}'")
+    print(f"\n  → success={result_2.success}, message='{result_2.message}'")
 
-    # --- Scenario 3: prodotto esaurito ---
+    # --- Scenario 3: product out of stock ---
     print("\n\n" + "─" * 55)
-    print("  SCENARIO 3: Prodotto esaurito")
+    print("  SCENARIO 3: Product out of stock")
     print("─" * 55)
 
-    carrello_3 = [
+    cart_3 = [
         CartItem("WEBCAM-HD", "Webcam Full HD", 1, 59.99),  # stock = 0
     ]
 
-    risultato_3 = facade.complete_order(
-        items=carrello_3,
+    result_3 = facade.complete_order(
+        items=cart_3,
         email="marco.rossi@email.it",
         address="Via Roma 42, Milano",
         card_number="4532-1234-5678-9012",
     )
 
-    print(f"\n  → success={risultato_3.success}, messaggio='{risultato_3.message}'")
+    print(f"\n  → success={result_3.success}, message='{result_3.message}'")
 
 
 # ==========================================
@@ -299,4 +299,4 @@ def codice_client(facade: CheckoutFacade):
 # ==========================================
 if __name__ == "__main__":
     facade = CheckoutFacade()
-    codice_client(facade)
+    client_code(facade)

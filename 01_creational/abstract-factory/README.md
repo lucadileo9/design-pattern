@@ -1,40 +1,40 @@
 # Abstract Factory Pattern
 
-## Problema
+## Problem
 
-Innanzitutto è importante analizzare questo design pattern solo dopo aver analizzato e capito il Factory Method, perché è un'estensione di quest'ultimo. 
-Infatti tale pattern si pone come obiettivo quello di risolvere un problema più complesso, ovvero quando abbiamo più famiglie di prodotti da creare. Nell'esempio del Factory Method, avevamo un solo tipo di classe, simili tra loro: `X`, `Y`, `Z`. Quindi quel che facemmo fu creare un'interfaccia comune `A` e poi una factory per ogni classe concreta, così da usare le factory per creare oggetti di tipo `A` senza conoscere la classe concreta.
-Ora invece immaginiamo di avere più famiglie di classi, ad esempio `X1`, `Y1`, `Z1` che appartengono alla famiglia 1, e `X2`, `Y2`, `Z2` che appartengono alla famiglia 2. Il problema è che se usassimo il Factory Method, avremmo bisogno di una factory per ogni classe concreta, quindi 6 factory: `FactoryX1`, `FactoryY1`, `FactoryZ1`, `FactoryX2`, `FactoryY2`, `FactoryZ2`. Questo porterebbe a un numero esponenziale di factory.
+First of all, it's important to analyze this design pattern only after having analyzed and understood the Factory Method, because it's an extension of the latter.
+This pattern aims to solve a more complex problem, namely when we have multiple families of products to create. In the Factory Method example, we had a single type of class, similar to each other: `X`, `Y`, `Z`. So what we did was create a common interface `A` and then a factory for each concrete class, so we could use the factories to create objects of type `A` without knowing the concrete class.
+Now instead, imagine having multiple families of classes, for example `X1`, `Y1`, `Z1` belonging to family 1, and `X2`, `Y2`, `Z2` belonging to family 2. The problem is that if we used the Factory Method, we'd need a factory for each concrete class, so 6 factories: `FactoryX1`, `FactoryY1`, `FactoryZ1`, `FactoryX2`, `FactoryY2`, `FactoryZ2`. This would lead to an exponential number of factories.
 
-Per ritornare all'esempio classico della logistica, immaginiamo di avere sempre i mezzi di trasporto `Camion`, `Nave`, `Aereo`, ma ora abbiamo due famiglie che li dividono ulteriormente: i mezzi elettrici (`CamionElettrico`, `NaveElettrica`, `AereoElettrico`) e i mezzi a combustione (`CamionCombustione`, `NaveCombustione`, `AereoCombustione`). Se usassimo il Factory Method, avremmo bisogno di 6 factory per creare questi mezzi, il che è inefficiente e difficile da mantenere.
+Going back to the classic logistics example, imagine still having the transport vehicles `Truck`, `Ship`, `Airplane`, but now we have two families that further divide them: electric vehicles (`ElectricTruck`, `ElectricShip`, `ElectricAirplane`) and combustion vehicles (`CombustionTruck`, `CombustionShip`, `CombustionAirplane`). If we used the Factory Method, we'd need 6 factories to create these vehicles, which is inefficient and hard to maintain.
 
-N.B.: tipicamente i vari prodotti di una famiglia sono progettati per lavorare insieme, come ad esempio un database con un driver specifico o un logger specifico e così via. 
+N.B.: typically the various products of a family are designed to work together, such as a database with a specific driver or a specific logger, and so on.
 
-## Soluzione
+## Solution
 
-La soluzione a questo problema è il pattern **Abstract Factory**. In questo pattern, invece di avere una factory per ogni classe concreta, abbiamo una factory astratta che definisce un'interfaccia per creare famiglie di oggetti correlati. Poi, per ogni famiglia di prodotti, creiamo una factory concreta che implementa questa interfaccia.
+The solution to this problem is the **Abstract Factory** pattern. In this pattern, instead of having a factory for each concrete class, we have an abstract factory that defines an interface for creating families of related objects. Then, for each product family, we create a concrete factory that implements this interface.
 
-Spiegato per fasi abbiamo:
-- **Product**: definiamo l'interfaccia del prodotto (es. `A`) con metodi astratti. Le classi concrete (`X1`, `Y1`, `Z1`, `X2`, `Y2`, `Z2`) implementeranno questa interfaccia.
-- **Abstract Factory**: definiamo l'interfaccia `AbstractFactory` con metodi astratti per creare OGNI tipo di prodotto, ad esempio `create_X()`, `create_Y()`, `create_Z()`. Le classi concrete (`FactoryFamiglia1`, `FactoryFamiglia2`) implementano questi metodi e restituiscono istanze dei prodotti concreti della rispettiva famiglia.
+Explained step by step:
+- **Product**: we define the product interface (e.g. `A`) with abstract methods. The concrete classes (`X1`, `Y1`, `Z1`, `X2`, `Y2`, `Z2`) will implement this interface.
+- **Abstract Factory**: we define the `AbstractFactory` interface with abstract methods to create EVERY type of product, e.g. `create_X()`, `create_Y()`, `create_Z()`. The concrete classes (`FactoryFamily1`, `FactoryFamily2`) implement these methods and return instances of the concrete products of their respective family.
 
-Di conseguenza quel che succede è che io con ogni factory concreta creo un'intera famiglia di prodotti, e il client può scegliere quale famiglia usare semplicemente istanziando la factory concreta corrispondente.
+As a result, what happens is that with each concrete factory I create an entire family of products, and the client can choose which family to use by simply instantiating the corresponding concrete factory.
 
-Come usare l'Abstract Factory
+How to use the Abstract Factory
 
-- Nel codice client, invece di istanziare direttamente i prodotti concreti, si istanzia la factory concreta corrispondente alla famiglia di prodotti desiderata (es. `FactoryFamiglia1`) e si chiama i metodi per creare i prodotti (es. `create_X()`, `create_Y()`, `create_Z()`).
-- Il client utilizza l'interfaccia dei prodotti senza conoscere la loro implementazione concreta, e può facilmente cambiare la famiglia di prodotti semplicemente cambiando la factory concreta istanziata.
+- In the client code, instead of directly instantiating concrete products, you instantiate the concrete factory corresponding to the desired product family (e.g. `FactoryFamily1`) and call the methods to create the products (e.g. `create_X()`, `create_Y()`, `create_Z()`).
+- The client uses the product interfaces without knowing their concrete implementation, and can easily change the product family by simply changing the instantiated concrete factory.
 
-Esempio (logistica)
-- Interfaccia comune: `MezzoDiTrasporto` con `carica()` e `scarica()`.
-- Classi concrete: `CamionElettrico`, `NaveElettrica`, `AereoElettrico` per la famiglia elettrica, e `CamionCombustione`, `NaveCombustione`, `AereoCombustione` per la famiglia a combustione, tutte implementano `MezzoDiTrasporto`.
-- Definiamo l'interfaccia `MezzoDiTrasportoFactory` con metodi `create_Camion()`, `create_Nave()`, `create_Aereo()`.
-- Implementazioni concrete: `FactoryElettrica`, `FactoryCombustione`, ciascuna crea i rispettivi mezzi di trasporto della famiglia. 
+Example (logistics)
+- Common interface: `TransportVehicle` with `load()` and `unload()`.
+- Concrete classes: `ElectricTruck`, `ElectricShip`, `ElectricAirplane` for the electric family, and `CombustionTruck`, `CombustionShip`, `CombustionAirplane` for the combustion family, all implementing `TransportVehicle`.
+- We define the `TransportVehicleFactory` interface with methods `create_Truck()`, `create_Ship()`, `create_Airplane()`.
+- Concrete implementations: `ElectricFactory`, `CombustionFactory`, each creates the respective transport vehicles of the family. 
 
 
 ## Diagrammi
 
-### Diagramma generico
+### Generic diagram
 
 ```mermaid
 %%{init: {"layout": "elk"}}%%
@@ -93,10 +93,10 @@ classDiagram
     AbstractFactory <|.. ConcreteFactory2
 
     %% Relazioni di Creazione (DIPENDENZE)
-    ConcreteFactory1 ..> ConcreteProductA1 : "crea"
-    ConcreteFactory1 ..> ConcreteProductB1 : "crea"
-    ConcreteFactory2 ..> ConcreteProductA2 : "crea"
-    ConcreteFactory2 ..> ConcreteProductB2 : "crea"
+    ConcreteFactory1 ..> ConcreteProductA1 : "creates"
+    ConcreteFactory1 ..> ConcreteProductB1 : "creates"
+    ConcreteFactory2 ..> ConcreteProductA2 : "creates"
+    ConcreteFactory2 ..> ConcreteProductB2 : "creates"
 
     %% Styling
     style AbstractFactory fill:#1e272e,stroke:#05c46b,stroke-width:2px,color:#fff
@@ -110,9 +110,9 @@ classDiagram
 
 
 
-### Diagramma specifico
+### Specific diagram
 
-La cosa migliore è guardare questi diagramma dopo aver visto il codice, altrimenti potrebbe essere un po' difficile da capire. 
+The best approach is to look at these diagrams after reviewing the code, otherwise they might be a bit difficult to understand. 
 
 ```mermaid
 %%{init: {"layout": "elk"}}%%
@@ -160,26 +160,26 @@ classDiagram
     }
 
     %% --- RELAZIONI ---
-    InfrastructureFactory <|-- ProductionFactory : implementa
-    InfrastructureFactory <|-- CloudFactory : implementa
+    InfrastructureFactory <|-- ProductionFactory : implements
+    InfrastructureFactory <|-- CloudFactory : implements
     
-    DatabaseConnection <|.. MySQLConnection : implementa
-    DatabaseConnection <|.. MongoDBConnection : implementa
+    DatabaseConnection <|.. MySQLConnection : implements
+    DatabaseConnection <|.. MongoDBConnection : implements
     
-    Logger <|.. FileLogger : implementa
-    Logger <|.. CloudLogger : implementa
+    Logger <|.. FileLogger : implements
+    Logger <|.. CloudLogger : implements
 
-    %% Relazioni di Creazione (Vicolo di coerenza)
-    ProductionFactory ..> MySQLConnection : "crea"
-    ProductionFactory ..> FileLogger : "crea"
+    %% Creation relationships (Consistency constraint)
+    ProductionFactory ..> MySQLConnection : "creates"
+    ProductionFactory ..> FileLogger : "creates"
     
-    CloudFactory ..> MongoDBConnection : "crea"
-    CloudFactory ..> CloudLogger : "crea"
+    CloudFactory ..> MongoDBConnection : "creates"
+    CloudFactory ..> CloudLogger : "creates"
 
-    %% Il Client usa solo le astrazioni
-    Application o-- InfrastructureFactory : riceve
-    Application o-- DatabaseConnection : usa
-    Application o-- Logger : usa
+    %% The Client uses only abstractions
+    Application o-- InfrastructureFactory : receives
+    Application o-- DatabaseConnection : uses
+    Application o-- Logger : uses
 
     %% Styling
     style InfrastructureFactory fill:#1e272e,stroke:#05c46b,stroke-width:2px,color:#fff
@@ -187,7 +187,7 @@ classDiagram
     style Logger fill:#1e272e,stroke:#ffa502,stroke-width:2px,color:#fff
     style Application fill:#2d3436,stroke:#ef5777,stroke-width:2px,color:#fff
 ```
-### Diagramma di sequenza
+### Sequence diagram
 
 
 ```mermaid
@@ -201,29 +201,29 @@ sequenceDiagram
     participant DB as MySQLConnection
     participant Log as FileLogger
 
-    Note over Client, Fact: 1. Setup dell'Ambiente
+    Note over Client, Fact: 1. Environment Setup
     Client->>Fact: new ProductionFactory()
     Client->>App: new Application(factory)
     
     activate App
     App->>Fact: create_database()
     Fact->>DB: new MySQLConnection(config)
-    Fact-->>App: ritorna istanza DB
+    Fact-->>App: returns DB instance
     
     App->>Fact: create_logger()
     Fact->>Log: new FileLogger(path)
-    Fact-->>App: ritorna istanza Logger
+    Fact-->>App: returns Logger instance
     deactivate App
 
-    Note over App, Log: 2. Esecuzione Business Logic
+    Note over App, Log: 2. Business Logic Execution
     Client->>App: run()
     activate App
-    App->>Log: info("Avvio applicazione")
+    App->>Log: info("Application starting")
     App->>DB: open()
     DB-->>App: True
     App->>DB: query("SELECT version()")
-    DB-->>App: "[MySQL] Risultato..."
-    App->>Log: info("Query eseguita")
+    DB-->>App: "[MySQL] Result..."
+    App->>Log: info("Query executed")
     
     App->>DB: close()
     App->>Log: flush()
@@ -231,27 +231,27 @@ sequenceDiagram
     
 ```
 
-### Vantaggi
-L'Abstract Factory offre benefici cruciali per la gestione di sistemi complessi:
+### Advantages
+The Abstract Factory offers crucial benefits for managing complex systems:
 
-- **Compatibilità dei Prodotti**: Garantite che i prodotti ottenuti da una factory siano compatibili tra loro, mantenendo la coerenza all'interno della famiglia di oggetti.
-
-
-- **Disaccoppiamento**: Si evita un accoppiamento stretto tra il codice client e le classi concrete dei prodotti.
+- **Product Compatibility**: You ensure that products obtained from a factory are compatible with each other, maintaining consistency within the object family.
 
 
-- **Single Responsibility Principle**: Potete estrarre il codice di creazione dei prodotti in un unico posto, rendendo il sistema più facile da supportare e manutenere.
+- **Decoupling**: Tight coupling between client code and concrete product classes is avoided.
+
+
+- **Single Responsibility Principle**: You can extract product creation code into a single place, making the system easier to support and maintain.
 
 
 
-- **Open/Closed Principle**: È possibile introdurre nuove varianti (famiglie) di prodotti senza dover modificare il codice client esistente. Tuttavia... vedi contro 
+- **Open/Closed Principle**: It's possible to introduce new product variants (families) without modifying existing client code. However... see disadvantages
 
 
-### Svantaggi
-Tuttavia, l'astrazione ha un costo:
-- **Complessità Elevata**: Il codice può diventare inutilmente complicato a causa dell'introduzione di numerose nuove interfacce e classi.
+### Disadvantages
+However, abstraction has a cost:
+- **High Complexity**: The code can become unnecessarily complicated due to the introduction of numerous new interfaces and classes.
 
-- **Rigidità dell'Interfaccia**: Se dovete aggiungere un nuovo tipo di prodotto alla famiglia (ad esempio, aggiungere un "Elicottero" alla vostra logistica), dovrete modificare l'interfaccia della Factory Astratta e tutte le sue implementazioni concrete.
+- **Interface Rigidity**: If you need to add a new product type to the family (for example, adding a "Helicopter" to your logistics), you'll need to modify the Abstract Factory interface and all its concrete implementations.
 
 
-- **Difficoltà Iniziale**: Richiede una pianificazione attenta e una conoscenza approfondita dei principi della programmazione orientata agli oggetti.
+- **Initial Difficulty**: It requires careful planning and thorough knowledge of object-oriented programming principles.

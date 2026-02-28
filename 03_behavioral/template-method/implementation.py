@@ -1,173 +1,173 @@
 # ==========================================
-# TEMPLATE METHOD — SOLUZIONE
+# TEMPLATE METHOD — SOLUTION
 # ==========================================
-# Definiamo una classe astratta (AlgoritmoBase) che contiene il
-# "metodo template" — esegui() — il quale chiama i 4 step in ordine.
+# We define an abstract class (BaseAlgorithm) that contains the
+# "template method" — execute() — which calls the 4 steps in order.
 #
-# Gli step COMUNI (1 e 4) sono implementati nella classe base.
-# Gli step SPECIFICI (2 e 3) sono dichiarati astratti: ogni
-# sotto-classe li implementa a modo suo.
+# The COMMON steps (1 and 4) are implemented in the base class.
+# The SPECIFIC steps (2 and 3) are declared abstract: each
+# subclass implements them in its own way.
 #
-# Risultato: zero duplicazione. Se cambia lo step 1, si modifica
-# UN solo punto. Aggiungere AlgoritmoD → solo step 2 e 3 nuovi.
+# Result: zero duplication. If step 1 changes, it's modified
+# in ONE single place. Adding AlgorithmD → only new step 2 and 3.
 
 from abc import ABC, abstractmethod
 
 
 # ==========================================
-# CLASSE ASTRATTA — il "template"
+# ABSTRACT CLASS — the "template"
 # ==========================================
-# Il metodo esegui() definisce lo SCHELETRO dell'algoritmo:
-# l'ordine degli step è fisso e non sovrascrivibile.
-# Le sotto-classi possono personalizzare solo gli step astratti.
+# The execute() method defines the SKELETON of the algorithm:
+# the order of steps is fixed and non-overridable.
+# Subclasses can only customize the abstract steps.
 
-class AlgoritmoBase(ABC):
+class BaseAlgorithm(ABC):
     """
-    Classe astratta che definisce il template method.
+    Abstract class that defines the template method.
     
-    - esegui()  → metodo template (NON sovrascrivere!)
-    - step1()   → comune, implementato qui
-    - step2()   → astratto, ogni sotto-classe lo implementa
-    - step3()   → astratto, ogni sotto-classe lo implementa
-    - step4()   → comune, implementato qui
+    - execute()  → template method (do NOT override!)
+    - step1()    → common, implemented here
+    - step2()    → abstract, each subclass implements it
+    - step3()    → abstract, each subclass implements it
+    - step4()    → common, implemented here
     """
 
-    def esegui(self, dati: list[int]) -> list[int]:
+    def execute(self, data: list[int]) -> list[int]:
         """
-        Template method: definisce la struttura dell'algoritmo.
-        Chiama gli step in ordine — le sotto-classi NON toccano
-        questo metodo, ma solo gli step astratti.
+        Template method: defines the structure of the algorithm.
+        Calls the steps in order — subclasses do NOT touch
+        this method, only the abstract steps.
         """
-        dati_lavoro = self._step1(dati)
-        if dati_lavoro is None:
+        working_data = self._step1(data)
+        if working_data is None:
             return []
-        dati_lavoro = self._step2(dati_lavoro)
-        dati_lavoro = self._step3(dati_lavoro)
-        self._step4(dati_lavoro)
-        return dati_lavoro
+        working_data = self._step2(working_data)
+        working_data = self._step3(working_data)
+        self._step4(working_data)
+        return working_data
 
-    # --- Step COMUNI (implementati qui, una sola volta) ---
+    # --- COMMON steps (implemented here, only once) ---
 
-    def _step1(self, dati: list[int]) -> list[int] | None:
-        """Validazione e caricamento — comune a tutti gli algoritmi."""
-        nome = self.__class__.__name__
-        print(f"[{nome}] Step 1 — Validazione e caricamento")
-        if not dati:
-            print("  ⚠️ Lista vuota, nulla da elaborare")
+    def _step1(self, data: list[int]) -> list[int] | None:
+        """Validation and loading — common to all algorithms."""
+        name = self.__class__.__name__
+        print(f"[{name}] Step 1 — Validation and loading")
+        if not data:
+            print("  ⚠️ Empty list, nothing to process")
             return None
-        dati_lavoro = dati.copy()
-        print(f"  Dati ricevuti: {dati_lavoro}")
-        return dati_lavoro
+        working_data = data.copy()
+        print(f"  Data received: {working_data}")
+        return working_data
 
-    def _step4(self, dati_lavoro: list[int]) -> None:
-        """Output finale — comune a tutti gli algoritmi."""
-        nome = self.__class__.__name__
-        print(f"[{nome}] Step 4 — Risultato finale")
-        print(f"  ✅ Pipeline completata → {dati_lavoro}")
-        print(f"  📊 Elementi: {len(dati_lavoro)}, Somma: {sum(dati_lavoro)}")
+    def _step4(self, working_data: list[int]) -> None:
+        """Final output — common to all algorithms."""
+        name = self.__class__.__name__
+        print(f"[{name}] Step 4 — Final result")
+        print(f"  ✅ Pipeline completed → {working_data}")
+        print(f"  📊 Elements: {len(working_data)}, Sum: {sum(working_data)}")
 
-    # --- Step ASTRATTI (implementati dalle sotto-classi) ---
+    # --- ABSTRACT steps (implemented by subclasses) ---
 
     @abstractmethod
-    def _step2(self, dati: list[int]) -> list[int]:
-        """Elaborazione — specifica per ogni algoritmo."""
+    def _step2(self, data: list[int]) -> list[int]:
+        """Processing — specific to each algorithm."""
         ...
 
     @abstractmethod
-    def _step3(self, dati: list[int]) -> list[int]:
-        """Trasformazione — specifica per ogni algoritmo."""
+    def _step3(self, data: list[int]) -> list[int]:
+        """Transformation — specific to each algorithm."""
         ...
 
 
 # ==========================================
-# CLASSI CONCRETE — solo gli step specifici
+# CONCRETE CLASSES — only the specific steps
 # ==========================================
-# Ogni sotto-classe implementa SOLO step2 e step3.
-# Step 1 e 4 li eredita gratis — zero duplicazione.
+# Each subclass implements ONLY step2 and step3.
+# Step 1 and 4 are inherited for free — zero duplication.
 
-class AlgoritmoA(AlgoritmoBase):
-    """Ordina i dati e raddoppia ogni valore."""
+class AlgorithmA(BaseAlgorithm):
+    """Sorts data and doubles every value."""
 
-    def _step2(self, dati: list[int]) -> list[int]:
-        print(f"[AlgoritmoA] Step 2 — Ordinamento crescente")
-        risultato = sorted(dati)
-        print(f"  Risultato: {risultato}")
-        return risultato
+    def _step2(self, data: list[int]) -> list[int]:
+        print(f"[AlgorithmA] Step 2 — Ascending sort")
+        result = sorted(data)
+        print(f"  Result: {result}")
+        return result
 
-    def _step3(self, dati: list[int]) -> list[int]:
-        print(f"[AlgoritmoA] Step 3 — Raddoppio valori")
-        risultato = [x * 2 for x in dati]
-        print(f"  Risultato: {risultato}")
-        return risultato
-
-
-class AlgoritmoB(AlgoritmoBase):
-    """Inverte l'ordine e somma coppie adiacenti."""
-
-    def _step2(self, dati: list[int]) -> list[int]:
-        print(f"[AlgoritmoB] Step 2 — Inversione ordine")
-        risultato = list(reversed(dati))
-        print(f"  Risultato: {risultato}")
-        return risultato
-
-    def _step3(self, dati: list[int]) -> list[int]:
-        print(f"[AlgoritmoB] Step 3 — Somma coppie adiacenti")
-        risultato = []
-        for i in range(0, len(dati) - 1, 2):
-            risultato.append(dati[i] + dati[i + 1])
-        if len(dati) % 2 == 1:
-            risultato.append(dati[-1])
-        print(f"  Risultato: {risultato}")
-        return risultato
+    def _step3(self, data: list[int]) -> list[int]:
+        print(f"[AlgorithmA] Step 3 — Doubling values")
+        result = [x * 2 for x in data]
+        print(f"  Result: {result}")
+        return result
 
 
-class AlgoritmoC(AlgoritmoBase):
-    """Filtra i pari e eleva al quadrato."""
+class AlgorithmB(BaseAlgorithm):
+    """Reverses order and sums adjacent pairs."""
 
-    def _step2(self, dati: list[int]) -> list[int]:
-        print(f"[AlgoritmoC] Step 2 — Filtra solo i pari")
-        risultato = [x for x in dati if x % 2 == 0]
-        print(f"  Risultato: {risultato}")
-        return risultato
+    def _step2(self, data: list[int]) -> list[int]:
+        print(f"[AlgorithmB] Step 2 — Reversing order")
+        result = list(reversed(data))
+        print(f"  Result: {result}")
+        return result
 
-    def _step3(self, dati: list[int]) -> list[int]:
-        print(f"[AlgoritmoC] Step 3 — Elevamento al quadrato")
-        risultato = [x ** 2 for x in dati]
-        print(f"  Risultato: {risultato}")
-        return risultato
+    def _step3(self, data: list[int]) -> list[int]:
+        print(f"[AlgorithmB] Step 3 — Summing adjacent pairs")
+        result = []
+        for i in range(0, len(data) - 1, 2):
+            result.append(data[i] + data[i + 1])
+        if len(data) % 2 == 1:
+            result.append(data[-1])
+        print(f"  Result: {result}")
+        return result
+
+
+class AlgorithmC(BaseAlgorithm):
+    """Filters even numbers and squares them."""
+
+    def _step2(self, data: list[int]) -> list[int]:
+        print(f"[AlgorithmC] Step 2 — Filter only even numbers")
+        result = [x for x in data if x % 2 == 0]
+        print(f"  Result: {result}")
+        return result
+
+    def _step3(self, data: list[int]) -> list[int]:
+        print(f"[AlgorithmC] Step 3 — Squaring")
+        result = [x ** 2 for x in data]
+        print(f"  Result: {result}")
+        return result
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
-# Il client usa TUTTI gli algoritmi attraverso la stessa
-# interfaccia (AlgoritmoBase.esegui). Non sa nulla degli
-# step interni — sa solo che la pipeline viene eseguita.
+# The client uses ALL algorithms through the same
+# interface (BaseAlgorithm.execute). It knows nothing about
+# the internal steps — it only knows the pipeline is executed.
 
 if __name__ == "__main__":
 
     print("=" * 50)
-    print("  TEMPLATE METHOD — Soluzione (con pattern)")
+    print("  TEMPLATE METHOD — Solution (with pattern)")
     print("=" * 50)
 
-    dati = [3, 7, 2, 8, 4, 1, 6]
+    data = [3, 7, 2, 8, 4, 1, 6]
 
-    print("\n--- AlgoritmoA ---")
-    a = AlgoritmoA()
-    a.esegui(dati)
+    print("\n--- AlgorithmA ---")
+    a = AlgorithmA()
+    a.execute(data)
 
-    print("\n--- AlgoritmoB ---")
-    b = AlgoritmoB()
-    b.esegui(dati)
+    print("\n--- AlgorithmB ---")
+    b = AlgorithmB()
+    b.execute(data)
 
-    print("\n--- AlgoritmoC ---")
-    c = AlgoritmoC()
-    c.esegui(dati)
+    print("\n--- AlgorithmC ---")
+    c = AlgorithmC()
+    c.execute(data)
 
-    # Vantaggi:
-    # 1. Step 1 e 4 → definiti UNA sola volta nella classe base
-    # 2. Ogni sotto-classe implementa SOLO ciò che la distingue
-    # 3. Aggiungere AlgoritmoD → nuova classe con solo step2 e step3
+    # Advantages:
+    # 1. Steps 1 and 4 → defined ONCE in the base class
+    # 2. Each subclass implements ONLY what distinguishes it
+    # 3. Adding AlgorithmD → new class with only step2 and step3
     # 4. La struttura dell'algoritmo (l'ordine degli step) è garantita
     #    dal template method — le sotto-classi non possono alterarla
     # OVviamente nulla vieta di riscrivere anche metodi comuni nel caso in

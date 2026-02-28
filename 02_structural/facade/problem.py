@@ -1,110 +1,110 @@
 # ==========================================
-# IL SOTTOSISTEMA — tre servizi complessi
+# THE SUBSYSTEM — three complex services
 # ==========================================
-# Ogni classe ha la propria interfaccia, i propri metodi,
-# il proprio protocollo (prima login, poi richiesta dati).
-# In un sistema reale sarebbero librerie o microservizi esterni.
+# Each class has its own interface, its own methods,
+# its own protocol (first login, then request data).
+# In a real system these would be libraries or external microservices.
 
-class ServizioInventarioX:
-    """Sottosistema X — gestisce dati di inventario."""
+class InventoryServiceX:
+    """Subsystem X — manages inventory data."""
     def login_x(self, user: str, password: str) -> bool:
-        print(f"[X] Login di '{user}'... OK.")
+        print(f"[X] Login for '{user}'... OK.")
         return True
 
-    def richiedi_dati_x(self) -> dict:
-        print("[X] Recupero dati inventario...")
+    def request_data_x(self) -> dict:
+        print("[X] Retrieving inventory data...")
         return {"widget_a": 150, "widget_b": 89, "gadget_x": 320}
 
     def logout_x(self):
-        print("[X] Sessione inventario chiusa.")
+        print("[X] Inventory session closed.")
 
 
-class ServizioAnalyticsY:
-    """Sottosistema Y — fornisce dati di analytics/vendite."""
-    def autenticazione_y(self, api_key: str) -> bool:
-        # Nota: il metodo si chiama diversamente da X (autenticazione, non login)
-        print(f"[Y] Autenticazione con API key '{api_key[:8]}...'... OK.")
+class AnalyticsServiceY:
+    """Subsystem Y — provides analytics/sales data."""
+    def authenticate_y(self, api_key: str) -> bool:
+        # Note: the method has a different name from X (authenticate, not login)
+        print(f"[Y] Authentication with API key '{api_key[:8]}...'... OK.")
         return True
 
-    def fetch_metriche_y(self) -> dict:
-        # Nota: ritorna le stesse chiavi ma con valori diversi (prezzi medi)
-        print("[Y] Recupero metriche di vendita...")
+    def fetch_metrics_y(self) -> dict:
+        # Note: returns the same keys but with different values (average prices)
+        print("[Y] Retrieving sales metrics...")
         return {"widget_a": 45.0, "widget_b": 12.5, "gadget_x": 78.0}
 
-    def disconnetti_y(self):
-        print("[Y] Connessione analytics chiusa.")
+    def disconnect_y(self):
+        print("[Y] Analytics connection closed.")
 
 
-class MotoreReportZ:
-    """Sottosistema Z — generatore di report visuali."""
-    def inizializza_z(self, titolo: str):
-        print(f"[Z] Inizializzazione report: '{titolo}'")
+class ReportEngineZ:
+    """Subsystem Z — visual report generator."""
+    def initialize_z(self, title: str):
+        print(f"[Z] Initializing report: '{title}'")
 
-    def aggiungi_riga_z(self, prodotto: str, quantita: int, prezzo: float):
-        totale = quantita * prezzo
-        print(f"[Z]   {prodotto:<15} | Qtà: {quantita:>5} | Prezzo: €{prezzo:>7.2f} | Totale: €{totale:>10.2f}")
+    def add_row_z(self, product: str, quantity: int, price: float):
+        total = quantity * price
+        print(f"[Z]   {product:<15} | Qty: {quantity:>5} | Price: €{price:>7.2f} | Total: €{total:>10.2f}")
 
-    def finalizza_z(self):
-        print("[Z] Report completato e salvato.")
+    def finalize_z(self):
+        print("[Z] Report completed and saved.")
 
 
 # ==========================================
-# IL PROBLEMA: IL CLIENT ORCHESTRATORE
+# THE PROBLEM: THE CLIENT AS ORCHESTRATOR
 # ==========================================
-# Il client deve conoscere OGNI sottosistema, OGNI metodo,
-# e l'ORDINE corretto delle operazioni. È lui il "collante".
+# The client must know EVERY subsystem, EVERY method,
+# and the CORRECT order of operations. It is the "glue".
 #
-# Problemi evidenti:
-#  1. Se X cambia il nome di un metodo (es. login_x → connect_x),
-#     questo codice si rompe.
-#  2. Se aggiungiamo un quarto sottosistema, dobbiamo modificare qui.
-#  3. Ogni client che vuole fare un report deve ripetere TUTTA questa logica.
-#  4. Se ci si dimentica un passaggio (es. il login), il sistema fallisce.
+# Obvious problems:
+#  1. If X changes a method name (e.g. login_x → connect_x),
+#     this code breaks.
+#  2. If we add a fourth subsystem, we must modify this code.
+#  3. Every client that wants to generate a report must repeat ALL this logic.
+#  4. If a step is forgotten (e.g. login), the system fails.
 
-def codice_client():
-    print("Client: devo generare un report. Preparo tutto manualmente...\n")
+def client_code():
+    print("Client: I need to generate a report. Preparing everything manually...\n")
 
-    # --- Passo 1: Login al servizio inventario ---
-    x = ServizioInventarioX()
+    # --- Step 1: Login to the inventory service ---
+    x = InventoryServiceX()
     x.login_x("admin", "password123")
 
-    # --- Passo 2: Recupero dati inventario ---
-    inventario = x.richiedi_dati_x()
+    # --- Step 2: Retrieve inventory data ---
+    inventory = x.request_data_x()
 
-    # --- Passo 3: Autenticazione al servizio analytics ---
-    y = ServizioAnalyticsY()
-    y.autenticazione_y("ak-93jf82hd-prod-key")
+    # --- Step 3: Authenticate to the analytics service ---
+    y = AnalyticsServiceY()
+    y.authenticate_y("ak-93jf82hd-prod-key")
 
-    # --- Passo 4: Recupero dati vendite ---
-    metriche = y.fetch_metriche_y()
+    # --- Step 4: Retrieve sales data ---
+    metrics = y.fetch_metrics_y()
 
-    # --- Passo 5: Fusione dati (logica in mano al client!) ---
-    # Il client deve sapere che le chiavi sono le stesse nei due dict.
-    # Se un sottosistema cambia le chiavi, si rompe tutto.
-    dati_fusi = {}
-    for prodotto in inventario:
-        dati_fusi[prodotto] = {
-            "quantita": inventario[prodotto],
-            "prezzo":   metriche.get(prodotto, 0.0),
+    # --- Step 5: Data merging (logic in the client's hands!) ---
+    # The client must know that the keys are the same in both dicts.
+    # If a subsystem changes the keys, everything breaks.
+    merged_data = {}
+    for product in inventory:
+        merged_data[product] = {
+            "quantity": inventory[product],
+            "price":    metrics.get(product, 0.0),
         }
 
-    # --- Passo 6: Generazione report ---
-    z = MotoreReportZ()
-    z.inizializza_z("Report Inventario + Vendite")
-    for prodotto, valori in dati_fusi.items():
-        z.aggiungi_riga_z(prodotto, valori["quantita"], valori["prezzo"])
-    z.finalizza_z()
+    # --- Step 6: Report generation ---
+    z = ReportEngineZ()
+    z.initialize_z("Inventory + Sales Report")
+    for product, values in merged_data.items():
+        z.add_row_z(product, values["quantity"], values["price"])
+    z.finalize_z()
 
-    # --- Passo 7: Pulizia (facile da dimenticare!) ---
+    # --- Step 7: Cleanup (easy to forget!) ---
     x.logout_x()
-    y.disconnetti_y()
+    y.disconnect_y()
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
-# Se un altro modulo dell'app vuole generare lo stesso report,
-# deve copiare tutto questo codice. Qualsiasi modifica a X, Y o Z
-# obbliga a cambiare TUTTI i punti dove questa logica è duplicata.
+# If another module of the app wants to generate the same report,
+# it must copy all this code. Any change to X, Y or Z
+# forces changes in ALL places where this logic is duplicated.
 if __name__ == "__main__":
-    codice_client()
+    client_code()

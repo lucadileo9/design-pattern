@@ -1,69 +1,69 @@
-# Pattern Comportamentali
+# Behavioral Patterns
 
-I pattern comportamentali si occupano della **comunicazione e della distribuzione delle responsabilità tra oggetti**: definiscono come gli oggetti interagiscono tra loro, come si scambiano informazioni e come vengono assegnati i compiti, rendendo il sistema più flessibile e disaccoppiato.
+Behavioral patterns deal with **communication and the distribution of responsibilities between objects**: they define how objects interact with each other, how they exchange information, and how tasks are assigned, making the system more flexible and decoupled.
 
 ---
 
 ## 1. Observer
 
-**Intento**: definire una dipendenza uno-a-molti tra oggetti, in modo che quando un oggetto cambia stato tutti i suoi dipendenti vengano notificati e aggiornati automaticamente.
+**Intent**: define a one-to-many dependency between objects, so that when one object changes state, all its dependents are notified and updated automatically.
 
-**Utilizzo tipico**: sistemi event-driven, aggiornamento automatico di UI al cambio di dati, notifiche push — ogni volta che un cambiamento in un oggetto deve propagarsi ad altri senza che l'oggetto conosca i suoi dipendenti.
+**Typical usage**: event-driven systems, automatic UI updates on data changes, push notifications — whenever a change in one object must propagate to others without the object knowing its dependents.
 
-Riferimento: [Spiegazione completa](./observer/README.md)
+Reference: [Full explanation](./observer/README.md)
 
 ---
 
 ## 2. Iterator
 
-**Intento**: fornire un modo standard per accedere sequenzialmente agli elementi di una collezione senza esporne la struttura interna.
+**Intent**: provide a standard way to sequentially access the elements of a collection without exposing its internal structure.
 
-**Utilizzo tipico**: attraversamento di strutture dati complesse (alberi, grafi, liste di liste) in cui si vuole nascondere al client la logica di iterazione, supportando anche modalità di visita diverse (es. pre-ordine, post-ordine).
+**Typical usage**: traversal of complex data structures (trees, graphs, lists of lists) where you want to hide the iteration logic from the client, while also supporting different traversal modes (e.g., pre-order, post-order).
 
-Riferimento: [Spiegazione completa](./iterator/README.md)
+Reference: [Full explanation](./iterator/README.md)
 
 ---
 
 ## 3. Strategy
 
-**Intento**: definire una famiglia di algoritmi intercambiabili, incapsulare ciascuno in una classe dedicata e renderli sostituibili a runtime, senza modificare il contesto che li usa.
+**Intent**: define a family of interchangeable algorithms, encapsulate each one in a dedicated class, and make them swappable at runtime, without modifying the context that uses them.
 
-**Utilizzo tipico**: selezione a runtime dell'algoritmo più adatto (ordinamento, pagamento, compressione, routing) — quando si vuole aggiungere nuove varianti senza toccare il codice esistente (Open/Closed Principle).
+**Typical usage**: runtime selection of the most suitable algorithm (sorting, payment, compression, routing) — when you want to add new variants without touching existing code (Open/Closed Principle).
 
-Riferimento: [Spiegazione completa](./strategy/README.md)
+Reference: [Full explanation](./strategy/README.md)
 
 ---
 
 ## 4. Template Method
 
-**Intento**: definire lo scheletro di un algoritmo in una classe astratta, delegando alle sottoclassi l'implementazione dei soli passi variabili, senza alterare la struttura generale.
+**Intent**: define the skeleton of an algorithm in an abstract class, delegating to subclasses the implementation of only the variable steps, without altering the overall structure.
 
-**Utilizzo tipico**: pipeline con flusso fisso ma step intercambiabili (importazione dati, generazione report, processi ETL) — quando più varianti condividono la stessa sequenza di passaggi ma differiscono in alcuni di essi.
+**Typical usage**: pipelines with a fixed flow but interchangeable steps (data import, report generation, ETL processes) — when multiple variants share the same sequence of steps but differ in some of them.
 
-Riferimento: [Spiegazione completa](./template-method/README.md)
+Reference: [Full explanation](./template-method/README.md)
 
 ---
 
 ## 5. Command
 
-**Intento**: incapsulare una richiesta come oggetto, parametrizzando i client con operazioni diverse e supportando operazioni annullabili (undo/redo).
+**Intent**: encapsulate a request as an object, parameterizing clients with different operations and supporting undoable operations (undo/redo).
 
-**Utilizzo tipico**: code di operazioni, sistemi undo/redo, macro, job scheduler — quando si vuole disaccoppiare chi invoca un'operazione da chi la esegue.
+**Typical usage**: operation queues, undo/redo systems, macros, job schedulers — when you want to decouple the invoker of an operation from the one that executes it.
 
-*Da completare...*
+*To be completed...*
 
 ---
 
 ## 6. Chain of Responsibility
 
-**Intento**: passare una richiesta lungo una catena di handler, dove ciascuno decide di gestirla o di passarla al successivo.
+**Intent**: pass a request along a chain of handlers, where each one decides whether to handle it or pass it to the next one.
 
-**Utilizzo tipico**: middleware HTTP, validazione a strati, sistemi di approvazione gerarchica — quando più oggetti possono gestire una richiesta e il gestore corretto non è noto a priori.
+**Typical usage**: HTTP middleware, layered validation, hierarchical approval systems — when multiple objects can handle a request and the correct handler is not known in advance.
 
-*Da completare...*
+*To be completed...*
 
 ---
 
-## Casi reali in cui ho usato questi pattern:
+## Real cases where I used these patterns:
 **Strategy**:
- - In un progetto di creazione di un sistema di calcolo distribuito in cui avevo diversi algoritmi di splitting del lavoro e assegnazione del lavoro. Ho creato un'interfaccia SplittingStrategy e una di AssignmentStrategy, e poi diverse classi concrete per ogni algoritmo specifico. In questo modo il sistema era molto flessibile e potevo facilmente aggiungere nuovi algoritmi senza modificare il codice esistente. Tuttavia non ho usato una vera e propria classe Conetxt, ma ho trattato la classe JobManager che conteneva le due strategie come una classe contesto, delegando a essa l'esecuzione delle strategie.
+ - In a project to create a distributed computing system where I had different work splitting and work assignment algorithms. I created a SplittingStrategy interface and an AssignmentStrategy one, and then different concrete classes for each specific algorithm. This way the system was very flexible and I could easily add new algorithms without modifying existing code. However, I didn't use a proper Context class, but instead treated the JobManager class that contained the two strategies as a context class, delegating the execution of the strategies to it.

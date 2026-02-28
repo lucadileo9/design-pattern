@@ -1,38 +1,38 @@
 # ==========================================
-# CONTESTO
+# CONTEXT
 # ==========================================
-# Abbiamo un GeneratoreReport che sa come formattare e stampare dati.
-# Lavora bene con i dati che arrivano dal database interno dell'azienda,
-# perché è stato scritto insieme ad esso — stesso team, stesso formato.
+# We have a ReportGenerator that knows how to format and print data.
+# It works well with data coming from the company's internal database,
+# because it was written alongside it — same team, same format.
 #
-# Il problema emerge quando dobbiamo integrare NUOVE sorgenti dati:
-# una REST API di un fornitore esterno e un file CSV di un partner.
-# Nessuna delle due restituisce dati nel formato che il generatore si aspetta.
+# The problem emerges when we need to integrate NEW data sources:
+# a REST API from an external supplier and a CSV file from a partner.
+# Neither returns data in the format the generator expects.
 #
-# Non possiamo modificare le sorgenti (codice esterno / librerie di terze parti).
-# Quindi modifichiamo il GeneratoreReport per gestire tutti i formati.
-# Questo è l'errore che l'Adapter pattern evita.
+# We can't modify the sources (external code / third-party libraries).
+# So we modify the ReportGenerator to handle all formats.
+# This is the mistake that the Adapter pattern avoids.
 
 
 # ==========================================
-# LE SORGENTI DATI (che non si possono toccare)
+# DATA SOURCES (that cannot be touched)
 # ==========================================
-# Simulano codice esterno: librerie, API, sistemi legacy.
-# Ognuna restituisce dati in un formato diverso e incompatibile.
+# They simulate external code: libraries, APIs, legacy systems.
+# Each one returns data in a different and incompatible format.
 
-class DatabaseAziendale:
-    """Sorgente interna. Restituisce una lista di dizionari con chiavi standard."""
-    def recupera_vendite(self) -> list[dict]:
+class CompanyDatabase:
+    """Internal source. Returns a list of dictionaries with standard keys."""
+    def retrieve_sales(self) -> list[dict]:
         return [
-            {"prodotto": "Widget A", "importo": 1500.0, "data": "2024-01-15"},
-            {"prodotto": "Widget B", "importo": 890.0,  "data": "2024-01-16"},
+            {"product": "Widget A", "amount": 1500.0, "date": "2024-01-15"},
+            {"product": "Widget B", "amount": 890.0,  "date": "2024-01-16"},
         ]
 
-class APIFornitoreEsterno:
+class ExternalSupplierAPI:
     """
-    REST API di un fornitore. Restituisce una lista di dizionari
-    ma con chiavi in inglese e nomi completamente diversi.
-    Non possiamo cambiare il formato: è definito dal fornitore.
+    REST API from a supplier. Returns a list of dictionaries
+    but with English keys and completely different names.
+    We can't change the format: it's defined by the supplier.
     """
     def fetch_orders(self) -> list[dict]:
         return [
@@ -40,83 +40,83 @@ class APIFornitoreEsterno:
             {"item_name": "Gadget Y", "total_eur": 210.5,  "order_date": "16-01-2024"},
         ]
 
-class ParserCSV:
+class CSVParser:
     """
-    Legge file CSV di un partner commerciale.
-    Restituisce una lista di tuple (non dizionari), con la data in formato diverso.
+    Reads CSV files from a commercial partner.
+    Returns a list of tuples (not dictionaries), with the date in a different format.
     """
-    def leggi_file(self) -> list[tuple]:
-        # (descrizione, valore_in_centesimi, giorno, mese, anno)
+    def read_file(self) -> list[tuple]:
+        # (description, value_in_cents, day, month, year)
         return [
-            ("Componente Z", 75000, 15, 1, 2024),
-            ("Componente W", 42500, 16, 1, 2024),
+            ("Component Z", 75000, 15, 1, 2024),
+            ("Component W", 42500, 16, 1, 2024),
         ]
 
 
 # ==========================================
-# IL PROBLEMA: IL CLIENT CHE GESTISCE TUTTO
+# THE PROBLEM: THE CLIENT THAT MANAGES EVERYTHING
 # ==========================================
-class GeneratoreReport:
+class ReportGenerator:
     """
-    Questo era un componente semplice e pulito.
-    Sapeva fare una cosa sola: formattare e stampare righe di report.
-    Dopo aver integrato le nuove sorgenti, è diventato un mostro.
+    This was a simple and clean component.
+    It knew how to do one thing only: format and print report rows.
+    After integrating the new sources, it became a monster.
     """
 
-    def genera_report(self, sorgente: str):
-        print(f"\n--- Report da: {sorgente} ---")
+    def generate_report(self, source: str):
+        print(f"\n--- Report from: {source} ---")
 
-        # PROBLEMA 1: il GeneratoreReport conosce i dettagli interni
-        #             di OGNI sorgente dati. È accoppiato a tutte.
-        # PROBLEMA 2: ogni nuovo formato richiede un nuovo elif qui dentro,
-        #             modificando una classe che "funzionava già".
-        # PROBLEMA 3: la logica di traduzione (es. centesimi→euro, date)
-        #             è sepolta qui nel mezzo, invisibile e non riusabile.
+        # PROBLEM 1: the ReportGenerator knows the internal details
+        #             of EVERY data source. It's coupled to all of them.
+        # PROBLEM 2: every new format requires a new elif in here,
+        #             modifying a class that "was already working".
+        # PROBLEM 3: the translation logic (e.g. cents→euros, dates)
+        #             is buried here in the middle, invisible and non-reusable.
 
-        if sorgente == "database":
-            db = DatabaseAziendale()
-            righe = db.recupera_vendite()
-            for r in righe:
-                # Il formato del DB è già quello giusto: accesso diretto.
-                print(f"  Prodotto: {r['prodotto']:<15} | Importo: €{r['importo']:>8.2f} | Data: {r['data']}")
+        if source == "database":
+            db = CompanyDatabase()
+            rows = db.retrieve_sales()
+            for r in rows:
+                # The DB format is already the right one: direct access.
+                print(f"  Product: {r['product']:<15} | Amount: €{r['amount']:>8.2f} | Date: {r['date']}")
 
-        elif sorgente == "api":
-            api = APIFornitoreEsterno()
-            righe = api.fetch_orders()
-            for r in righe:
-                # Dobbiamo tradurre: chiavi diverse, formato data diverso (gg-mm-aaaa → aaaa-mm-gg)
-                parti_data = r["order_date"].split("-")
-                data_convertita = f"{parti_data[2]}-{parti_data[1]}-{parti_data[0]}"
-                print(f"  Prodotto: {r['item_name']:<15} | Importo: €{r['total_eur']:>8.2f} | Data: {data_convertita}")
+        elif source == "api":
+            api = ExternalSupplierAPI()
+            rows = api.fetch_orders()
+            for r in rows:
+                # We must translate: different keys, different date format (dd-mm-yyyy → yyyy-mm-dd)
+                date_parts = r["order_date"].split("-")
+                converted_date = f"{date_parts[2]}-{date_parts[1]}-{date_parts[0]}"
+                print(f"  Product: {r['item_name']:<15} | Amount: €{r['total_eur']:>8.2f} | Date: {converted_date}")
 
-        elif sorgente == "csv":
-            parser = ParserCSV()
-            righe = parser.leggi_file()
-            for r in righe:
-                # Dobbiamo tradurre: tuple → campi, centesimi → euro, data da 3 campi separati
-                prodotto    = r[0]
-                importo_eur = r[1] / 100
-                data        = f"{r[4]}-{r[3]:02d}-{r[2]:02d}"
-                print(f"  Prodotto: {prodotto:<15} | Importo: €{importo_eur:>8.2f} | Data: {data}")
+        elif source == "csv":
+            parser = CSVParser()
+            rows = parser.read_file()
+            for r in rows:
+                # We must translate: tuples → fields, cents → euros, date from 3 separate fields
+                product     = r[0]
+                amount_eur  = r[1] / 100
+                date        = f"{r[4]}-{r[3]:02d}-{r[2]:02d}"
+                print(f"  Product: {product:<15} | Amount: €{amount_eur:>8.2f} | Date: {date}")
 
         else:
-            raise ValueError(f"Sorgente '{sorgente}' non supportata!")
-        # Se domani arriva una quarta sorgente (es. un file XML, o un WebSocket),
-        # dobbiamo tornare qui e aggiungere un altro elif.
-        # Ogni modifica rischia di rompere i casi che già funzionavano.
+            raise ValueError(f"Source '{source}' not supported!")
+        # If tomorrow a fourth source arrives (e.g. an XML file, or a WebSocket),
+        # we have to come back here and add another elif.
+        # Every modification risks breaking the cases that were already working.
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
-# I problemi visibili:
-#  • GeneratoreReport dipende direttamente da DatabaseAziendale,
-#    APIFornitoreEsterno e ParserCSV — tre classi esterne.
-#  • Aggiungere una nuova sorgente = modificare GeneratoreReport.
-#  • La logica di conversione (date, centesimi, chiavi) è dispersa
-#    in un unico metodo lungo e difficile da testare.
+# Visible problems:
+#  • ReportGenerator depends directly on CompanyDatabase,
+#    ExternalSupplierAPI and CSVParser — three external classes.
+#  • Adding a new source = modifying ReportGenerator.
+#  • The conversion logic (dates, cents, keys) is scattered
+#    in a single long method that's hard to test.
 if __name__ == "__main__":
-    generatore = GeneratoreReport()
-    generatore.genera_report("database")
-    generatore.genera_report("api")
-    generatore.genera_report("csv")
+    generator = ReportGenerator()
+    generator.generate_report("database")
+    generator.generate_report("api")
+    generator.generate_report("csv")

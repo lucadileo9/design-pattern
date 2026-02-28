@@ -1,14 +1,14 @@
 # ==========================================
-# OBSERVER — Esempio reale: Event-driven UI
+# OBSERVER — Real Example: Event-driven UI
 # ==========================================
-# In un'interfaccia grafica, un componente (es. un bottone) è il
-# Subject. Quando l'utente interagisce con esso, diversi Observer
-# reagiscono in modo indipendente: aggiornare la UI, scrivere
-# un log, tracciare analytics, ecc.
+# In a graphical interface, a component (e.g., a button) is the
+# Subject. When the user interacts with it, different Observers
+# react independently: update the UI, write a log, track
+# analytics, etc.
 #
-# Il bottone non sa CHI lo osserva né COSA fanno gli observer.
-# Sa solo che deve chiamare il loro metodo su_evento().
-# Questo è esattamente come funzionano i framework UI moderni
+# The button doesn't know WHO is observing it nor WHAT the observers do.
+# It only knows it must call their on_event() method.
+# This is exactly how modern UI frameworks work
 # (React, Vue, Qt, Tkinter, WPF…).
 
 from abc import ABC, abstractmethod
@@ -17,212 +17,212 @@ from datetime import datetime
 
 
 # ==========================================
-# EVENTO — dati associati a un'interazione
+# EVENT — data associated with an interaction
 # ==========================================
 
 @dataclass
-class Evento:
-    """Descrive un'interazione dell'utente con un componente UI."""
-    tipo: str                   # "click", "input", "submit"
-    sorgente: str               # nome del componente che ha generato l'evento
-    dati: dict = field(default_factory=dict)
+class Event:
+    """Describes a user interaction with a UI component."""
+    type: str                   # "click", "input", "submit"
+    source: str                 # name of the component that generated the event
+    data: dict = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.now().strftime("%H:%M:%S"))
 
 
 # ==========================================
-# OBSERVER — interfaccia comune
+# OBSERVER — common interface
 # ==========================================
 
 class EventListener(ABC):
-    """Chiunque voglia reagire a eventi UI implementa questa interfaccia."""
+    """Anyone who wants to react to UI events implements this interface."""
 
     @abstractmethod
-    def su_evento(self, evento: Evento) -> None:
+    def on_event(self, event: Event) -> None:
         ...
 
 
 # ==========================================
-# SUBJECT — componente UI generico
-# Da notare che avremmo potuto creare direttamente un Subject specifico (tipo un bottone), 
-# ma in questo modo possiamo riutilizzare la logica di gestione dei listener per 
-# qualsiasi componente UI.
+# SUBJECT — generic UI component
+# Note that we could have directly created a specific Subject (like a button),
+# but this way we can reuse the listener management logic for
+# any UI component.
 # ==========================================
 
-class ComponenteUI:
-    """Subject: un componente dell'interfaccia che emette eventi."""
+class UIComponent:
+    """Subject: a UI component that emits events."""
 
-    def __init__(self, nome: str):
-        self.nome = nome
-        self._listener: dict[str, list[EventListener]] = {}
+    def __init__(self, name: str):
+        self.name = name
+        self._listeners: dict[str, list[EventListener]] = {}
 
-    def registra(self, tipo_evento: str, listener: EventListener) -> None:
-        """Registra un listener per un tipo di evento specifico."""
-        if tipo_evento not in self._listener:
-            self._listener[tipo_evento] = []
-        self._listener[tipo_evento].append(listener)
+    def register(self, event_type: str, listener: EventListener) -> None:
+        """Registers a listener for a specific event type."""
+        if event_type not in self._listeners:
+            self._listeners[event_type] = []
+        self._listeners[event_type].append(listener)
 
-    def rimuovi(self, tipo_evento: str, listener: EventListener) -> None:
-        """Rimuove un listener da un tipo di evento."""
-        if tipo_evento in self._listener:
-            self._listener[tipo_evento].remove(listener)
+    def remove(self, event_type: str, listener: EventListener) -> None:
+        """Removes a listener from an event type."""
+        if event_type in self._listeners:
+            self._listeners[event_type].remove(listener)
 
-    def _emetti(self, tipo_evento: str, dati: dict | None = None) -> None:
-        """Notifica tutti i listener registrati per questo tipo di evento."""
-        evento = Evento(tipo=tipo_evento, sorgente=self.nome, dati=dati or {})
-        for listener in self._listener.get(tipo_evento, []):
-            listener.su_evento(evento)
+    def _emit(self, event_type: str, data: dict | None = None) -> None:
+        """Notifies all listeners registered for this event type."""
+        event = Event(type=event_type, source=self.name, data=data or {})
+        for listener in self._listeners.get(event_type, []):
+            listener.on_event(event)
 
 
 # ==========================================
-# COMPONENTI UI CONCRETI
+# CONCRETE UI COMPONENTS
 # ==========================================
 
-class Bottone(ComponenteUI):
-    """Un bottone cliccabile."""
+class Button(UIComponent):
+    """A clickable button."""
 
-    # Da notare che la classe Bottone nel sup "metodo principale" o comunque nel metodo
-    # legato al pattern observer si limita a:
-        # 1. fare l'operazione specifica del bottone (es. click), in questo caso un semplice print
-        # 2. chiamare _emetti() per notificare tutti i listener registrati a questo evento
-    # Il bottone NON si preoccupa di chi sono i listener, di cosa fanno, di come reagiscono, ecc.
+    # Note that the Button class in its "main method" or in the method
+    # related to the observer pattern simply:
+        # 1. performs the button-specific operation (e.g., click), in this case a simple print
+        # 2. calls _emit() to notify all listeners registered for this event
+    # The button does NOT worry about who the listeners are, what they do, how they react, etc.
     def click(self) -> None:
-        print(f"\n[{self.nome}] 🖱️ Click!")
-        self._emetti("click")
+        print(f"\n[{self.name}] 🖱️ Click!")
+        self._emit("click")
 
 
-class CampoTesto(ComponenteUI):
-    """Un campo di input testuale."""
+class TextField(UIComponent):
+    """A text input field."""
 
-    def __init__(self, nome: str):
-        super().__init__(nome)
-        self.valore = ""
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.value = ""
 
-    def scrivi(self, testo: str) -> None:
-        self.valore = testo
-        print(f"\n[{self.nome}] ⌨️ Testo inserito: '{testo}'")
-        self._emetti("input", {"valore": testo})
+    def write(self, text: str) -> None:
+        self.value = text
+        print(f"\n[{self.name}] ⌨️ Text entered: '{text}'")
+        self._emit("input", {"value": text})
 
 
-class Form(ComponenteUI):
-    """Un form che può essere inviato."""
+class Form(UIComponent):
+    """A form that can be submitted."""
 
-    def __init__(self, nome: str):
-        super().__init__(nome)
-        self.campi: dict[str, str] = {}
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.fields: dict[str, str] = {}
 
-    def imposta_campo(self, chiave: str, valore: str) -> None:
-        self.campi[chiave] = valore
+    def set_field(self, key: str, value: str) -> None:
+        self.fields[key] = value
 
-    def invia(self) -> None:
-        print(f"\n[{self.nome}] 📨 Form inviato con dati: {self.campi}")
-        self._emetti("submit", dict(self.campi))
+    def submit(self) -> None:
+        print(f"\n[{self.name}] 📨 Form submitted with data: {self.fields}")
+        self._emit("submit", dict(self.fields))
 
 
 # ==========================================
-# OBSERVER CONCRETI
+# CONCRETE OBSERVERS
 # ==========================================
-# Ogni observer reagisce a modo suo. Il componente UI non sa
-# nulla di loro — chiama su_evento() e basta.
+# Each observer reacts in its own way. The UI component knows
+# nothing about them — it calls on_event() and that's it.
 
 class Logger(EventListener):
-    """Scrive ogni evento in un log (simula scrittura su file)."""
+    """Writes every event to a log (simulates writing to a file)."""
 
     def __init__(self):
         self.log: list[str] = []
 
-    def su_evento(self, evento: Evento) -> None:
-        riga = f"[{evento.timestamp}] {evento.tipo.upper()} su '{evento.sorgente}'"
-        self.log.append(riga)
-        print(f"  📝 Logger: {riga}")
+    def on_event(self, event: Event) -> None:
+        line = f"[{event.timestamp}] {event.type.upper()} on '{event.source}'"
+        self.log.append(line)
+        print(f"  📝 Logger: {line}")
 
 
 class Analytics(EventListener):
-    """Conta le interazioni per tipo (simula un sistema di tracking)."""
+    """Counts interactions by type (simulates a tracking system)."""
 
     def __init__(self):
-        self.contatori: dict[str, int] = {}
+        self.counters: dict[str, int] = {}
 
-    def su_evento(self, evento: Evento) -> None:
-        chiave = f"{evento.sorgente}:{evento.tipo}"
-        self.contatori[chiave] = self.contatori.get(chiave, 0) + 1
-        print(f"  📊 Analytics: {chiave} → {self.contatori[chiave]} volta/e")
+    def on_event(self, event: Event) -> None:
+        key = f"{event.source}:{event.type}"
+        self.counters[key] = self.counters.get(key, 0) + 1
+        print(f"  📊 Analytics: {key} → {self.counters[key]} time(s)")
 
 
-class Validatore(EventListener):
-    """Controlla che un campo non sia vuoto (validazione in tempo reale)."""
+class Validator(EventListener):
+    """Checks that a field is not empty (real-time validation)."""
 
-    def su_evento(self, evento: Evento) -> None:
-        valore = evento.dati.get("valore", "")
-        if valore.strip():
-            print(f"  ✅ Validatore: '{evento.sorgente}' → OK")
+    def on_event(self, event: Event) -> None:
+        value = event.data.get("value", "")
+        if value.strip():
+            print(f"  ✅ Validator: '{event.source}' → OK")
         else:
-            print(f"  ❌ Validatore: '{evento.sorgente}' → campo vuoto!")
+            print(f"  ❌ Validator: '{event.source}' → empty field!")
 
 
-class AggiornamentoUI(EventListener):
-    """Simula l'aggiornamento di un elemento della UI."""
+class UIUpdate(EventListener):
+    """Simulates updating a UI element."""
 
-    def __init__(self, elemento: str):
-        self.elemento = elemento
+    def __init__(self, element: str):
+        self.element = element
 
-    def su_evento(self, evento: Evento) -> None:
-        if evento.tipo == "submit":
-            print(f"  🔄 UI: '{self.elemento}' aggiornato con i dati del form")
-        elif evento.tipo == "click":
-            print(f"  🔄 UI: '{self.elemento}' reagisce al click")
+    def on_event(self, event: Event) -> None:
+        if event.type == "submit":
+            print(f"  🔄 UI: '{self.element}' updated with the form data")
+        elif event.type == "click":
+            print(f"  🔄 UI: '{self.element}' reacts to the click")
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
 
 if __name__ == "__main__":
 
-    # --- Observer condivisi ---
+    # --- Shared observers ---
     logger = Logger()
     analytics = Analytics()
-    validatore = Validatore()
-    aggiorna_tabella = AggiornamentoUI("Tabella utenti")
+    validator = Validator()
+    update_table = UIUpdate("Users table")
 
-    # --- Componenti UI ---
-    btn_salva = Bottone("Bottone Salva")
-    campo_nome = CampoTesto("Campo Nome")
-    form_registrazione = Form("Form Registrazione")
+    # --- UI Components ---
+    btn_save = Button("Save Button")
+    field_name = TextField("Name Field")
+    registration_form = Form("Registration Form")
 
-    # --- Registrazione listener (chi ascolta cosa) ---
-    btn_salva.registra("click", logger)
-    btn_salva.registra("click", analytics)
-    btn_salva.registra("click", aggiorna_tabella)
+    # --- Listener registration (who listens to what) ---
+    btn_save.register("click", logger)
+    btn_save.register("click", analytics)
+    btn_save.register("click", update_table)
 
-    campo_nome.registra("input", logger)
-    campo_nome.registra("input", analytics)
-    campo_nome.registra("input", validatore)
+    field_name.register("input", logger)
+    field_name.register("input", analytics)
+    field_name.register("input", validator)
 
-    form_registrazione.registra("submit", logger)
-    form_registrazione.registra("submit", analytics)
-    form_registrazione.registra("submit", aggiorna_tabella)
+    registration_form.register("submit", logger)
+    registration_form.register("submit", analytics)
+    registration_form.register("submit", update_table)
 
     print("=" * 50)
     print("  EVENT-DRIVEN UI — Observer Pattern")
     print("=" * 50)
 
-    # ---- 1. Click sul bottone → 3 observer reagiscono ----
-    btn_salva.click()
+    # ---- 1. Click on the button → 3 observers react ----
+    btn_save.click()
 
-    # ---- 2. Input nel campo testo → validazione in tempo reale ----
-    campo_nome.scrivi("Mario Rossi")
-    campo_nome.scrivi("")           # validazione fallisce
+    # ---- 2. Input in the text field → real-time validation ----
+    field_name.write("Mario Rossi")
+    field_name.write("")           # validation fails
 
-    # ---- 3. Submit del form ----
-    form_registrazione.imposta_campo("nome", "Mario Rossi")
-    form_registrazione.imposta_campo("email", "mario@example.com")
-    form_registrazione.invia()
+    # ---- 3. Form submission ----
+    registration_form.set_field("name", "Mario Rossi")
+    registration_form.set_field("email", "mario@example.com")
+    registration_form.submit()
 
-    # ---- 4. Secondo click (analytics conta) ----
-    btn_salva.click()
+    # ---- 4. Second click (analytics counts) ----
+    btn_save.click()
 
-    # ---- 5. Rimozione di un listener ----
-    print("\n--- Rimuovo il Logger dal bottone ---")
-    btn_salva.rimuovi("click", logger)
-    btn_salva.click()               # il logger NON reagisce più
+    # ---- 5. Removing a listener ----
+    print("\n--- Removing the Logger from the button ---")
+    btn_save.remove("click", logger)
+    btn_save.click()               # the logger NO LONGER reacts
 

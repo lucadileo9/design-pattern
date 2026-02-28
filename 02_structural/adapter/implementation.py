@@ -1,172 +1,172 @@
 from abc import ABC, abstractmethod
 
 # ==========================================
-# LE SORGENTI DATI — invariate rispetto al problema
+# DATA SOURCES — unchanged from the problem
 # ==========================================
-# Queste classi non si toccano. Sono codice esterno, librerie di terze parti,
-# o sistemi legacy: non abbiamo il controllo sul loro formato di output.
-# Il punto dell'Adapter è proprio non doverle modificare.
+# These classes are not touched. They are external code, third-party libraries,
+# or legacy systems: we have no control over their output format.
+# The point of the Adapter is precisely not having to modify them.
 
-class DatabaseAziendale:
-    def recupera_vendite(self) -> list[dict]:
+class CompanyDatabase:
+    def retrieve_sales(self) -> list[dict]:
         return [
-            {"prodotto": "Widget A", "importo": 1500.0, "data": "2024-01-15"},
-            {"prodotto": "Widget B", "importo": 890.0,  "data": "2024-01-16"},
+            {"product": "Widget A", "amount": 1500.0, "date": "2024-01-15"},
+            {"product": "Widget B", "amount": 890.0,  "date": "2024-01-16"},
         ]
 
-class APIFornitoreEsterno:
+class ExternalSupplierAPI:
     def fetch_orders(self) -> list[dict]:
         return [
             {"item_name": "Gadget X", "total_eur": 3200.0, "order_date": "15-01-2024"},
             {"item_name": "Gadget Y", "total_eur": 210.5,  "order_date": "16-01-2024"},
         ]
 
-class ParserCSV:
-    def leggi_file(self) -> list[tuple]:
-        # (descrizione, valore_in_centesimi, giorno, mese, anno)
+class CSVParser:
+    def read_file(self) -> list[tuple]:
+        # (description, value_in_cents, day, month, year)
         return [
-            ("Componente Z", 75000, 15, 1, 2024),
-            ("Componente W", 42500, 16, 1, 2024),
+            ("Component Z", 75000, 15, 1, 2024),
+            ("Component W", 42500, 16, 1, 2024),
         ]
 
 
 # ==========================================
-# 1. IL TARGET (interfaccia che il client conosce)
+# 1. THE TARGET (interface that the client knows)
 # ==========================================
-# Definiamo il formato standard che il GeneratoreReport si aspetta.
-# È l'unico contratto che il client conosce: non sa nulla di fetch_orders(),
-# leggi_file() o dei formati specifici di ciascuna sorgente.
+# We define the standard format that the ReportGenerator expects.
+# It's the only contract the client knows: it knows nothing about fetch_orders(),
+# read_file() or the specific formats of each source.
 #
-# Il formato normalizzato che tutti gli adapter devono produrre è:
-#   {"prodotto": str, "importo": float, "data": "AAAA-MM-GG"}
+# The normalized format that all adapters must produce is:
+#   {"product": str, "amount": float, "date": "YYYY-MM-DD"}
 #
-# Il formato scelto (che verrà usato in tutto il codice del client) è un 
-# dizionario con chiavi italiane e data in formato ISO. Ma potrebbe essere
-# qualsiasi cosa: l'importante è che sia UNICO e STANDARD per tutto il client.
+# The chosen format (that will be used throughout the client code) is a
+# dictionary with standard keys and date in ISO format. But it could be
+# anything: the important thing is that it's UNIQUE and STANDARD for the entire client.
 
-class SorgenteDati(ABC):
+class DataSource(ABC):
     @abstractmethod
-    def get_vendite(self) -> list[dict]:
+    def get_sales(self) -> list[dict]:
         """
-        Restituisce sempre una lista di dizionari nel formato standard:
-        [{"prodotto": str, "importo": float, "data": "AAAA-MM-GG"}, ...]
+        Always returns a list of dictionaries in the standard format:
+        [{"product": str, "amount": float, "date": "YYYY-MM-DD"}, ...]
         """
         pass
 
 
 # ==========================================
-# 2. GLI ADAPTER (uno per ogni Adaptee)
+# 2. THE ADAPTERS (one for each Adaptee)
 # ==========================================
-# Ogni Adapter:
-#   - IMPLEMENTA SorgenteDati  → il client lo tratta come un Target
-#   - CONTIENE un'istanza dell'Adaptee → delega il lavoro reale ad esso
-#   - Traduce il formato specifico dell'Adaptee in quello standard del Target
+# Each Adapter:
+#   - IMPLEMENTS DataSource  → the client treats it as a Target
+#   - CONTAINS an instance of the Adaptee → delegates the real work to it
+#   - Translates the Adaptee's specific format into the Target's standard format
 #
-# La logica di conversione (date, centesimi, chiavi) che nel problema
-# era messa nel GeneratoreReport ora è isolata qui, in una classe dedicata
-# per ogni sorgente. Così facendo rispettiamo il Single Responsibility Principle:
-# ogni classe ha una sola responsabilità: l'adapter si occupa solo di tradurre
+# The conversion logic (dates, cents, keys) that in the problem
+# was placed in the ReportGenerator is now isolated here, in a dedicated class
+# for each source. This way we respect the Single Responsibility Principle:
+# each class has a single responsibility: the adapter only handles translation
 
-class DatabaseAdapter(SorgenteDati):
+class DatabaseAdapter(DataSource):
     """
-    Adapter per DatabaseAziendale.
-    Il DB già usa il formato standard, quindi non serve traduzione:
-    l'adapter si limita a delegare la chiamata.
-    Esiste comunque per uniformare l'interfaccia verso il client.
-    """
-    def __init__(self):
-        self._adaptee = DatabaseAziendale()
-
-    def get_vendite(self) -> list[dict]:
-        # Il formato del DB coincide già con il Target: delega diretta.
-        return self._adaptee.recupera_vendite()
-
-
-class APIAdapter(SorgenteDati):
-    """
-    Adapter per APIFornitoreEsterno.
-    Traduce: chiavi inglesi → chiavi italiane, data "GG-MM-AAAA" → "AAAA-MM-GG".
+    Adapter for CompanyDatabase.
+    The DB already uses the standard format, so no translation is needed:
+    the adapter simply delegates the call.
+    It exists anyway to uniform the interface towards the client.
     """
     def __init__(self):
-        self._adaptee = APIFornitoreEsterno()
+        self._adaptee = CompanyDatabase()
 
-    def get_vendite(self) -> list[dict]:
-        righe_grezze = self._adaptee.fetch_orders()
-        risultato = []
-        for r in righe_grezze:
-            # Traduzione del formato data: "15-01-2024" → "2024-01-15"
-            g, m, a = r["order_date"].split("-")
-            risultato.append({
-                "prodotto": r["item_name"],
-                "importo":  r["total_eur"],
-                "data":     f"{a}-{m}-{g}",
+    def get_sales(self) -> list[dict]:
+        # The DB format already matches the Target: direct delegation.
+        return self._adaptee.retrieve_sales()
+
+
+class APIAdapter(DataSource):
+    """
+    Adapter for ExternalSupplierAPI.
+    Translates: English keys → standard keys, date "DD-MM-YYYY" → "YYYY-MM-DD".
+    """
+    def __init__(self):
+        self._adaptee = ExternalSupplierAPI()
+
+    def get_sales(self) -> list[dict]:
+        raw_rows = self._adaptee.fetch_orders()
+        result = []
+        for r in raw_rows:
+            # Date format translation: "15-01-2024" → "2024-01-15"
+            d, m, y = r["order_date"].split("-")
+            result.append({
+                "product": r["item_name"],
+                "amount":  r["total_eur"],
+                "date":    f"{y}-{m}-{d}",
             })
-        return risultato
+        return result
 
 
-class CSVAdapter(SorgenteDati):
+class CSVAdapter(DataSource):
     """
-    Adapter per ParserCSV.
-    Traduce: tuple con 5 campi → dict standard, centesimi → euro, 3 campi data → stringa ISO.
+    Adapter for CSVParser.
+    Translates: tuples with 5 fields → standard dict, cents → euros, 3 date fields → ISO string.
     """
     def __init__(self):
-        self._adaptee = ParserCSV()
+        self._adaptee = CSVParser()
 
-    def get_vendite(self) -> list[dict]:
-        righe_grezze = self._adaptee.leggi_file()
-        risultato = []
-        for r in righe_grezze:
-            # (descrizione, valore_in_centesimi, giorno, mese, anno)
-            risultato.append({
-                "prodotto": r[0],
-                "importo":  r[1] / 100,              # centesimi → euro
-                "data":     f"{r[4]}-{r[3]:02d}-{r[2]:02d}",  # AAAA-MM-GG
+    def get_sales(self) -> list[dict]:
+        raw_rows = self._adaptee.read_file()
+        result = []
+        for r in raw_rows:
+            # (description, value_in_cents, day, month, year)
+            result.append({
+                "product": r[0],
+                "amount":  r[1] / 100,              # cents → euros
+                "date":    f"{r[4]}-{r[3]:02d}-{r[2]:02d}",  # YYYY-MM-DD
             })
-        return risultato
+        return result
 
 
 # ==========================================
-# 3. IL CLIENT — GeneratoreReport
+# 3. THE CLIENT — ReportGenerator
 # ==========================================
-# Confronto con la versione nel problema:
+# Comparison with the version in the problem:
 #
-#   PRIMA: conosceva DatabaseAziendale, APIFornitoreEsterno, ParserCSV,
-#          aveva tre elif con logica di conversione diversa per ognuna.
+#   BEFORE: knew CompanyDatabase, ExternalSupplierAPI, CSVParser,
+#           had three elif with different conversion logic for each.
 #
-#   ORA:   conosce solo SorgenteDati. Un metodo. Un formato. Zero elif.
-#          Non sa né vuole sapere se i dati vengono da un DB, un'API o un CSV.
+#   NOW:    knows only DataSource. One method. One format. Zero elif.
+#           Doesn't know or care if the data comes from a DB, an API, or a CSV.
 #
-# Aggiungere una quinta sorgente domani (es. un file XML)?
-# Si scrive XmlAdapter(SorgenteDati) e il GeneratoreReport non cambia di una riga.
+# Adding a fifth source tomorrow (e.g. an XML file)?
+# Just write XmlAdapter(DataSource) and the ReportGenerator doesn't change by a single line.
 
-class GeneratoreReport:
-    def genera_report(self, sorgente: SorgenteDati, nome: str):
-        print(f"\n--- Report da: {nome} ---")
-        for r in sorgente.get_vendite():
-            # Il formato è sempre lo stesso: accesso diretto alle chiavi standard.
-            print(f"  Prodotto: {r['prodotto']:<15} | Importo: €{r['importo']:>8.2f} | Data: {r['data']}")
+class ReportGenerator:
+    def generate_report(self, source: DataSource, name: str):
+        print(f"\n--- Report from: {name} ---")
+        for r in source.get_sales():
+            # The format is always the same: direct access to standard keys.
+            print(f"  Product: {r['product']:<15} | Amount: €{r['amount']:>8.2f} | Date: {r['date']}")
 
 
 # ==========================================
-# 4. CODICE CLIENT
+# 4. CLIENT CODE
 # ==========================================
-# Il client istanzia gli Adapter (sa che esistono sorgenti diverse),
-# ma passa al generatore solo l'interfaccia SorgenteDati.
-# La scelta dell'Adapter potrebbe anche venire da configurazione o
-# da un'altra factory — in quel caso il generatore sarebbe completamente
-# ignaro persino di quale sorgente sta usando.
+# The client instantiates the Adapters (knows that different sources exist),
+# but passes to the generator only the DataSource interface.
+# The Adapter choice could also come from configuration or
+# from another factory — in that case the generator would be completely
+# unaware of which source it's using.
 
-# Da notare che l'output dei due file (con e senza Adapter) è identico.
-# La differenza è che ora il codice è pulito, modulare, estendibile e rispetta i principi SOLID.
+# Note that the output of both files (with and without Adapter) is identical.
+# The difference is that now the code is clean, modular, extensible and respects SOLID principles.
 
 if __name__ == "__main__":
-    generatore = GeneratoreReport()
+    generator = ReportGenerator()
 
-    sorgenti = [
-        (DatabaseAdapter(), "Database Aziendale"),
-        (APIAdapter(),      "API Fornitore Esterno"),
-        (CSVAdapter(),      "File CSV Partner"),
+    sources = [
+        (DatabaseAdapter(), "Company Database"),
+        (APIAdapter(),      "External Supplier API"),
+        (CSVAdapter(),      "Partner CSV File"),
     ]
 
-    for adapter, nome in sorgenti:
-        generatore.genera_report(adapter, nome)
+    for adapter, name in sources:
+        generator.generate_report(adapter, name)

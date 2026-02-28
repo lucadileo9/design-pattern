@@ -1,239 +1,239 @@
 # ==========================================
-# TEMPLATE METHOD — Esempio reale: Pipeline di Importazione Dati
+# TEMPLATE METHOD — Real Example: Data Import Pipeline
 # ==========================================
-# Un sistema deve importare dati da sorgenti diverse (CSV, SQL).
-# Il flusso è sempre lo stesso: leggi → pulisci → salva.
-# Ma il COME si legge cambia in base alla sorgente.
+# A system must import data from different sources (CSV, SQL).
+# The flow is always the same: read → clean → save.
+# But HOW the reading is done changes based on the source.
 #
-# La classe base (ImportatoreDati) definisce il template method
-# importa() che garantisce l'ordine: leggi_sorgente() → pulisci_dati() → salva_nel_db().
-# Le sotto-classi implementano SOLO leggi_sorgente() — il resto
-# lo ereditano gratis. Aggiungere un JSONImporter domani → una
-# sola classe nuova, zero modifiche al flusso esistente.
+# The base class (DataImporter) defines the template method
+# import_data() that guarantees the order: read_source() → clean_data() → save_to_db().
+# Subclasses implement ONLY read_source() — the rest
+# is inherited for free. Adding a JSONImporter tomorrow → one
+# new class, zero modifications to the existing flow.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 
 # ==========================================
-# MODELLO DATI
+# DATA MODEL
 # ==========================================
 
 @dataclass
 class Record:
-    """Un singolo record importato (es. una riga di log)."""
+    """A single imported record (e.g., a log row)."""
     timestamp: str
-    livello: str        # INFO, WARNING, ERROR
-    messaggio: str
-    sorgente: str = ""  # compilato durante l'importazione
+    level: str          # INFO, WARNING, ERROR
+    message: str
+    source: str = ""    # filled during import
 
 
 # ==========================================
-# CLASSE ASTRATTA — il "template"
+# ABSTRACT CLASS — the "template"
 # ==========================================
-# importa() è il template method: definisce il flusso rigido
-# leggi → pulisci → salva. Le sotto-classi NON toccano questo
-# metodo — implementano solo leggi_sorgente().
+# import_data() is the template method: defines the rigid flow
+# read → clean → save. Subclasses do NOT touch this
+# method — they only implement read_source().
 
-class ImportatoreDati(ABC):
+class DataImporter(ABC):
     """
-    Classe base: definisce la pipeline di importazione.
+    Base class: defines the import pipeline.
 
-    Template method: importa()
-        1. leggi_sorgente()  → ASTRATTO (ogni formato lo implementa)
-        2. pulisci_dati()    → COMUNE (rimuove duplicati, normalizza)
-        3. salva_nel_db()    → COMUNE (simula il salvataggio)
+    Template method: import_data()
+        1. read_source()   → ABSTRACT (each format implements it)
+        2. clean_data()    → COMMON (removes duplicates, normalizes)
+        3. save_to_db()    → COMMON (simulates saving)
     """
 
-    def __init__(self, nome_sorgente: str):
-        self.nome_sorgente = nome_sorgente
+    def __init__(self, source_name: str):
+        self.source_name = source_name
 
-    def importa(self) -> list[Record]:
+    def import_data(self) -> list[Record]:
         """
-        Template method — l'ordine è fisso e non sovrascrivibile.
-        Le sotto-classi personalizzano SOLO leggi_sorgente().
+        Template method — the order is fixed and non-overridable.
+        Subclasses customize ONLY read_source().
         """
         print(f"\n{'='*50}")
-        print(f"  Pipeline: {self.nome_sorgente}")
+        print(f"  Pipeline: {self.source_name}")
         print(f"{'='*50}")
 
-        # Step 1 — lettura (ASTRATTO)
-        records = self._leggi_sorgente()
+        # Step 1 — reading (ABSTRACT)
+        records = self._read_source()
 
-        # Step 2 — pulizia (COMUNE)
-        records = self._pulisci_dati(records)
+        # Step 2 — cleaning (COMMON)
+        records = self._clean_data(records)
 
-        # Step 3 — salvataggio (COMUNE)
-        self._salva_nel_db(records)
+        # Step 3 — saving (COMMON)
+        self._save_to_db(records)
 
         return records
 
-    # --- Step ASTRATTO (implementato dalle sotto-classi) ---
+    # --- ABSTRACT step (implemented by subclasses) ---
 
     @abstractmethod
-    def _leggi_sorgente(self) -> list[Record]:
-        """Legge i dati dalla sorgente specifica. Ogni formato è diverso."""
+    def _read_source(self) -> list[Record]:
+        """Reads data from the specific source. Each format is different."""
         ...
 
-    # --- Step COMUNI (implementati qui, una sola volta) ---
+    # --- COMMON steps (implemented here, only once) ---
 
-    def _pulisci_dati(self, records: list[Record]) -> list[Record]:
+    def _clean_data(self, records: list[Record]) -> list[Record]:
         """
-        Pulizia comune a TUTTE le sorgenti:
-        - rimuove record con messaggio vuoto
-        - normalizza il livello in maiuscolo
-        - rimuove duplicati (stesso timestamp + messaggio)
+        Cleaning common to ALL sources:
+        - removes records with empty message
+        - normalizes level to uppercase
+        - removes duplicates (same timestamp + message)
         """
-        nome = self.__class__.__name__
-        print(f"\n[{nome}] Step 2 — Pulizia dati")
-        print(f"  Record ricevuti: {len(records)}")
+        name = self.__class__.__name__
+        print(f"\n[{name}] Step 2 — Data cleaning")
+        print(f"  Records received: {len(records)}")
 
-        # Normalizza livello
+        # Normalize level
         for r in records:
-            r.livello = r.livello.strip().upper()
+            r.level = r.level.strip().upper()
 
-        # Rimuovi record con messaggio vuoto
-        prima = len(records)
-        records = [r for r in records if r.messaggio.strip()]
-        rimossi_vuoti = prima - len(records)
+        # Remove records with empty message
+        before = len(records)
+        records = [r for r in records if r.message.strip()]
+        removed_empty = before - len(records)
 
-        # Rimuovi duplicati
-        visti: set[tuple[str, str]] = set()
-        unici: list[Record] = []
+        # Remove duplicates
+        seen: set[tuple[str, str]] = set()
+        unique: list[Record] = []
         for r in records:
-            chiave = (r.timestamp, r.messaggio)
-            if chiave not in visti:
-                visti.add(chiave)
-                unici.append(r)
-        rimossi_duplicati = len(records) - len(unici)
-        records = unici
+            key = (r.timestamp, r.message)
+            if key not in seen:
+                seen.add(key)
+                unique.append(r)
+        removed_duplicates = len(records) - len(unique)
+        records = unique
 
-        print(f"  Rimossi {rimossi_vuoti} vuoti, {rimossi_duplicati} duplicati")
-        print(f"  Record puliti: {len(records)}")
+        print(f"  Removed {removed_empty} empty, {removed_duplicates} duplicates")
+        print(f"  Clean records: {len(records)}")
         return records
 
-    def _salva_nel_db(self, records: list[Record]) -> None:
+    def _save_to_db(self, records: list[Record]) -> None:
         """
-        Salvataggio comune a TUTTE le sorgenti.
-        (Simulato — in produzione sarebbe un INSERT nel DB.)
+        Saving common to ALL sources.
+        (Simulated — in production this would be a DB INSERT.)
         """
-        nome = self.__class__.__name__
-        print(f"\n[{nome}] Step 3 — Salvataggio nel DB")
+        name = self.__class__.__name__
+        print(f"\n[{name}] Step 3 — Saving to DB")
 
         if not records:
-            print("  ⚠️ Nessun record da salvare")
+            print("  ⚠️ No records to save")
             return
 
         for r in records:
-            icona = {"INFO": "ℹ️", "WARNING": "⚠️", "ERROR": "❌"}.get(r.livello, "❓")
-            print(f"  {icona} [{r.timestamp}] {r.livello}: {r.messaggio}")
+            icon = {"INFO": "ℹ️", "WARNING": "⚠️", "ERROR": "❌"}.get(r.level, "❓")
+            print(f"  {icon} [{r.timestamp}] {r.level}: {r.message}")
 
-        print(f"\n  ✅ {len(records)} record salvati da '{self.nome_sorgente}'")
+        print(f"\n  ✅ {len(records)} records saved from '{self.source_name}'")
 
 
 # ==========================================
-# CLASSI CONCRETE — solo la lettura cambia
+# CONCRETE CLASSES — only the reading changes
 # ==========================================
 
-class CSVImporter(ImportatoreDati):
-    """Legge log da un file CSV (simulato con stringhe)."""
+class CSVImporter(DataImporter):
+    """Reads logs from a CSV file (simulated with strings)."""
 
-    def __init__(self, contenuto_csv: str):
+    def __init__(self, csv_content: str):
         super().__init__("file_log.csv")
-        self._contenuto = contenuto_csv
+        self._content = csv_content
 
-    def _leggi_sorgente(self) -> list[Record]:
-        print(f"\n[CSVImporter] Step 1 — Lettura file CSV")
-        print(f"  📄 Parsing di '{self.nome_sorgente}'...")
+    def _read_source(self) -> list[Record]:
+        print(f"\n[CSVImporter] Step 1 — Reading CSV file")
+        print(f"  📄 Parsing '{self.source_name}'...")
 
         records: list[Record] = []
-        righe = self._contenuto.strip().split("\n")
+        rows = self._content.strip().split("\n")
 
-        for i, riga in enumerate(righe):
-            # Salta l'intestazione
+        for i, row in enumerate(rows):
+            # Skip header
             if i == 0:
-                print(f"  Intestazione: {riga}")
+                print(f"  Header: {row}")
                 continue
 
-            parti = riga.split(",")
-            if len(parti) >= 3:
+            parts = row.split(",")
+            if len(parts) >= 3:
                 record = Record(
-                    timestamp=parti[0].strip(),
-                    livello=parti[1].strip(),
-                    messaggio=parti[2].strip(),
-                    sorgente="CSV"
+                    timestamp=parts[0].strip(),
+                    level=parts[1].strip(),
+                    message=parts[2].strip(),
+                    source="CSV"
                 )
                 records.append(record)
 
-        print(f"  Righe lette: {len(records)}")
+        print(f"  Rows read: {len(records)}")
         return records
 
 
-class SQLImporter(ImportatoreDati):
-    """Legge log da un database SQL (simulato con una lista di tuple)."""
+class SQLImporter(DataImporter):
+    """Reads logs from a SQL database (simulated with a list of tuples)."""
 
-    def __init__(self, risultati_query: list[tuple[str, str, str]]):
-        super().__init__("db_esterno.logs")
-        self._risultati = risultati_query
+    def __init__(self, query_results: list[tuple[str, str, str]]):
+        super().__init__("external_db.logs")
+        self._results = query_results
 
-    def _leggi_sorgente(self) -> list[Record]:
-        print(f"\n[SQLImporter] Step 1 — Query database SQL")
-        print(f"  🗄️ Connessione a '{self.nome_sorgente}'...")
-        print(f"  🗄️ Esecuzione: SELECT timestamp, livello, messaggio FROM logs")
+    def _read_source(self) -> list[Record]:
+        print(f"\n[SQLImporter] Step 1 — SQL database query")
+        print(f"  🗄️ Connecting to '{self.source_name}'...")
+        print(f"  🗄️ Executing: SELECT timestamp, level, message FROM logs")
 
         records: list[Record] = []
-        for riga in self._risultati:
+        for row in self._results:
             record = Record(
-                timestamp=riga[0],
-                livello=riga[1],
-                messaggio=riga[2],
-                sorgente="SQL"
+                timestamp=row[0],
+                level=row[1],
+                message=row[2],
+                source="SQL"
             )
             records.append(record)
 
-        print(f"  Righe lette: {len(records)}")
-        print(f"  🗄️ Connessione chiusa")
+        print(f"  Rows read: {len(records)}")
+        print(f"  🗄️ Connection closed")
         return records
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
 
 if __name__ == "__main__":
 
     print("=" * 50)
-    print("  TEMPLATE METHOD — Pipeline di Importazione Dati")
+    print("  TEMPLATE METHOD — Data Import Pipeline")
     print("=" * 50)
 
-    # --- Scenario 1: importazione da CSV ---
-    # Include: un messaggio vuoto e un duplicato (verranno rimossi)
-    csv_data = """timestamp,livello,messaggio
-2026-02-26 10:00:01,info,Avvio del server
-2026-02-26 10:00:05,warning,Memoria al 85%
-2026-02-26 10:00:12,error,Connessione al DB fallita
-2026-02-26 10:00:12,error,Connessione al DB fallita
+    # --- Scenario 1: import from CSV ---
+    # Includes: an empty message and a duplicate (will be removed)
+    csv_data = """timestamp,level,message
+2026-02-26 10:00:01,info,Server startup
+2026-02-26 10:00:05,warning,Memory at 85%
+2026-02-26 10:00:12,error,DB connection failed
+2026-02-26 10:00:12,error,DB connection failed
 2026-02-26 10:00:20,info,
-2026-02-26 10:00:30,info,Retry connessione riuscito"""
+2026-02-26 10:00:30,info,Connection retry succeeded"""
 
     csv_importer = CSVImporter(csv_data)
-    csv_importer.importa()
+    csv_importer.import_data()
 
-    # --- Scenario 2: importazione da SQL ---
-    # Include: un messaggio vuoto (verrà rimosso)
+    # --- Scenario 2: import from SQL ---
+    # Includes: an empty message (will be removed)
     sql_data = [
-        ("2026-02-26 11:00:00", "INFO", "Deploy completato"),
-        ("2026-02-26 11:05:00", "warning", "CPU al 92%"),
-        ("2026-02-26 11:10:00", "ERROR", "Timeout API esterna"),
+        ("2026-02-26 11:00:00", "INFO", "Deploy completed"),
+        ("2026-02-26 11:05:00", "warning", "CPU at 92%"),
+        ("2026-02-26 11:10:00", "ERROR", "External API timeout"),
         ("2026-02-26 11:15:00", "info", "  "),
-        ("2026-02-26 11:20:00", "INFO", "Scaling automatico attivato"),
+        ("2026-02-26 11:20:00", "INFO", "Auto-scaling activated"),
     ]
 
     sql_importer = SQLImporter(sql_data)
-    sql_importer.importa()
+    sql_importer.import_data()
 
-    # Il punto chiave: entrambi gli importer usano la STESSA
-    # pipeline (importa → leggi → pulisci → salva). Solo la
-    # lettura è diversa. Aggiungere un JSONImporter richiede
-    # solo una nuova classe con _leggi_sorgente() — il resto
-    # viene ereditato dalla classe base senza duplicazione.
+    # The key point: both importers use the SAME
+    # pipeline (import_data → read → clean → save). Only the
+    # reading differs. Adding a JSONImporter requires
+    # only a new class with _read_source() — the rest
+    # is inherited from the base class without duplication.

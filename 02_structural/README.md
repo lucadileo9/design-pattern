@@ -1,61 +1,61 @@
-# Pattern Strutturali
+# Structural Patterns
 
-I pattern strutturali si occupano della **composizione di classi e oggetti**: come assemblarli in strutture più grandi mantenendo flessibilità, riusabilità e leggibilità. Anziché intervenire sulla creazione degli oggetti, si concentrano su come questi si relazionano e collaborano tra loro.
-Spessi infatti essi non introducono nuove funzionalità né specificano determinati comportamenti, ma si limitano a organizzare e strutturare il codice esistente in modo più efficiente e manutenibile. 
+Structural patterns deal with the **composition of classes and objects**: how to assemble them into larger structures while maintaining flexibility, reusability, and readability. Rather than intervening in object creation, they focus on how objects relate to and collaborate with each other.
+In fact, they often don't introduce new functionality or specify particular behaviors, but simply organize and structure existing code in a more efficient and maintainable way.
 
 ---
 
 ## 1. Adapter
 
-**Intento**: convertire l'interfaccia di una classe in un'altra attesa dal client, permettendo a classi con interfacce incompatibili di lavorare insieme.
+**Intent**: convert the interface of a class into another one expected by the client, allowing classes with incompatible interfaces to work together.
 
-**Utilizzo tipico**: integrare librerie esterne, codice legacy o API di terze parti senza modificarli, adattando il loro output al formato atteso dal sistema.
+**Typical use**: integrating external libraries, legacy code, or third-party APIs without modifying them, adapting their output to the format expected by the system.
 
-Riferimento: [Spiegazione completa](./adapter/README.md)
+Reference: [Full explanation](./adapter/README.md)
 
 ---
 
 ## 2. Facade
 
-**Intento**: fornire un'interfaccia semplificata a un sottosistema complesso, nascondendo la complessità interna al client.
+**Intent**: provide a simplified interface to a complex subsystem, hiding the internal complexity from the client.
 
-**Utilizzo tipico**: orchestrare più servizi o moduli (es. pagamenti, spedizioni, notifiche) attraverso un unico punto di accesso, riducendo l'accoppiamento tra il client e i sottosistemi.
+**Typical use**: orchestrating multiple services or modules (e.g. payments, shipping, notifications) through a single access point, reducing coupling between the client and the subsystems.
 
-Riferimento: [Spiegazione completa](./facade/README.md)
+Reference: [Full explanation](./facade/README.md)
 
 ---
 
 ## 3. Composite
 
-**Intento**: comporre oggetti in strutture ad albero permettendo al client di trattare uniformemente singoli oggetti e composizioni.
+**Intent**: compose objects into tree structures allowing the client to uniformly treat individual objects and compositions.
 
-**Utilizzo tipico**: strutture gerarchiche ricorsive come menu, file system, categorie e-commerce, organigrammi — dove si vuole applicare la stessa operazione a un elemento singolo o a un intero ramo.
+**Typical use**: recursive hierarchical structures such as menus, file systems, e-commerce categories, org charts — where you want to apply the same operation to a single element or an entire branch.
 
-Riferimento: [Spiegazione completa](./composite/README.md)
+Reference: [Full explanation](./composite/README.md)
 
 ---
 
 ## 4. Decorator
 
-**Intento**: aggiungere responsabilità a un oggetto dinamicamente, senza modificarne la classe. Alternativa flessibile all'ereditarietà per estendere il comportamento.
+**Intent**: add responsibilities to an object dynamically, without modifying its class. A flexible alternative to inheritance for extending behavior.
 
-**Utilizzo tipico**: aggiunta di funzionalità trasversali (logging, caching, validazione) a oggetti esistenti in modo componibile.
+**Typical use**: adding cross-cutting functionality (logging, caching, validation) to existing objects in a composable way.
 
-*Da completare...*
+*To be completed...*
 
 ---
 
 ## 5. Proxy
 
-**Intento**: fornire un surrogato o segnaposto per un altro oggetto, controllando l'accesso a esso.
+**Intent**: provide a surrogate or placeholder for another object, controlling access to it.
 
-**Utilizzo tipico**: lazy loading, controllo degli accessi, caching, logging — ogni volta che si vuole intercettare o wrappare le chiamate a un oggetto reale.
+**Typical use**: lazy loading, access control, caching, logging — whenever you want to intercept or wrap calls to a real object.
 
-*Da completare...*
+*To be completed...*
 
 ---
 
-## Casi reali in cui ho usato questi pattern:
-**Facade**: 
-- In un progetto di integrazione tra più servizi a cui accedevo tramite API (teams, telegram, notion), ho creato un Facade che si occupava di orchestrare tutte le chiamate ai vari servizi, nascondendo la complessità al client. 
-- In un progetto di creazione di un sistema di calcolo distribuito (in java usando RMI) ho creato una classe Facade JobManager che si occupava della gestione del job, in particolare usando le classi con cui veniva inizializzato prendeva il job lo divideva in delle task più piccole (usando la strategia con cui era stato inizializzato), stabiliva la distrivuzione delle task sui vari worker (usando la strategia con cui era stato inizializzato) e infine delegava ad un'altra task l'esecuzione delle task (classe dedicata che eseguiva le chiamate RMI).
+## Real-world cases where I used these patterns:
+**Facade**:
+- In an integration project between multiple services accessed via API (Teams, Telegram, Notion), I created a Facade that handled orchestrating all the calls to the various services, hiding the complexity from the client.
+- In a project to create a distributed computing system (in Java using RMI) I created a Facade class JobManager that handled job management; specifically, using the classes it was initialized with, it took the job, split it into smaller tasks (using the strategy it was initialized with), determined the distribution of tasks across workers (using the strategy it was initialized with), and finally delegated task execution to another class (a dedicated class that performed the RMI calls).

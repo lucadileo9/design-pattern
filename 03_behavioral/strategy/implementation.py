@@ -1,115 +1,115 @@
 # ==========================================
-# STRATEGY PATTERN — SOLUZIONE
+# STRATEGY PATTERN — SOLUTION
 # ==========================================
-# Ogni algoritmo diventa una classe separata che implementa
-# la stessa interfaccia (Strategia). Il Contesto mantiene un
-# riferimento alla strategia corrente e le delega l'esecuzione.
+# Each algorithm becomes a separate class that implements
+# the same interface (Strategy). The Context maintains a
+# reference to the current strategy and delegates execution to it.
 #
-# Aggiungere un algoritmo D → creare una nuova classe.
-# Il Contesto e le strategie esistenti non vengono toccati.
+# Adding an algorithm D → create a new class.
+# The Context and the existing strategies are not touched.
 
 from abc import ABC, abstractmethod
 
 
 # ==========================================
-# STRATEGY — interfaccia comune
+# STRATEGY — common interface
 # ==========================================
-# Dichiara il metodo che tutte le strategie devono implementare.
-# Il Contesto conosce solo questa interfaccia.
+# Declares the method that all strategies must implement.
+# The Context only knows this interface.
 
-class Strategia(ABC):
-    """Interfaccia comune per tutti gli algoritmi."""
+class Strategy(ABC):
+    """Common interface for all algorithms."""
 
     @abstractmethod
-    def esegui(self, dati: list[int]) -> None:
-        """Esegue l'algoritmo sui dati forniti dal Contesto."""
+    def execute(self, data: list[int]) -> None:
+        """Executes the algorithm on the data provided by the Context."""
         ...
 
 
 # ==========================================
-# STRATEGIE CONCRETE — un algoritmo per classe
+# CONCRETE STRATEGIES — one algorithm per class
 # ==========================================
-# Ogni strategia è isolata nella propria classe.
-# Non sa nulla delle altre strategie né del Contesto.
+# Each strategy is isolated in its own class.
+# It knows nothing about the other strategies or the Context.
 
-class StrategiaA(Strategia):
-    """Algoritmo A: somma tutti gli elementi."""
+class StrategyA(Strategy):
+    """Algorithm A: sums all elements."""
 
-    def esegui(self, dati: list[int]) -> None:
-        risultato = sum(dati)
-        print(f"Strategia A (somma): {risultato}")
-
-
-class StrategiaB(Strategia):
-    """Algoritmo B: trova il massimo."""
-
-    def esegui(self, dati: list[int]) -> None:
-        risultato = max(dati)
-        print(f"Strategia B (massimo): {risultato}")
+    def execute(self, data: list[int]) -> None:
+        result = sum(data)
+        print(f"Strategy A (sum): {result}")
 
 
-class StrategiaC(Strategia):
-    """Algoritmo C: conta gli elementi pari."""
+class StrategyB(Strategy):
+    """Algorithm B: finds the maximum."""
 
-    def esegui(self, dati: list[int]) -> None:
-        risultato = sum(1 for x in dati if x % 2 == 0)
-        print(f"Strategia C (conta pari): {risultato}")
+    def execute(self, data: list[int]) -> None:
+        result = max(data)
+        print(f"Strategy B (maximum): {result}")
 
 
-# ==========================================
-# CONTESTO — delega alla strategia corrente
-# ==========================================
-# Il Contesto non conosce i dettagli degli algoritmi.
-# Sa solo che la strategia ha un metodo esegui() — polimorfismo.
+class StrategyC(Strategy):
+    """Algorithm C: counts even elements."""
 
-class Contesto:
-    """Mantiene un riferimento a una Strategia e le delega il lavoro."""
-
-    def __init__(self, dati: list[int], strategia: Strategia):
-        self.dati = dati
-        self._strategia = strategia
-
-    def imposta_strategia(self, strategia: Strategia) -> None:
-        """Cambia strategia a runtime — il Contesto non cambia."""
-        self._strategia = strategia
-
-    def esegui_operazione(self) -> None:
-        """Delega l'esecuzione alla strategia corrente."""
-        self._strategia.esegui(self.dati)
+    def execute(self, data: list[int]) -> None:
+        result = sum(1 for x in data if x % 2 == 0)
+        print(f"Strategy C (count even): {result}")
 
 
 # ==========================================
-# UTILIZZO
+# CONTEXT — delegates to the current strategy
 # ==========================================
-# Il client sceglie la strategia (un oggetto, non una stringa).
-# Il Contesto delega senza if/elif. Aggiungere StrategiaD
-# non richiede di toccare nulla di esistente.
+# The Context does not know the details of the algorithms.
+# It only knows the strategy has an execute() method — polymorphism.
+
+class Context:
+    """Maintains a reference to a Strategy and delegates work to it."""
+
+    def __init__(self, data: list[int], strategy: Strategy):
+        self.data = data
+        self._strategy = strategy
+
+    def set_strategy(self, strategy: Strategy) -> None:
+        """Changes the strategy at runtime — the Context does not change."""
+        self._strategy = strategy
+
+    def execute_operation(self) -> None:
+        """Delegates execution to the current strategy."""
+        self._strategy.execute(self.data)
+
+
+# ==========================================
+# USAGE
+# ==========================================
+# The client chooses the strategy (an object, not a string).
+# The Context delegates without if/elif. Adding StrategyD
+# does not require touching anything existing.
 
 if __name__ == "__main__":
 
-    dati = [3, 7, 2, 8, 4, 1, 6]
+    data = [3, 7, 2, 8, 4, 1, 6]
 
     print("=" * 45)
-    print("  STRATEGY PATTERN — ogni algoritmo è una classe")
+    print("  STRATEGY PATTERN — each algorithm is a class")
     print("=" * 45)
 
-    # --- Il client crea il contesto con una strategia iniziale ---
-    contesto = Contesto(dati, StrategiaA())
-    contesto.esegui_operazione()                # usa Strategia A
+    # --- The client creates the context with an initial strategy ---
+    context = Context(data, StrategyA())
+    context.execute_operation()                # uses Strategy A
 
-    # --- Cambio strategia a runtime ---
-    contesto.imposta_strategia(StrategiaB())
-    contesto.esegui_operazione()                # usa Strategia B
+    # --- Changing strategy at runtime ---
+    context.set_strategy(StrategyB())
+    context.execute_operation()                # uses Strategy B
 
-    contesto.imposta_strategia(StrategiaC())
-    contesto.esegui_operazione()                # usa Strategia C
+    context.set_strategy(StrategyC())
+    context.execute_operation()                # uses Strategy C
 
 
-    # VANTAGGI rispetto al problem.py:
-    # 1. Ogni algoritmo è isolato nella propria classe → testabile singolarmente.
-    # 2. Il Contesto è semplice: delega e basta, zero if/elif.
-    # 3. Aggiungere StrategiaD non modifica nulla di esistente → OCP rispettato.
-    # 4. Il client passa oggetti (type-safe), non stringhe magiche.
+    # ADVANTAGES over problem.py:
+    # 1. Each algorithm is isolated in its own class → individually testable.
+    # 2. The Context is simple: it delegates and that's it, zero if/elif.
+    # 3. Adding StrategyD does not modify anything existing → OCP respected.
+    # 4. The client passes objects (type-safe), not magic strings.
 
-    # è importante notare che l'esecuzione e il risultato è lo stesso, quel che cambia
-    # è la struttura del codice, che ora è più modulare, estensibile e manutenibile.
+    # It's important to note that the execution and result are the same; what changes
+    # is the code structure, which is now more modular, extensible, and maintainable.

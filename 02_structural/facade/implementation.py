@@ -1,153 +1,153 @@
 # ==========================================
-# IL PATTERN FACADE — I sottosistemi restano IDENTICI
+# THE FACADE PATTERN — The subsystems remain IDENTICAL
 # ==========================================
-# Le classi X, Y, Z non vengono toccate: la Facade li avvolge
-# e offre al client un'interfaccia semplificata.
+# Classes X, Y, Z are not touched: the Facade wraps them
+# and offers the client a simplified interface.
 
 
-class ServizioInventarioX:
-    """Sottosistema X — gestisce dati di inventario."""
+class InventoryServiceX:
+    """Subsystem X — manages inventory data."""
     def login_x(self, user: str, password: str) -> bool:
-        print(f"[X] Login di '{user}'... OK.")
+        print(f"[X] Login for '{user}'... OK.")
         return True
 
-    def richiedi_dati_x(self) -> dict:
-        print("[X] Recupero dati inventario...")
+    def request_data_x(self) -> dict:
+        print("[X] Retrieving inventory data...")
         return {"widget_a": 150, "widget_b": 89, "gadget_x": 320}
 
     def logout_x(self):
-        print("[X] Sessione inventario chiusa.")
+        print("[X] Inventory session closed.")
 
 
-class ServizioAnalyticsY:
-    """Sottosistema Y — fornisce dati di analytics/vendite."""
-    def autenticazione_y(self, api_key: str) -> bool:
-        print(f"[Y] Autenticazione con API key '{api_key[:8]}...'... OK.")
+class AnalyticsServiceY:
+    """Subsystem Y — provides analytics/sales data."""
+    def authenticate_y(self, api_key: str) -> bool:
+        print(f"[Y] Authentication with API key '{api_key[:8]}...'... OK.")
         return True
 
-    def fetch_metriche_y(self) -> dict:
-        print("[Y] Recupero metriche di vendita...")
+    def fetch_metrics_y(self) -> dict:
+        print("[Y] Retrieving sales metrics...")
         return {"widget_a": 45.0, "widget_b": 12.5, "gadget_x": 78.0}
 
-    def disconnetti_y(self):
-        print("[Y] Connessione analytics chiusa.")
+    def disconnect_y(self):
+        print("[Y] Analytics connection closed.")
 
 
-class MotoreReportZ:
-    """Sottosistema Z — generatore di report visuali."""
-    def inizializza_z(self, titolo: str):
-        print(f"[Z] Inizializzazione report: '{titolo}'")
+class ReportEngineZ:
+    """Subsystem Z — visual report generator."""
+    def initialize_z(self, title: str):
+        print(f"[Z] Initializing report: '{title}'")
 
-    def aggiungi_riga_z(self, prodotto: str, quantita: int, prezzo: float):
-        totale = quantita * prezzo
-        print(f"[Z]   {prodotto:<15} | Qtà: {quantita:>5} | Prezzo: €{prezzo:>7.2f} | Totale: €{totale:>10.2f}")
+    def add_row_z(self, product: str, quantity: int, price: float):
+        total = quantity * price
+        print(f"[Z]   {product:<15} | Qty: {quantity:>5} | Price: €{price:>7.2f} | Total: €{total:>10.2f}")
 
-    def finalizza_z(self):
-        print("[Z] Report completato e salvato.")
+    def finalize_z(self):
+        print("[Z] Report completed and saved.")
 
 
 # ==========================================
-# LA FACADE
+# THE FACADE
 # ==========================================
-# La Facade:
-#  - Conosce quali sottosistemi servono e come usarli
-#  - Espone al client un metodo semplice e descrittivo
-#  - Gestisce internamente l'ordine delle operazioni, la fusione
-#    dei dati, e la pulizia delle risorse
+# The Facade:
+#  - Knows which subsystems are needed and how to use them
+#  - Exposes a simple and descriptive method to the client
+#  - Internally handles the order of operations, data merging,
+#    and resource cleanup
 #
-# Il client non sa nemmeno che X, Y e Z esistono.
+# The client doesn't even know that X, Y and Z exist.
 
 class ReportFacade:
     """
-    Facade che nasconde la complessità di X, Y e Z.
+    Facade that hides the complexity of X, Y and Z.
 
-    Il client chiama UN solo metodo: genera_report().
-    Tutto il resto (login, fetch, merge, render, logout) è interno.
+    The client calls ONE single method: generate_report().
+    Everything else (login, fetch, merge, render, logout) is internal.
     """
 
     def __init__(self, user_x: str, password_x: str, api_key_y: str):
-        # La Facade crea e configura i sottosistemi al suo interno
-        self._x = ServizioInventarioX()
-        self._y = ServizioAnalyticsY()
-        self._z = MotoreReportZ()
+        # The Facade creates and configures the subsystems internally
+        self._x = InventoryServiceX()
+        self._y = AnalyticsServiceY()
+        self._z = ReportEngineZ()
 
-        # Credenziali memorizzate privatamente
+        # Credentials stored privately
         self._user_x = user_x
         self._password_x = password_x
         self._api_key_y = api_key_y
 
     # --------------------------------------------------
-    # Metodo pubblico — l'unica cosa che il client vede
+    # Public method — the only thing the client sees
     # --------------------------------------------------
-    def genera_report(self, titolo: str = "Report Inventario + Vendite"):
+    def generate_report(self, title: str = "Inventory + Sales Report"):
         """
-        Genera un report completo, orchestrando X → Y → fusione → Z.
-        Il client non deve conoscere nessun sottosistema.
+        Generates a complete report, orchestrating X → Y → merge → Z.
+        The client doesn't need to know any subsystem.
         """
-        print(f"Facade: avvio generazione report '{titolo}'\n")
+        print(f"Facade: starting report generation '{title}'\n")
 
-        # Passo 1-2: login e dati da X
+        # Step 1-2: login and data from X
         self._x.login_x(self._user_x, self._password_x)
-        inventario = self._x.richiedi_dati_x()
+        inventory = self._x.request_data_x()
 
-        # Passo 3-4: autenticazione e dati da Y
-        self._y.autenticazione_y(self._api_key_y)
-        metriche = self._y.fetch_metriche_y()
+        # Step 3-4: authentication and data from Y
+        self._y.authenticate_y(self._api_key_y)
+        metrics = self._y.fetch_metrics_y()
 
-        # Passo 5: fusione (logica che prima era nel client)
-        dati_fusi = self._fondi_dati(inventario, metriche)
+        # Step 5: merge (logic that was previously in the client)
+        merged_data = self._merge_data(inventory, metrics)
 
-        # Passo 6: generazione report con Z
-        self._z.inizializza_z(titolo)
-        for prodotto, valori in dati_fusi.items():
-            self._z.aggiungi_riga_z(prodotto, valori["quantita"], valori["prezzo"])
-        self._z.finalizza_z()
+        # Step 6: report generation with Z
+        self._z.initialize_z(title)
+        for product, values in merged_data.items():
+            self._z.add_row_z(product, values["quantity"], values["price"])
+        self._z.finalize_z()
 
-        # Passo 7: pulizia — il client non deve ricordarsene
+        # Step 7: cleanup — the client doesn't have to remember this
         self._x.logout_x()
-        self._y.disconnetti_y()
+        self._y.disconnect_y()
 
-        print("\nFacade: report completato con successo.")
+        print("\nFacade: report completed successfully.")
 
     # --------------------------------------------------
-    # Metodo privato — la logica di fusione è incapsulata
+    # Private method — the merge logic is encapsulated
     # --------------------------------------------------
     @staticmethod
-    def _fondi_dati(inventario: dict, metriche: dict) -> dict:
-        """Unisce i dati di inventario con le metriche di vendita."""
-        risultato = {}
-        for prodotto in inventario:
-            risultato[prodotto] = {
-                "quantita": inventario[prodotto],
-                "prezzo":   metriche.get(prodotto, 0.0),
+    def _merge_data(inventory: dict, metrics: dict) -> dict:
+        """Merges inventory data with sales metrics."""
+        result = {}
+        for product in inventory:
+            result[product] = {
+                "quantity": inventory[product],
+                "price":    metrics.get(product, 0.0),
             }
-        return risultato
+        return result
 
 
 # ==========================================
-# CODICE CLIENT — semplice, pulito, disaccoppiato
+# CLIENT CODE — simple, clean, decoupled
 # ==========================================
-# Il client:
-#  - Non conosce X, Y, Z
-#  - Non deve ricordare l'ordine delle operazioni
-#  - Non deve gestire la pulizia delle risorse
-#  - Se X cambia API, si aggiorna SOLO la Facade
+# The client:
+#  - Doesn't know X, Y, Z
+#  - Doesn't have to remember the order of operations
+#  - Doesn't have to manage resource cleanup
+#  - If X changes its API, only the Facade is updated
 
-def codice_client(facade: ReportFacade):
-    """Il client riceve la Facade e chiama un solo metodo."""
-    facade.genera_report("Report Trimestrale Q3")
+def client_code(facade: ReportFacade):
+    """The client receives the Facade and calls a single method."""
+    facade.generate_report("Quarterly Report Q3")
 
 
 # ==========================================
-# UTILIZZO
+# USAGE
 # ==========================================
-# Anche qui è importante notare che l'output dell'applicazione è identico a prima, ma il client è molto più semplice e disaccoppiato.
+# It's also important to note that the application output is identical to before, but the client is much simpler and decoupled.
 if __name__ == "__main__":
-    # Configurazione: il client crea la Facade con le credenziali,
-    # poi la usa senza preoccuparsi di nient'altro.
+    # Configuration: the client creates the Facade with the credentials,
+    # then uses it without worrying about anything else.
     facade = ReportFacade(
         user_x="admin",
         password_x="password123",
         api_key_y="ak-93jf82hd-prod-key",
     )
-    codice_client(facade)
+    client_code(facade)

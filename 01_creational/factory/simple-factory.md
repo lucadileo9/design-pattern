@@ -1,14 +1,14 @@
 # Simple Factory Pattern
 
-Il simple factory pattern è un design pattern creazionale che fornisce un'interfaccia per creare oggetti in una superclasse, ma consente alle sottoclassi di alterare il tipo di oggetti che verranno creati. In altre parole, il simple factory pattern delega la responsabilità della creazione degli oggetti a una classe separata, chiamata factory, che decide quale classe concreta istanziare in base a determinate condizioni o parametri.
-Quindi è parecchio diversa (e più semplice) rispetto al factory method.
+The simple factory pattern is a creational design pattern that provides an interface for creating objects in a superclass, but allows subclasses to alter the type of objects that will be created. In other words, the simple factory pattern delegates the responsibility of object creation to a separate class, called factory, which decides which concrete class to instantiate based on certain conditions or parameters.
+So it's quite different (and simpler) compared to the factory method.
 
-Continuando con l'esempio della logistica, potremmo avere una classe `MezzoDiTrasportoFactory` che si occupa SOLO di creare istanze di `Camion`, `Nave` e `Aereo` in base a determinate condizioni o parametri.
-Di conseguenza il costruttore di `MezzoDiTrasportoFactory` potrebbe solamente prendere un parametro che indica quale tipo di mezzo di trasporto creare, avere quindi un giga switch-case o if-else che decide quale classe concreta istanziare e restituire l'istanza creata. In questo modo, se in futuro dovessimo introdurre una nuova classe concreta, basterà aggiungere una nuova condizione al metodo `create()` della classe Factory, senza dover modificare il nostro codice principale.
+Continuing with the logistics example, we could have a `TransportVehicleFactory` class that is ONLY responsible for creating instances of `Truck`, `Ship`, and `Airplane` based on certain conditions or parameters.
+Consequently, the constructor of `TransportVehicleFactory` could simply take a parameter indicating which type of transport vehicle to create, have a giant switch-case or if-else that decides which concrete class to instantiate, and return the created instance. This way, if in the future we need to introduce a new concrete class, we just need to add a new condition to the `create()` method of the Factory class, without having to modify our main code.
 
-## Limiti
-Il simple factory pattern è semplice da implementare e può essere utile in situazioni in cui la logica di creazione degli oggetti è relativamente semplice e non richiede una grande flessibilità. Tuttavia, presenta alcuni limiti:
-- Se la logica di creazione degli oggetti diventa complessa, la classe factory può diventare difficile da mantenere e testare.
-- Se il numero di classi concrete cresce, la classe factory può diventare un "god class" che conosce tutte le classi concrete, violando il principio di Open/Closed.
-- Non supporta bene l'estensione, poiché ogni volta che si aggiunge una nuova classe concreta, è necessario modificare la classe factory, il che può portare a errori e rendere il codice meno manutenibile.
-- Non è adatto per situazioni in cui la creazione degli oggetti richiede una logica complessa o dipende da molte variabili, poiché la classe factory potrebbe diventare troppo complicata e difficile da gestire.
+## Limitations
+The simple factory pattern is simple to implement and can be useful in situations where the object creation logic is relatively simple and doesn't require great flexibility. However, it has some limitations:
+- If the object creation logic becomes complex, the factory class can become difficult to maintain and test.
+- If the number of concrete classes grows, the factory class can become a "god class" that knows all concrete classes, violating the Open/Closed principle.
+- It doesn't support extension well, since every time a new concrete class is added, it's necessary to modify the factory class, which can lead to errors and make the code less maintainable.
+- It's not suitable for situations where object creation requires complex logic or depends on many variables, since the factory class could become too complicated and difficult to manage.

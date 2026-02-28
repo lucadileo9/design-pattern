@@ -1,121 +1,121 @@
 # ==========================================
-# IL PROBLEMA CHE L'OBSERVER RISOLVE
+# THE PROBLEM THAT THE OBSERVER SOLVES
 # ==========================================
-# Un negoziante (Negozio) riceve periodicamente nuovi prodotti.
-# Alcuni clienti sono interessati a prodotti specifici e vogliono
-# sapere quando arrivano.
+# A shopkeeper (Shop) periodically receives new products.
+# Some customers are interested in specific products and want
+# to know when they arrive.
 #
-# Senza il pattern Observer, ogni cliente deve fare POLLING:
-# chiedere ripetutamente al negozio "È arrivato il mio prodotto?".
-# Il negozio viene bombardato di richieste, e i clienti sprecano
-# tempo a controllare continuamente.
+# Without the Observer pattern, each customer must POLL:
+# repeatedly ask the shop "Has my product arrived?".
+# The shop gets bombarded with requests, and customers waste
+# time checking continuously.
 
 
 import time
 
 
 # ==========================================
-# IL NEGOZIO — non sa nulla dei clienti
+# THE SHOP — knows nothing about the customers
 # ==========================================
-# Il negozio gestisce i propri prodotti. Non ha nessun meccanismo
-# per avvisare i clienti: sono LORO a dover controllare.
+# The shop manages its own products. It has no mechanism
+# to notify customers: THEY have to check themselves.
 
-class Negozio:
-    """Il negozio: gestisce il magazzino, ma non avvisa nessuno."""
+class Shop:
+    """The shop: manages the inventory, but doesn't notify anyone."""
 
-    def __init__(self, nome: str):
-        self.nome = nome
-        self.prodotti_disponibili: list[str] = []
+    def __init__(self, name: str):
+        self.name = name
+        self.available_products: list[str] = []
 
-    def aggiungi_prodotto(self, prodotto: str) -> None:
-        """Aggiunge un prodotto al magazzino — nessuna notifica."""
-        self.prodotti_disponibili.append(prodotto)
-        print(f"[{self.nome}] Nuovo prodotto in magazzino: '{prodotto}'")
+    def add_product(self, product: str) -> None:
+        """Adds a product to the inventory — no notification."""
+        self.available_products.append(product)
+        print(f"[{self.name}] New product in stock: '{product}'")
 
-    def ha_prodotto(self, prodotto: str) -> bool:
-        """Il cliente deve chiamare questo metodo per controllare."""
-        return prodotto in self.prodotti_disponibili
+    def has_product(self, product: str) -> bool:
+        """The customer must call this method to check."""
+        return product in self.available_products
 
 
 # ==========================================
-# IL CLIENTE — deve fare polling manualmente
+# THE CUSTOMER — must poll manually
 # ==========================================
-# Il cliente vuole un prodotto specifico. L'unico modo per
-# sapere se è arrivato è chiedere ripetutamente al negozio.
+# The customer wants a specific product. The only way to
+# know if it has arrived is to repeatedly ask the shop.
 
-class Cliente:
-    """Un cliente che aspetta un prodotto specifico."""
+class Customer:
+    """A customer who is waiting for a specific product."""
 
-    def __init__(self, nome: str, prodotto_desiderato: str):
-        self.nome = nome
-        self.prodotto_desiderato = prodotto_desiderato
+    def __init__(self, name: str, desired_product: str):
+        self.name = name
+        self.desired_product = desired_product
 
-    def controlla_disponibilita(self, negozio: Negozio) -> bool:
+    def check_availability(self, shop: Shop) -> bool:
         """
-        POLLING: il cliente chiede attivamente al negozio.
-        Deve farlo ripetutamente, sperando che il prodotto sia arrivato.
+        POLLING: the customer actively asks the shop.
+        They must do this repeatedly, hoping the product has arrived.
         """
-        disponibile = negozio.ha_prodotto(self.prodotto_desiderato)
-        if disponibile:
-            print(f"  [{self.nome}] Evvai! '{self.prodotto_desiderato}' è disponibile!")
+        available = shop.has_product(self.desired_product)
+        if available:
+            print(f"  [{self.name}] Yay! '{self.desired_product}' is available!")
         else:
-            print(f"  [{self.nome}] '{self.prodotto_desiderato}' non c'è ancora...")
-        return disponibile
+            print(f"  [{self.name}] '{self.desired_product}' is not here yet...")
+        return available
 
 
 # ==========================================
-# SIMULAZIONE DEL POLLING
+# POLLING SIMULATION
 # ==========================================
-# Ogni cliente controlla il negozio continuamente.
-# Il negozio viene bombardato di richieste inutili.
-# Se ci sono 100 clienti, il carico diventa insostenibile.
+# Each customer checks the shop continuously.
+# The shop gets bombarded with useless requests.
+# If there are 100 customers, the load becomes unsustainable.
 
 if __name__ == "__main__":
 
-    negozio = Negozio("Elettronica Express")
+    shop = Shop("Electronics Express")
 
-    mario = Cliente("Mario", "PlayStation 6")
-    giulia = Cliente("Giulia", "iPhone 20")
-    luca = Cliente("Luca", "PlayStation 6")
+    mario = Customer("Mario", "PlayStation 6")
+    giulia = Customer("Giulia", "iPhone 20")
+    luca = Customer("Luca", "PlayStation 6")
 
     print("=" * 50)
-    print("  POLLING — i clienti controllano ripetutamente")
+    print("  POLLING — customers check repeatedly")
     print("=" * 50)
 
-    # --- Turno 1: nessun prodotto ancora ---
-    print("\n--- Turno 1: i clienti controllano ---")
-    mario.controlla_disponibilita(negozio)      # niente
-    giulia.controlla_disponibilita(negozio)     # niente
-    luca.controlla_disponibilita(negozio)       # niente
+    # --- Turn 1: no products yet ---
+    print("\n--- Turn 1: customers check ---")
+    mario.check_availability(shop)      # nothing
+    giulia.check_availability(shop)     # nothing
+    luca.check_availability(shop)       # nothing
 
-    # --- Il negozio riceve un prodotto ---
-    print("\n--- Il negozio riceve merce ---")
-    negozio.aggiungi_prodotto("PlayStation 6")
+    # --- The shop receives a product ---
+    print("\n--- The shop receives goods ---")
+    shop.add_product("PlayStation 6")
 
-    # --- Turno 2: i clienti controllano DI NUOVO ---
-    print("\n--- Turno 2: i clienti controllano ---")
-    mario.controlla_disponibilita(negozio)      # trovato!
-    giulia.controlla_disponibilita(negozio)     # niente (vuole iPhone)
-    luca.controlla_disponibilita(negozio)       # trovato!
+    # --- Turn 2: customers check AGAIN ---
+    print("\n--- Turn 2: customers check ---")
+    mario.check_availability(shop)      # found!
+    giulia.check_availability(shop)     # nothing (wants iPhone)
+    luca.check_availability(shop)       # found!
 
-    # --- Il negozio riceve un altro prodotto ---
-    print("\n--- Il negozio riceve altra merce ---")
-    negozio.aggiungi_prodotto("iPhone 20")
+    # --- The shop receives another product ---
+    print("\n--- The shop receives more goods ---")
+    shop.add_product("iPhone 20")
 
-    # --- Turno 3: TUTTI devono controllare ancora ---
-    print("\n--- Turno 3: i clienti controllano ---")
-    mario.controlla_disponibilita(negozio)      # già trovato prima, spreco
-    giulia.controlla_disponibilita(negozio)     # finalmente!
-    luca.controlla_disponibilita(negozio)       # già trovato prima, spreco
+    # --- Turn 3: EVERYONE must check again ---
+    print("\n--- Turn 3: customers check ---")
+    mario.check_availability(shop)      # already found before, waste
+    giulia.check_availability(shop)     # finally!
+    luca.check_availability(shop)       # already found before, waste
 
-    # PROBLEMI:
-    # 1. Ogni cliente deve controllare OGNI volta, anche quando non
-    #    serve 
-    # 2. Il negozio riceve N richieste per turno (con 100 clienti = 100
-    #    richieste ripetute ad ogni turno).
-    # 3. Se il negozio aggiunge un prodotto tra un turno e l'altro,
-    #    i clienti se ne accorgono solo al turno successivo (ritardo).
-    # 4. Il client (il main) deve orchestrare manualmente il polling.
-    # Da notare inoltre che il negozio viene costantemente interrogato,
-    # quindi viene costantemente disturbato, non potendo ad esempio
-    # concentrarsi su altre attività
+    # PROBLEMS:
+    # 1. Each customer must check EVERY time, even when it's not
+    #    needed
+    # 2. The shop receives N requests per turn (with 100 customers = 100
+    #    repeated requests every turn).
+    # 3. If the shop adds a product between turns,
+    #    customers only notice on the next turn (delay).
+    # 4. The client (the main) must manually orchestrate the polling.
+    # Also note that the shop is constantly being interrogated,
+    # so it is constantly being disturbed, unable to, for example,
+    # focus on other activities

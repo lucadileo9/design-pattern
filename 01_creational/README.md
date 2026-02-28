@@ -1,58 +1,58 @@
-# Pattern Creazionali
+# Creational Patterns
 
-Questi modelli affrontano il problema della creazione di oggetti. Quando la creazione diretta (tramite `new`) potrebbe portare a complessità o dipendenze indesiderate, i pattern creazionali offrono meccanismi flessibili per separare la creazione dalla responsabilità dell'oggetto stesso.
+These patterns address the problem of object creation. When direct creation (via `new`) could lead to unwanted complexity or dependencies, creational patterns offer flexible mechanisms to separate creation from the object's own responsibility.
 
 ---
 
 ## 1. Singleton
 
-**Intento**: garantire che una classe abbia una sola istanza e fornire un punto di accesso globale a essa.
+**Intent**: ensure that a class has only one instance and provide a global access point to it.
 
-**Utilizzo tipico**: gestione di risorse condivise (connessioni a database, logger, configurazioni globali).
+**Typical usage**: managing shared resources (database connections, loggers, global configurations).
 
-Riferimento: [Spiegazione completa](./singleton/README.md)
+Reference: [Full explanation](./singleton/README.md)
 
 ---
 
 ## 2. Factory Method
 
-**Intento**: definire un'interfaccia per creare un oggetto, delegando alle sottoclassi la decisione su quale classe specifica istanziare.
+**Intent**: define an interface for creating an object, delegating to subclasses the decision of which specific class to instantiate.
 
-**Utilizzo tipico**: quando il sistema non può anticipare il tipo esatto di oggetti da creare o vuole delegare la responsabilità della creazione.
+**Typical usage**: when the system cannot anticipate the exact type of objects to create or wants to delegate creation responsibility.
 
-Riferimento: [Spiegazione completa](./factory/README.md)
+Reference: [Full explanation](./factory/README.md)
 
 ---
 
 ## 3. Abstract Factory
 
-**Intento**: fornire un'interfaccia per creare famiglie di oggetti correlati o dipendenti senza specificare le loro classi concrete.
+**Intent**: provide an interface for creating families of related or dependent objects without specifying their concrete classes.
 
-**Utilizzo tipico**: creazione di interfacce utente multitema o sistemi che devono supportare diverse varianti di prodotti in modo coerente.
+**Typical usage**: creating multi-theme user interfaces or systems that need to support different product variants in a consistent way.
 
-Riferimento: [Spiegazione completa](./abstract_factory/README.md)
+Reference: [Full explanation](./abstract_factory/README.md)
 
 ---
 
 ## 4. Builder
 
-**Intento**: separare la costruzione di un oggetto complesso dalla sua rappresentazione, permettendo processi di costruzione step-by-step.
+**Intent**: separate the construction of a complex object from its representation, allowing step-by-step construction processes.
 
-**Utilizzo tipico**: creazione di oggetti con molti parametri opzionali o quando il processo di costruzione è complesso.
+**Typical usage**: creating objects with many optional parameters or when the construction process is complex.
 
-*Da completare...*
+*To be completed...*
 
 ---
 
 ## 5. Prototype
 
-**Intento**: creare nuovi oggetti clonando un prototipo esistente invece di crearne da zero.
+**Intent**: create new objects by cloning an existing prototype instead of building from scratch.
 
-**Utilizzo tipico**: quando la creazione di un nuovo oggetto è più costosa della clonazione, o quando si vuole evitare le sottoclassi.
+**Typical usage**: when creating a new object is more expensive than cloning, or when you want to avoid subclassing.
 
-*Da completare...*
+*To be completed...*
 
 
-## Casi reali in cui ho usato questi pattern:
+## Real cases where I used these patterns:
 **Singleton**: 
- - Ho fatto un'applicazione che interagiva tramite python con microsft teams, notion e un bot telegram. Ho usato un singleton per gestire l'avvio bot, siccome dovevo essere sicuro che quando le varie api chiamavano il bot, questo fosse già stato avviato, e sopratutto che non venisse avviato più di una volta e che si trattasse effettivamente sempre della stessa istanza.
+ - I built an application that interacted via Python with Microsoft Teams, Notion, and a Telegram bot. I used a Singleton to manage the bot startup, since I needed to be sure that when the various APIs called the bot, it had already been started, and especially that it wouldn't be started more than once and that it was always the same instance.

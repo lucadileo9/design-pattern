@@ -1,197 +1,197 @@
 # ==========================================
-# COMPOSITE — Esempio reale: Menu di un ristorante
+# COMPOSITE — Real Example: Restaurant Menu
 # ==========================================
-# Un menu di ristorante ha una struttura ad albero:
-#   - Piatti singoli (foglie): "Bruschetta", "Carbonara", ecc.
-#   - Sezioni (composite): "Antipasti", "Primi", "Bevande", ecc.
+# A restaurant menu has a tree structure:
+#   - Individual dishes (leaves): "Bruschetta", "Carbonara", etc.
+#   - Sections (composites): "Appetizers", "First Courses", "Drinks", etc.
 #
-# Le sezioni possono contenere piatti o sotto-sezioni
-# (es. "Bevande" → "Analcoliche" / "Alcoliche").
+# Sections can contain dishes or sub-sections
+# (e.g. "Drinks" → "Non-Alcoholic" / "Alcoholic").
 #
-# Il client vuole poter chiedere a qualsiasi elemento:
-#   - mostra()           → stampa la struttura
-#   - conta_piatti()     → quanti piatti ci sono
-#   - get_prezzo_medio() → prezzo medio dei piatti contenuti
-# … senza distinguere tra piatto singolo e sezione intera.
+# The client wants to be able to ask any element:
+#   - display()            → print the structure
+#   - count_dishes()       → how many dishes are there
+#   - get_average_price()  → average price of contained dishes
+# … without distinguishing between a single dish and an entire section.
 
 from abc import ABC, abstractmethod
 
 
 # ==========================================
-# COMPONENT — interfaccia comune
+# COMPONENT — common interface
 # ==========================================
 
-class ComponenteMenu(ABC):
-    """Interfaccia comune per piatti e sezioni del menu."""
+class MenuComponent(ABC):
+    """Common interface for dishes and menu sections."""
 
-    def __init__(self, nome: str):
-        self.nome = nome
+    def __init__(self, name: str):
+        self.name = name
 
     @abstractmethod
-    def mostra(self, indentazione: int = 0) -> None:
-        """Stampa l'elemento (e i figli, se presenti)."""
+    def display(self, indentation: int = 0) -> None:
+        """Prints the element (and its children, if any)."""
         ...
 
     @abstractmethod
-    def conta_piatti(self) -> int:
-        """Numero di piatti (foglie) contenuti."""
+    def count_dishes(self) -> int:
+        """Number of dishes (leaves) contained."""
         ...
 
     @abstractmethod
-    def get_prezzi(self) -> list[float]:
-        """Lista di tutti i prezzi dei piatti contenuti."""
+    def get_prices(self) -> list[float]:
+        """List of all prices of contained dishes."""
         ...
 
-    def get_prezzo_medio(self) -> float:
-        """Prezzo medio calcolato dai prezzi raccolti."""
-        prezzi = self.get_prezzi()
-        if not prezzi:
+    def get_average_price(self) -> float:
+        """Average price calculated from collected prices."""
+        prices = self.get_prices()
+        if not prices:
             return 0.0
-        return sum(prezzi) / len(prezzi)
+        return sum(prices) / len(prices)
 
 
 # ==========================================
-# LEAF — singolo piatto
+# LEAF — single dish
 # ==========================================
 
-class Piatto(ComponenteMenu):
-    """Foglia: un piatto con nome, prezzo e (opzionale) descrizione."""
+class Dish(MenuComponent):
+    """Leaf: a dish with name, price and (optional) description."""
 
-    def __init__(self, nome: str, prezzo: float, descrizione: str = ""):
-        super().__init__(nome)
-        self.prezzo = prezzo
-        self.descrizione = descrizione
+    def __init__(self, name: str, price: float, description: str = ""):
+        super().__init__(name)
+        self.price = price
+        self.description = description
 
-    def mostra(self, indentazione: int = 0) -> None:
-        prefisso = "  " * indentazione
-        desc = f"  — {self.descrizione}" if self.descrizione else ""
-        print(f"{prefisso}• {self.nome}: €{self.prezzo:.2f}{desc}")
+    def display(self, indentation: int = 0) -> None:
+        prefix = "  " * indentation
+        desc = f"  — {self.description}" if self.description else ""
+        print(f"{prefix}• {self.name}: €{self.price:.2f}{desc}")
 
-    def conta_piatti(self) -> int:
+    def count_dishes(self) -> int:
         return 1
 
-    def get_prezzi(self) -> list[float]:
-        return [self.prezzo]
+    def get_prices(self) -> list[float]:
+        return [self.price]
 
 
 # ==========================================
-# COMPOSITE — sezione del menu
+# COMPOSITE — menu section
 # ==========================================
 
-class SezioneMenu(ComponenteMenu):
-    """Composite: una sezione che contiene piatti e/o sotto-sezioni."""
+class MenuSection(MenuComponent):
+    """Composite: a section that contains dishes and/or sub-sections."""
 
-    def __init__(self, nome: str):
-        super().__init__(nome)
-        self._figli: list[ComponenteMenu] = []
+    def __init__(self, name: str):
+        super().__init__(name)
+        self._children: list[MenuComponent] = []
 
-    def aggiungi(self, componente: ComponenteMenu) -> None:
-        self._figli.append(componente)
+    def add(self, component: MenuComponent) -> None:
+        self._children.append(component)
 
-    def rimuovi(self, componente: ComponenteMenu) -> None:
-        self._figli.remove(componente)
+    def remove(self, component: MenuComponent) -> None:
+        self._children.remove(component)
 
-    # --- operazioni dell'interfaccia (delegate ai figli) ---
+    # --- interface operations (delegated to children) ---
 
-    def mostra(self, indentazione: int = 0) -> None:
-        prefisso = "  " * indentazione
-        print(f"{prefisso}📂 {self.nome}")
-        for figlio in self._figli:
-            figlio.mostra(indentazione + 1)
+    def display(self, indentation: int = 0) -> None:
+        prefix = "  " * indentation
+        print(f"{prefix}📂 {self.name}")
+        for child in self._children:
+            child.display(indentation + 1)
 
-    def conta_piatti(self) -> int:
-        return sum(figlio.conta_piatti() for figlio in self._figli)
+    def count_dishes(self) -> int:
+        return sum(child.count_dishes() for child in self._children)
 
-    def get_prezzi(self) -> list[float]:
-        prezzi: list[float] = []
-        for figlio in self._figli:
-            prezzi.extend(figlio.get_prezzi())
-        return prezzi
+    def get_prices(self) -> list[float]:
+        prices: list[float] = []
+        for child in self._children:
+            prices.extend(child.get_prices())
+        return prices
 
 
 # ==========================================
-# UTILIZZO — costruzione e navigazione del menu
+# USAGE — building and navigating the menu
 # ==========================================
 
 if __name__ == "__main__":
 
-    # --- Antipasti ---
-    bruschetta = Piatto("Bruschetta", 6.00, "pomodoro, basilico, olio EVO")
-    caprese = Piatto("Caprese", 8.50, "mozzarella di bufala, pomodoro")
-    tagliere = Piatto("Tagliere misto", 12.00, "salumi e formaggi locali")
+    # --- Appetizers ---
+    bruschetta = Dish("Bruschetta", 6.00, "tomato, basil, EVO oil")
+    caprese = Dish("Caprese", 8.50, "buffalo mozzarella, tomato")
+    platter = Dish("Mixed Platter", 12.00, "local cured meats and cheeses")
 
-    antipasti = SezioneMenu("Antipasti")
-    antipasti.aggiungi(bruschetta)
-    antipasti.aggiungi(caprese)
-    antipasti.aggiungi(tagliere)
+    appetizers = MenuSection("Appetizers")
+    appetizers.add(bruschetta)
+    appetizers.add(caprese)
+    appetizers.add(platter)
 
-    # --- Primi ---
-    carbonara = Piatto("Carbonara", 11.00)
-    amatriciana = Piatto("Amatriciana", 10.50)
-    risotto = Piatto("Risotto ai funghi porcini", 13.00)
+    # --- First Courses ---
+    carbonara = Dish("Carbonara", 11.00)
+    amatriciana = Dish("Amatriciana", 10.50)
+    risotto = Dish("Porcini Mushroom Risotto", 13.00)
 
-    primi = SezioneMenu("Primi Piatti")
-    primi.aggiungi(carbonara)
-    primi.aggiungi(amatriciana)
-    primi.aggiungi(risotto)
+    first_courses = MenuSection("First Courses")
+    first_courses.add(carbonara)
+    first_courses.add(amatriciana)
+    first_courses.add(risotto)
 
-    # --- Secondi ---
-    tagliata = Piatto("Tagliata di manzo", 18.00, "con rucola e grana")
-    branzino = Piatto("Branzino al forno", 16.50)
+    # --- Main Courses ---
+    tagliata = Dish("Beef Tagliata", 18.00, "with arugula and parmesan")
+    sea_bass = Dish("Baked Sea Bass", 16.50)
 
-    secondi = SezioneMenu("Secondi Piatti")
-    secondi.aggiungi(tagliata)
-    secondi.aggiungi(branzino)
+    main_courses = MenuSection("Main Courses")
+    main_courses.add(tagliata)
+    main_courses.add(sea_bass)
 
-    # --- Bevande con sotto-sezioni ---
-    acqua = Piatto("Acqua naturale/frizzante", 2.50)
-    cola = Piatto("Cola", 3.50)
-    succo = Piatto("Succo di frutta", 3.00)
+    # --- Drinks with sub-sections ---
+    water = Dish("Still/Sparkling Water", 2.50)
+    cola = Dish("Cola", 3.50)
+    juice = Dish("Fruit Juice", 3.00)
 
-    analcoliche = SezioneMenu("Analcoliche")
-    analcoliche.aggiungi(acqua)
-    analcoliche.aggiungi(cola)
-    analcoliche.aggiungi(succo)
+    non_alcoholic = MenuSection("Non-Alcoholic")
+    non_alcoholic.add(water)
+    non_alcoholic.add(cola)
+    non_alcoholic.add(juice)
 
-    birra = Piatto("Birra artigianale 0.4L", 5.50)
-    vino_rosso = Piatto("Vino rosso della casa (calice)", 4.50)
-    vino_bianco = Piatto("Vino bianco della casa (calice)", 4.50)
+    beer = Dish("Craft Beer 0.4L", 5.50)
+    red_wine = Dish("House Red Wine (glass)", 4.50)
+    white_wine = Dish("House White Wine (glass)", 4.50)
 
-    alcoliche = SezioneMenu("Alcoliche")
-    alcoliche.aggiungi(birra)
-    alcoliche.aggiungi(vino_rosso)
-    alcoliche.aggiungi(vino_bianco)
+    alcoholic = MenuSection("Alcoholic")
+    alcoholic.add(beer)
+    alcoholic.add(red_wine)
+    alcoholic.add(white_wine)
 
-    bevande = SezioneMenu("Bevande")
-    bevande.aggiungi(analcoliche)       # sotto-sezione dentro sezione
-    bevande.aggiungi(alcoliche)         # sotto-sezione dentro sezione
+    drinks = MenuSection("Drinks")
+    drinks.add(non_alcoholic)           # sub-section inside section
+    drinks.add(alcoholic)               # sub-section inside section
 
-    # --- Menu completo (radice) ---
-    menu = SezioneMenu("Menu Ristorante 'Da Luca'")
-    menu.aggiungi(antipasti)
-    menu.aggiungi(primi)
-    menu.aggiungi(secondi)
-    menu.aggiungi(bevande)
+    # --- Complete menu (root) ---
+    menu = MenuSection("Restaurant Menu 'Da Luca'")
+    menu.add(appetizers)
+    menu.add(first_courses)
+    menu.add(main_courses)
+    menu.add(drinks)
 
-    # ---- 1. Mostra l'intero menu ----
+    # ---- 1. Display the entire menu ----
     print("=" * 50)
-    print("  MENU COMPLETO")
+    print("  FULL MENU")
     print("=" * 50)
-    menu.mostra()
+    menu.display()
 
-    # ---- 2. Statistiche (uniformi su foglie e composite) ----
-    print(f"\nPiatti totali nel menu:    {menu.conta_piatti()}")
-    print(f"Prezzo medio (tutto):      €{menu.get_prezzo_medio():.2f}")
-    print(f"Prezzo medio (antipasti):  €{antipasti.get_prezzo_medio():.2f}")
-    print(f"Piatti in 'Bevande':       {bevande.conta_piatti()}")
-    print(f"Piatti in 'Analcoliche':   {analcoliche.conta_piatti()}")
+    # ---- 2. Statistics (uniform across leaves and composites) ----
+    print(f"\nTotal dishes in menu:      {menu.count_dishes()}")
+    print(f"Average price (all):       €{menu.get_average_price():.2f}")
+    print(f"Average price (appetizers):€{appetizers.get_average_price():.2f}")
+    print(f"Dishes in 'Drinks':        {drinks.count_dishes()}")
+    print(f"Dishes in 'Non-Alcoholic': {non_alcoholic.count_dishes()}")
 
-    # Una foglia funziona esattamente come un composite:
-    print(f"\nPrezzo medio 'Carbonara': €{carbonara.get_prezzo_medio():.2f}")
-    print(f"Piatti in 'Carbonara':     {carbonara.conta_piatti()}")
+    # A leaf works exactly like a composite:
+    print(f"\nAverage price 'Carbonara': €{carbonara.get_average_price():.2f}")
+    print(f"Dishes in 'Carbonara':     {carbonara.count_dishes()}")
 
-    # ---- 3. Rimozione di un piatto ----
-    print("\n--- Rimuovo 'Amatriciana' dai Primi ---")
-    primi.rimuovi(amatriciana)
-    primi.mostra()
-    print(f"Nuovo prezzo medio (primi): €{primi.get_prezzo_medio():.2f}")
+    # ---- 3. Removing a dish ----
+    print("\n--- Removing 'Amatriciana' from First Courses ---")
+    first_courses.remove(amatriciana)
+    first_courses.display()
+    print(f"New average price (first courses): €{first_courses.get_average_price():.2f}")
